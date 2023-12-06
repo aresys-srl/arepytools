@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "arepytools"
+description = "ArePyTools is the Aresys Python toolset for SAR data processing."
+authors = [{ name = "Aresys S.R.L.", email = "info@aresys.it" }]
+license = { text = "MIT" }
+classifiers = [
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Utilities",
+    "License :: OSI Approved :: MIT License",
+]
+requires-python = ">= 3.8"
+dependencies = ["xsdata", "lxml", "python-dateutil", "scipy", "numpy >= 1.20"]
+dynamic = ["version"]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[tool.setuptools]
+license-files = ["LICENSE.txt"]
+include-package-data = false
+
+[tool.setuptools.packages.find]
+exclude = ["tests", "tests*"]
+namespaces = false
+
+[tool.setuptools.dynamic]
+version = { attr = "arepytools.__version__" }
