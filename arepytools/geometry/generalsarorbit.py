@@ -8,15 +8,15 @@ General SAR orbit module
 
 from __future__ import annotations
 
+import functools
 import os
-from typing import Callable, Optional, Tuple, Union
+from typing import Callable, List, Optional, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
 import scipy.optimize
 
 import arepytools.geometry.inverse_geocoding_core as inverse_core
-from arepytools import _utils
 from arepytools.geometry import conversions
 from arepytools.geometry._interpolator import GeometryInterpolator
 from arepytools.geometry.direct_geocoding import (
@@ -221,7 +221,8 @@ class GeneralSarOrbit:
 
         if time_axis.size < GeneralSarOrbit.get_minimum_number_of_data_points():
             raise RuntimeError(
-                f"Not enough state vectors provided. {time_axis.size} < {GeneralSarOrbit.get_minimum_number_of_data_points()}"
+                "Not enough state vectors provided. "
+                + f"{time_axis.size} < {GeneralSarOrbit.get_minimum_number_of_data_points()}"
             )
 
         self._time_axis = time_axis
@@ -446,13 +447,13 @@ class GeneralSarOrbit:
 
     def earth2sat(
         self, earth_point, doppler_centroid=None, carrier_wavelength=None, orbit_tx=None
-    ):
+    ) -> Tuple[List[PreciseDateTime], List[float]]:
         """Compute monostatic or bistatic earth-to-sat projection
 
         Parameters
         ----------
         earth_point : np.ndarray
-            xyz coordinates of the point on earth as (3,) numpy array
+            xyz coordinates of the point on earth as (3,) numpy array or list
         doppler_centroid : float, optional
             doppler centroid frequency, by default None
         carrier_wavelength : float, optional
@@ -470,7 +471,11 @@ class GeneralSarOrbit:
         if carrier_wavelength is None:
             carrier_wavelength = 1.0
 
-        _check_earth2sat_input(earth_point)
+        earth_point = np.asarray(earth_point)
+        if earth_point.shape != (3,):
+            raise RuntimeError(
+                f"EarthPoint has wrong shape: {earth_point.shape} != (3,)"
+            )
 
         trajectory_rx = GSO3DCurveWrapper(self)
 
@@ -515,10 +520,13 @@ class GeneralSarOrbit:
                 wavelength=carrier_wavelength,
             )
 
-        if isinstance(times[0], PreciseDateTime):
-            return tuple([[t] for t in times])
-        if isinstance(times[0], np.ndarray):
-            return tuple([t.tolist() for t in times])
+        az, rg = times
+        if isinstance(az, PreciseDateTime):
+            assert isinstance(rg, float)
+            return ([az], [rg])
+
+        assert isinstance(rg, np.ndarray)
+        return (az.tolist(), rg.tolist())
 
     def evaluate_doppler_equation(
         self, earth_point: np.ndarray, doppler_centroid, carrier_wavelength
@@ -651,6 +659,9 @@ def compute_anx_times(
 
     anx_times = np.empty((len(anx_time_intervals),), dtype=orbit.time_axis_array.dtype)
 
+    def get_z_coordinate(time, origin):
+        return orbit.get_position(origin + time)[2]
+
     for interval_index, anx_time_interval in enumerate(anx_time_intervals):
         reference_time = anx_time_interval[0]
 
@@ -660,8 +671,7 @@ def compute_anx_times(
         velocity_z = orbit.get_velocity(central_time)[2]
         xtol = min(max_abs_time_error, max_abs_z_error / abs(velocity_z))
 
-        def get_z_coordinate(time):
-            return orbit.get_position(reference_time + time)[2]
+        get_z_coordinate = functools.partial(get_z_coordinate, origin=reference_time)
 
         anx_time_interval_rel = [t - reference_time for t in anx_time_interval]
         anx_time_rel = scipy.optimize.bisect(
@@ -952,7 +962,10 @@ def _check_sat2earth_input(
     if not isinstance(azimuth_time, PreciseDateTime):
         raise RuntimeError("Azimuth should be a single absolute time")
 
-    range_times = _utils.input_data_to_numpy_array_with_checks(range_times, dtype=float)
+    if isinstance(range_times, (list, np.ndarray)):
+        range_times = np.asarray(range_times)
+    else:
+        range_times = np.full((1,), range_times)
 
     if (frequency_doppler_centroid is not None and wavelength is None) or (
         wavelength is not None and frequency_doppler_centroid is None
@@ -962,9 +975,10 @@ def _check_sat2earth_input(
         )
 
     if frequency_doppler_centroid is not None:
-        frequency_doppler_centroid = _utils.input_data_to_numpy_array_with_checks(
-            frequency_doppler_centroid, dtype=float, ndim=1
-        )
+        if isinstance(frequency_doppler_centroid, (list, np.ndarray)):
+            frequency_doppler_centroid = np.asarray(frequency_doppler_centroid)
+        else:
+            frequency_doppler_centroid = np.full((1,), frequency_doppler_centroid)
 
     if frequency_doppler_centroid is not None and (
         frequency_doppler_centroid.ndim != 1
@@ -977,13 +991,7 @@ def _check_sat2earth_input(
         else:
             raise RuntimeError(
                 "Frequency doppler centroid vector should have the same shape of the range times vector: "
-                + "{} != {}".format(frequency_doppler_centroid.shape, range_times.shape)
+                + f"{frequency_doppler_centroid.shape} != {range_times.shape}"
             )
 
     return range_times, frequency_doppler_centroid
-
-
-def _check_earth2sat_input(point):
-    _utils.check_type(point, np.ndarray)
-    _utils.check_dtype_of_numpy_array(point, float)
-    _utils.check_shape_of_numpy_array(point, shape=(3,))

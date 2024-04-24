@@ -11,7 +11,7 @@ import warnings
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -117,7 +117,7 @@ class NominalPointTarget:
 def read_raster_with_raster_info(
     raster_file: Union[str, Path],
     raster_info: metadata.RasterInfo,
-    block_to_read: List[int] = None,
+    block_to_read: Optional[List[int]] = None,
 ) -> np.ndarray:
     """Read raster file using information from a RasterInfo metadata object.
 
@@ -166,7 +166,7 @@ def read_raster(
     num_of_lines: int,
     data_type: Union[str, metadata.ECellType] = metadata.ECellType.float32,
     binary_ordering_mode: Union[str, metadata.EByteOrder] = metadata.EByteOrder.le,
-    block_to_read: List[int] = None,
+    block_to_read: Optional[List[int]] = None,
     header_offset: int = 0,
     row_prefix: int = 0,
 ) -> np.ndarray:
@@ -535,7 +535,7 @@ def write_metadata(
 
 
 def create_new_metadata(
-    num_metadata_channels: int = 1, description: str = None
+    num_metadata_channels: int = 1, description: Optional[str] = None
 ) -> metadata.MetaData:
     """Create a new empty MetaData object with the selected number of metadata channels.
 
@@ -583,8 +583,8 @@ def read_binary_header_with_raster_info(
     if raster_info.header_offset_bytes == 0:
         return b""
 
-    with open(raster_file, "rb") as rf:
-        header = rf.read(raster_info.header_offset_bytes)
+    with open(raster_file, "rb") as file:
+        header = file.read(raster_info.header_offset_bytes)
 
     return header
 
@@ -617,8 +617,8 @@ def write_binary_header_with_raster_info(
             f"Header size incompatible with header offset: {header_size} != {offset_size}"
         )
 
-    with open(raster_file, "wb") as rf:
-        rf.write(header)
+    with open(raster_file, "wb") as file:
+        file.write(header)
 
 
 def read_row_prefix_with_raster_info(
@@ -649,9 +649,9 @@ def read_row_prefix_with_raster_info(
         raster_info.samples, raster_info.cell_type, raster_info.row_prefix_bytes
     )
 
-    with open(raster_file, "rb") as rf:
-        rf.seek(offset_byte)
-        row_prefix = rf.read(raster_info.row_prefix_bytes)
+    with open(raster_file, "rb") as file:
+        file.seek(offset_byte)
+        row_prefix = file.read(raster_info.row_prefix_bytes)
 
     return row_prefix
 
@@ -694,9 +694,9 @@ def write_row_prefix_with_raster_info(
         raster_info.samples, raster_info.cell_type, row_prefix_size_ri
     )
 
-    with open(raster_file, "wb") as rf:
-        rf.seek(offset_byte)
-        rf.write(row_prefix)
+    with open(raster_file, "wb") as file:
+        file.seek(offset_byte)
+        file.write(row_prefix)
 
 
 def get_line_size(

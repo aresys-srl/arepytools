@@ -158,7 +158,8 @@ class GeneralSarAttitude:
 
         if np.shape(ypr_angles) != (3, time_axis.size):
             raise RuntimeError(
-                f"Invalid ypr angles shape: {np.shape(ypr_angles)} it should be compatible with the number of time axis {time_axis.size}"
+                f"Invalid ypr angles shape: {np.shape(ypr_angles)} "
+                + f"it should be compatible with the number of time axis {time_axis.size}"
             )
 
         if (
@@ -166,7 +167,8 @@ class GeneralSarAttitude:
             < GeneralSarAttitude.get_minimum_number_of_data_points()
         ):
             raise RuntimeError(
-                f"Not enough attitude records provided: {np.shape(ypr_angles)[1]} < {GeneralSarAttitude.get_minimum_number_of_data_points()}"
+                "Not enough attitude records provided: "
+                + f"{np.shape(ypr_angles)[1]} < {GeneralSarAttitude.get_minimum_number_of_data_points()}"
             )
 
         self._time_axis = time_axis
@@ -315,10 +317,10 @@ class GeneralSarAttitude:
             "Yaw Pitch Roll matrix: " + os.linesep + ypr_str + os.linesep
         )
         rotation_order = (
-            "Rotation order: {}".format(self.rotation_order.name.upper()) + os.linesep
+            f"Rotation order: {self.rotation_order.name.upper()}" + os.linesep
         )
         reference_frame = (
-            "Reference frame: {}".format(self.reference_frame.name.upper()) + os.linesep
+            f"Reference frame: {self.reference_frame.name.upper()}" + os.linesep
         )
         gso_portion = "Attitude info base on orbit:" + os.linesep + gso_str + os.linesep
         return (
@@ -406,7 +408,8 @@ def compute_pointing_directions(
 
     if antenna_reference_frames.shape[-2:] != (3, 3):
         raise ValueError(
-            f"Invalid antenna_reference_frames shape: {antenna_reference_frames.shape} should be either (3,3) or (N,3,3)"
+            f"Invalid antenna_reference_frames shape: {antenna_reference_frames.shape} "
+            + "should be either (3,3) or (N,3,3)"
         )
 
     if (
@@ -415,7 +418,8 @@ def compute_pointing_directions(
         and azimuth_angles.size * 9 != antenna_reference_frames.size
     ):
         raise ValueError(
-            f"Incompatible azimuth_angles and antenna_reference_frames shapes: {azimuth_angles.shape}, {antenna_reference_frames.shape}"
+            "Incompatible azimuth_angles and antenna_reference_frames shapes: "
+            + f"{azimuth_angles.shape}, {antenna_reference_frames.shape}"
         )
 
     if (
@@ -424,7 +428,8 @@ def compute_pointing_directions(
         and elevation_angles.size * 9 != antenna_reference_frames.size
     ):
         raise ValueError(
-            f"Incompatible elevation_angles and antenna_reference_frames shapes: {elevation_angles.shape}, {antenna_reference_frames.shape}"
+            "Incompatible elevation_angles and antenna_reference_frames shapes: "
+            + f"{elevation_angles.shape}, {antenna_reference_frames.shape}"
         )
 
     if (
@@ -494,12 +499,13 @@ def direct_geocoding_with_pointing(
 
     num_elements = max(time_points.size, azimuth_angles.size, elevation_angles.size)
     if (
-        (time_points.size != 1 and time_points.size != num_elements)
-        or (azimuth_angles.size != 1 and azimuth_angles.size != num_elements)
-        or (elevation_angles.size != 1 and elevation_angles.size != num_elements)
+        time_points.size not in (1, num_elements)
+        or azimuth_angles.size not in (1, num_elements)
+        or elevation_angles.size not in (1, num_elements)
     ):
         raise ValueError(
-            f"Incompatible time_points, azimuth_angles and elevation_angles shapes: {time_points.shape}, {azimuth_angles.shape} and {elevation_angles.shape}"
+            "Incompatible time_points, azimuth_angles and elevation_angles shapes: "
+            + f"{time_points.shape}, {azimuth_angles.shape} and {elevation_angles.shape}"
         )
 
     sensor_positions = orbit.get_position(time_points.reshape((-1,))).T.reshape(

@@ -20,9 +20,7 @@ _minor_semi_axis_sqr = WGS84.semi_minor_axis**2
 def _ze(x: float, y: float) -> float:
     eps = 1.0e-21
 
-    return (
-        np.sqrt(_minor_semi_axis_sqr - _semi_axis_ratio_sqr * (x**2 + y**2)) + eps
-    )
+    return np.sqrt(_minor_semi_axis_sqr - _semi_axis_ratio_sqr * (x**2 + y**2)) + eps
 
 
 def _ze_x(x: float, y: float) -> float:
@@ -30,6 +28,7 @@ def _ze_x(x: float, y: float) -> float:
 
 
 def _ze_xy(x: float, y: float) -> float:
+    # pylint: disable-next=arguments-out-of-order
     return (_semi_axis_ratio_sqr * x) / _ze(x, y) ** 2 * _ze_x(y, x)
 
 

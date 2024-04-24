@@ -38,9 +38,12 @@ class GenericPoly:
         ]
 
     def __repr__(self):
-        representation = "coefficients: {}\n".format([coeff for coeff, _ in self.poly])
-        representation += "powers: {}\n".format([powers for _, powers in self.poly])
-        representation += "reference values: {}\n".format(list(self.reference_values))
+        coefficients = [coeff for coeff, _ in self.poly]
+        powers = [powers for _, powers in self.poly]
+        reference_values = list(self.reference_values)
+        representation = f"coefficients: {coefficients}\n"
+        representation += f"powers: {powers}\n"
+        representation += f"reference values: {reference_values}\n"
         return representation
 
     def evaluate(self, values):
@@ -87,12 +90,12 @@ class SortedPolyList:
             self._sorted_poly_list = list_generic_poly
             self._sort_poly_list()
         else:
-            self._sorted_poly_list = list()
+            self._sorted_poly_list = []
 
     def __repr__(self):
         representation = "Sorted Poly List:\n"
         for index, poly in enumerate(self._sorted_poly_list):
-            representation += "Poly #{}: \n{}\n".format(index, poly)
+            representation += f"Poly #{index}: \n{poly}\n"
         return representation
 
     def append(self, generic_poly):

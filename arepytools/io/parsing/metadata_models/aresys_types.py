@@ -172,34 +172,57 @@ class Units(Enum):
     M_S2 = "m/s2"
     M_S3 = "m/s3"
     M_S4 = "m/s4"
+    M_S5 = "m/s5"
+    M_S6 = "m/s6"
+    M_S7 = "m/s7"
+    M_S8 = "m/s8"
+    M_S9 = "m/s9"
     S_S = "s/s"
     S_S2 = "s/s2"
     S_S3 = "s/s3"
     S_S4 = "s/s4"
     S_S5 = "s/s5"
+    HZ = "Hz"
     HZ_S = "Hz/s"
     HZ_S2 = "Hz/s2"
     HZ_S3 = "Hz/s3"
     HZ_S4 = "Hz/s4"
     HZ_S5 = "Hz/s5"
+    HZ_S6 = "Hz/s6"
+    HZ_S7 = "Hz/s7"
+    HZ_S8 = "Hz/s8"
+    HZ_S9 = "Hz/s9"
     RAD_S = "rad/s"
     RAD_S2 = "rad/s2"
     RAD_S3 = "rad/s3"
     RAD_S4 = "rad/s4"
     RAD_S5 = "rad/s5"
+    RAD_S6 = "rad/s6"
+    RAD_S7 = "rad/s7"
+    RAD_S8 = "rad/s8"
+    RAD_S9 = "rad/s9"
     S85 = "s85"
     UTC = "Utc"
     B = "b"
-    HZ = "Hz"
     K = "K"
     S_M = "s/m"
     S_M2 = "s/m2"
     S_M3 = "s/m3"
     S_M4 = "s/m4"
+    S_M5 = "s/m5"
+    S_M6 = "s/m6"
+    S_M7 = "s/m7"
+    S_M8 = "s/m8"
+    S_M9 = "s/m9"
     DEG_S = "deg/s"
     DEG_S2 = "deg/s2"
     DEG_S3 = "deg/s3"
     DEG_S4 = "deg/s4"
+    DEG_S5 = "deg/s5"
+    DEG_S6 = "deg/s6"
+    DEG_S7 = "deg/s7"
+    DEG_S8 = "deg/s8"
+    DEG_S9 = "deg/s9"
 
 
 @dataclass
@@ -628,14 +651,14 @@ class AcquisitionTimelineType(TreeElementBaseType):
 
     @dataclass
     class InternalCalibrationAzimuthtimes:
-        val: List[
-            "AcquisitionTimelineType.InternalCalibrationAzimuthtimes.Val"
-        ] = field(
-            default_factory=list,
-            metadata={
-                "type": "Element",
-                "namespace": "",
-            },
+        val: List["AcquisitionTimelineType.InternalCalibrationAzimuthtimes.Val"] = (
+            field(
+                default_factory=list,
+                metadata={
+                    "type": "Element",
+                    "namespace": "",
+                },
+            )
         )
 
         @dataclass
@@ -3258,15 +3281,15 @@ class BurstInfoType(TreeElementBaseType):
             "namespace": "",
         },
     )
-    lines_per_burst_change_list: Optional[
-        "BurstInfoType.LinesPerBurstChangeList"
-    ] = field(
-        default=None,
-        metadata={
-            "name": "LinesPerBurstChangeList",
-            "type": "Element",
-            "namespace": "",
-        },
+    lines_per_burst_change_list: Optional["BurstInfoType.LinesPerBurstChangeList"] = (
+        field(
+            default=None,
+            metadata={
+                "name": "LinesPerBurstChangeList",
+                "type": "Element",
+                "namespace": "",
+            },
+        )
     )
     burst_repetition_frequency: Optional[DoubleWithUnit] = field(
         default=None,

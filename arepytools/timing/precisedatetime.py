@@ -64,7 +64,7 @@ def _parse_isoformat_date(date_string):
 
 
 def _isoformat_date(year, month, day):
-    return "{:04d}-{:02d}-{:02d}".format(year, month, day)
+    return f"{year:04d}-{month:02d}-{day:02d}"
 
 
 def _parse_isoformat_tz(time_string):
@@ -377,12 +377,10 @@ class PreciseDateTime:
     __radd__ = __add__
 
     @overload
-    def __sub__(self, other: float) -> PreciseDateTime:
-        ...
+    def __sub__(self, other: float) -> PreciseDateTime: ...
 
     @overload
-    def __sub__(self, other: PreciseDateTime) -> float:
-        ...
+    def __sub__(self, other: PreciseDateTime) -> float: ...
 
     def __sub__(
         self, other: Union[float, PreciseDateTime]
@@ -406,14 +404,15 @@ class PreciseDateTime:
                 self._picoseconds - other._picoseconds
             ) * self._PRECISION
             return self._seconds - other._seconds + seconds_fraction
-        elif isinstance(other, numbers.Real):
+
+        if isinstance(other, numbers.Real):
             seconds_fraction = other - int(other)
             return PreciseDateTime(
                 self._seconds - int(other),
                 self._picoseconds - seconds_fraction / self._PRECISION,
             )
-        else:
-            return NotImplemented
+
+        return NotImplemented
 
     def __repr__(self) -> str:
         assert isinstance(self._seconds, int)
@@ -421,7 +420,7 @@ class PreciseDateTime:
         absolute_datetime = self._REFERENCE_DATETIME + datetime.timedelta(
             0, self._seconds
         )
-        tmp_str = "{:0>12d}".format(int(self._picoseconds))
+        tmp_str = f"{int(self._picoseconds):0>12d}"
 
         # Replacing month abbreviated name directive with english abbreviated month name
         # to be locale independent
@@ -438,8 +437,8 @@ class PreciseDateTime:
             return (other._seconds == self._seconds) and (
                 other._picoseconds == self._picoseconds
             )
-        else:
-            return NotImplemented
+
+        return NotImplemented
 
     def __lt__(self, other) -> bool:
         if isinstance(other, self.__class__):
@@ -447,8 +446,8 @@ class PreciseDateTime:
                 self._seconds == other._seconds
                 and self._picoseconds < other._picoseconds
             )
-        else:
-            return NotImplemented
+
+        return NotImplemented
 
     @classmethod
     def get_precision(cls) -> float:
@@ -731,9 +730,7 @@ class PreciseDateTime:
         absolute_datetime = datetime.datetime(year, month, day, hours, minutes, seconds)
         if not 0 <= picoseconds < 1 / cls._PRECISION:
             raise ValueError(
-                "Picoseconds must be non-negative and less than {}".format(
-                    1 / cls._PRECISION
-                )
+                f"Picoseconds must be non-negative and less than {1 / cls._PRECISION}"
             )
 
         time_diff_from_reference_date = absolute_datetime - cls._REFERENCE_DATETIME
@@ -818,9 +815,7 @@ class PreciseDateTime:
         try:
             date, time_string = _parse_isoformat_date(date_string)
         except ValueError as exc:
-            raise ValueError(
-                "Invalid isoformat string: {}".format(datetime_string)
-            ) from exc
+            raise ValueError(f"Invalid isoformat string: {datetime_string}") from exc
 
         time = ()
         if time_string:
@@ -832,15 +827,15 @@ class PreciseDateTime:
 
                 timezone = time[-1]
                 if timezone is not None and timezone != tz.UTC:
-                    raise ValueError("Unsupported timezone: {}".format(timezone))
+                    raise ValueError(f"Unsupported timezone: {timezone}")
                 time = time[:-1]
             except ValueError as exc:
                 raise ValueError(
-                    "Invalid isoformat string: {}".format(datetime_string)
+                    f"Invalid isoformat string: {datetime_string}"
                 ) from exc
 
             if unparsed_string:
-                raise ValueError("Invalid isoformat string: {}".format(datetime_string))
+                raise ValueError(f"Invalid isoformat string: {datetime_string}")
 
         return cls.from_numeric_datetime(*(date + time))
 
@@ -904,7 +899,7 @@ class PreciseDateTime:
             self._picoseconds,
             timespec=timespec,
         )
-        return "{}{:s}{}Z".format(date, sep, time)
+        return f"{date}{sep:s}{time}Z"
 
 
 class InvalidUtcString(ValueError):

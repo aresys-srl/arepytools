@@ -8,7 +8,7 @@ Product Folder Utils module
 
 import re
 from pathlib import Path
-from typing import List, Union
+from typing import List, Optional, Union
 
 from arepytools.io.manifest import Manifest
 from arepytools.io.productfolder_layout import (
@@ -205,7 +205,7 @@ def create_product_folder(
     pf_path: Union[str, Path],
     raster_extension: Union[str, RasterExtensions] = RasterExtensions.RAW,
     overwrite_ok: bool = False,
-    product_folder_description: str = None,
+    product_folder_description: Optional[str] = None,
 ) -> ProductFolder2:
     """Create a new Product Folder layout at the desired location. If the path provided
     already exists, it raises an error unless the overwrite_ok flag is set to True.

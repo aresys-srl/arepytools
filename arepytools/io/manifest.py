@@ -10,9 +10,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 
-import lxml.etree as etree
+from lxml import etree
 
 from arepytools.io.productfolder_layout import RasterExtensions
 
@@ -28,15 +28,13 @@ class Manifest:
     """Product folder manifest document dataclass"""
 
     version: str = _VERSION
-    description: str = None
-    datafile_extension: Union[str, RasterExtensions] = None
+    description: Optional[str] = None
+    datafile_extension: Optional[Union[str, RasterExtensions]] = None
 
     def __post_init__(self) -> None:
         if self.datafile_extension is None:
-            object.__setattr__(self, "datafile_extension", RasterExtensions.RAW)
-        object.__setattr__(
-            self, "datafile_extension", RasterExtensions(self.datafile_extension)
-        )
+            self.datafile_extension = RasterExtensions.RAW
+        self.datafile_extension = RasterExtensions(self.datafile_extension)
 
     def write(self, file_path: Union[str, Path]) -> None:
         """Writing manifest file to disk.
@@ -54,9 +52,12 @@ class Manifest:
         if self.description is not None:
             etree.SubElement(manifest_xml, "ProductDescription").text = self.description
 
-        etree.SubElement(
-            manifest_xml, "DataFileExtension"
-        ).text = self.datafile_extension.value
+        assert self.datafile_extension is not None and isinstance(
+            self.datafile_extension, RasterExtensions
+        )
+        etree.SubElement(manifest_xml, "DataFileExtension").text = (
+            self.datafile_extension.value
+        )
 
         tree = etree.ElementTree(manifest_xml)
         tree.write(
@@ -86,7 +87,8 @@ class Manifest:
         if not file_path.is_file():
             raise InvalidManifestFilePath("Input file does not exist")
 
-        manifest_root = etree.parse(file_path).getroot()
+        # casting Path to string when loading due to bug with PosixPath on Linux
+        manifest_root = etree.parse(str(file_path)).getroot()
         version = manifest_root.values()[0]
         try:
             description = manifest_root.find("ProductDescription").text

@@ -1,9 +1,14 @@
 # SPDX-FileCopyrightText: Aresys S.r.l. <info@aresys.it>
 # SPDX-License-Identifier: MIT
 
+
 """
-Constants module
-----------------
+**Deprecated** Constants module
+-------------------------------
+
+.. deprecated:: v1.7.0
+    Importing constants is deprecated.
+    Use scipy.constants.speed_of_light for LIGHT_SPEED.
 
 Examples
 --------
@@ -11,13 +16,22 @@ Examples
 >>> print(cst.LIGHT_SPEED)
 299792458.0
 """
+import warnings
+
+import scipy
+
+warnings.warn(
+    "arepytools.constants module is deprecated. Instead of importing LIGHT_SPEED use 'from scipy.constants import speed_of_light'",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 SECONDS_IN_A_DAY = 86164.09054
 """
 Number of seconds in a day
 """
 
-LIGHT_SPEED = 299792458.0
+LIGHT_SPEED = scipy.constants.speed_of_light
 """
 Speed of light in vacuum (m/s).
 """

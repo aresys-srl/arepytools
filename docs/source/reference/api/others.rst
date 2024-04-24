@@ -1,0 +1,4 @@
+Others
+======
+
+.. automodule:: arepytools.constants

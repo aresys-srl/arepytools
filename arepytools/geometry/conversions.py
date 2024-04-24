@@ -10,7 +10,6 @@ from typing import Union
 
 import numpy as np
 
-from arepytools import _utils
 from arepytools.geometry.ellipsoid import WGS84
 
 _NUMBER_OF_ITERATIONS = 5
@@ -34,9 +33,12 @@ def llh2xyz(coordinates: Union[list, np.ndarray]) -> np.ndarray:
     np.ndarray
         a two dimensional numpy array of shape (3, N) with xyz coordinates
     """
-    coordinates = _utils.input_data_to_numpy_array_with_checks(
-        coordinates, dtype=float, first_axis_size=3, name="coordinates"
-    )
+    coordinates = np.asarray(coordinates)
+    if coordinates.shape[0] != 3:
+        raise RuntimeError(
+            f"Coordinates has wrong shape: {coordinates.shape} not in (3,), (3, 1) or (3, N)"
+        )
+
     if coordinates.ndim == 1:
         coordinates = coordinates.copy()
         coordinates.shape = (3, 1)
@@ -70,9 +72,12 @@ def xyz2llh(coordinates: Union[list, np.ndarray]) -> np.ndarray:
     np.ndarray
         a two dimensional numpy array of shape (3, N) with llh coordinates
     """
-    coordinates = _utils.input_data_to_numpy_array_with_checks(
-        coordinates, dtype=float, first_axis_size=3, name="coordinates"
-    )
+    coordinates = np.asarray(coordinates)
+    if coordinates.shape[0] != 3:
+        raise RuntimeError(
+            f"Coordinates has wrong shape: {coordinates.shape} not in (3,), (3, 1) or (3, N)"
+        )
+
     if coordinates.ndim == 1:
         coordinates = coordinates.copy()
         coordinates.shape = (3, 1)
@@ -115,9 +120,7 @@ def xyz2llh(coordinates: Union[list, np.ndarray]) -> np.ndarray:
 
     # Compute height
     sin_phi = np.sin(lat)
-    big_n = WGS84.semi_major_axis / np.sqrt(
-        1 - sin_phi**2 * WGS84.eccentricity_square
-    )
+    big_n = WGS84.semi_major_axis / np.sqrt(1 - sin_phi**2 * WGS84.eccentricity_square)
     h = (
         r * np.cos(lat)
         + (z + WGS84.eccentricity_square * big_n * sin_phi) * sin_phi

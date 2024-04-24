@@ -267,12 +267,16 @@ def translate_raster_info_to_model(
         samples_start=translate_str_with_unit_to_model(
             raster_info.samples_start, unit=raster_info.samples_start_unit
         ),
-        invalid_value=translate_dcomplex_to_model(raster_info.invalid_value)
-        if raster_info.invalid_value is not None
-        else None,
-        raster_format=translate_raster_format_type_to_model(raster_info.format_type)
-        if raster_info.format_type is not None
-        else None,
+        invalid_value=(
+            translate_dcomplex_to_model(raster_info.invalid_value)
+            if raster_info.invalid_value is not None
+            else None
+        ),
+        raster_format=(
+            translate_raster_format_type_to_model(raster_info.format_type)
+            if raster_info.format_type is not None
+            else None
+        ),
     )
 
 
@@ -305,12 +309,16 @@ def translate_raster_info_from_model(
         row_prefix_bytes=raster_info.row_prefix_bytes,
         byteorder=translate_endianity_from_model(raster_info.byte_order),
         celltype=translate_cell_type_from_model(raster_info.cell_type),
-        invalid_value=translate_dcomplex_from_model(raster_info.invalid_value)
-        if raster_info.invalid_value is not None
-        else None,
-        format_type=translate_raster_format_type_from_model(raster_info.raster_format)
-        if raster_info.raster_format is not None
-        else None,
+        invalid_value=(
+            translate_dcomplex_from_model(raster_info.invalid_value)
+            if raster_info.invalid_value is not None
+            else None
+        ),
+        format_type=(
+            translate_raster_format_type_from_model(raster_info.raster_format)
+            if raster_info.raster_format is not None
+            else None
+        ),
     )
 
     assert raster_info.lines_step.unit is not None
@@ -1001,9 +1009,11 @@ def translate_burst_info_from_model(
                 burst.azimuth_start_time.value
             ),
             lines_i=lines,
-            burst_center_azimuth_shift_i=burst.burst_center_azimuth_shift.value
-            if burst.burst_center_azimuth_shift is not None
-            else None,
+            burst_center_azimuth_shift_i=(
+                burst.burst_center_azimuth_shift.value
+                if burst.burst_center_azimuth_shift is not None
+                else None
+            ),
         )
 
     return output_info
@@ -1039,11 +1049,13 @@ def translate_burst_info_to_model(
             azimuth_start_time=metadata_models.StringWithUnit(
                 value=str(burst.azimuth_start_time), unit=metadata_models.Units.UTC
             ),
-            burst_center_azimuth_shift=metadata_models.DoubleWithUnit(
-                burst.burst_center_azimuth_shift, unit=metadata_models.Units.S
-            )
-            if burst.burst_center_azimuth_shift is not None
-            else None,
+            burst_center_azimuth_shift=(
+                metadata_models.DoubleWithUnit(
+                    burst.burst_center_azimuth_shift, unit=metadata_models.Units.S
+                )
+                if burst.burst_center_azimuth_shift is not None
+                else None
+            ),
             n=index + 1,
         )
         burst_list.append(burst_model)
@@ -1142,12 +1154,16 @@ def translate_state_vectors_to_model(
     state_vectors_model = metadata_models.StateVectorDataType(
         p_sv_m=position,
         v_sv_m_os=velocity,
-        orbit_number="NOT_AVAILABLE"
-        if state_vectors.orbit_number < 0
-        else str(state_vectors.orbit_number),
-        track="NOT_AVAILABLE"
-        if state_vectors.track_number < 0
-        else str(state_vectors.track_number),
+        orbit_number=(
+            "NOT_AVAILABLE"
+            if state_vectors.orbit_number < 0
+            else str(state_vectors.orbit_number)
+        ),
+        track=(
+            "NOT_AVAILABLE"
+            if state_vectors.track_number < 0
+            else str(state_vectors.track_number)
+        ),
         orbit_direction=translate_orbit_direction_to_model(
             state_vectors.orbit_direction
         ),
@@ -1525,18 +1541,24 @@ def translate_pulse_from_model(pulse: metadata_models.PulseType) -> metadata.Pul
         i_pulse_length=pulse.pulse_length.value,
         i_bandwidth=pulse.bandwidth.value,
         i_pulse_sampling_rate=pulse.pulse_sampling_rate.value,
-        i_pulse_energy=pulse.pulse_energy.value
-        if pulse.pulse_energy is not None
-        else None,
-        i_pulse_start_frequency=pulse.pulse_start_frequency.value
-        if pulse.pulse_start_frequency is not None
-        else None,
-        i_pulse_start_phase=pulse.pulse_start_phase.value
-        if pulse.pulse_start_phase is not None
-        else None,
-        i_pulse_direction=translate_pulse_direction_from_model(pulse.direction)
-        if pulse.direction is not None
-        else None,
+        i_pulse_energy=(
+            pulse.pulse_energy.value if pulse.pulse_energy is not None else None
+        ),
+        i_pulse_start_frequency=(
+            pulse.pulse_start_frequency.value
+            if pulse.pulse_start_frequency is not None
+            else None
+        ),
+        i_pulse_start_phase=(
+            pulse.pulse_start_phase.value
+            if pulse.pulse_start_phase is not None
+            else None
+        ),
+        i_pulse_direction=(
+            translate_pulse_direction_from_model(pulse.direction)
+            if pulse.direction is not None
+            else None
+        ),
     )
 
 
@@ -1559,30 +1581,38 @@ def translate_pulse_to_model(pulse: metadata.Pulse) -> metadata_models.PulseType
         bandwidth=metadata_models.DoubleWithUnit(
             pulse.bandwidth, translate_unit_to_model(pulse.bandwidth_unit)
         ),
-        pulse_energy=metadata_models.DoubleWithUnit(
-            pulse.pulse_energy, translate_unit_to_model(pulse.pulse_energy_unit)
-        )
-        if pulse.pulse_energy is not None
-        else None,
+        pulse_energy=(
+            metadata_models.DoubleWithUnit(
+                pulse.pulse_energy, translate_unit_to_model(pulse.pulse_energy_unit)
+            )
+            if pulse.pulse_energy is not None
+            else None
+        ),
         pulse_sampling_rate=metadata_models.DoubleWithUnit(
             pulse.pulse_sampling_rate,
             translate_unit_to_model(pulse.pulse_sampling_rate_unit),
         ),
-        pulse_start_frequency=metadata_models.DoubleWithUnit(
-            pulse.pulse_start_frequency,
-            translate_unit_to_model(pulse.pulse_start_frequency_unit),
-        )
-        if pulse.pulse_start_frequency is not None
-        else None,
-        pulse_start_phase=metadata_models.DoubleWithUnit(
-            pulse.pulse_start_phase,
-            translate_unit_to_model(pulse.pulse_start_phase_unit),
-        )
-        if pulse.pulse_start_phase is not None
-        else None,
-        direction=translate_pulse_direction_to_model(pulse.pulse_direction)
-        if pulse.pulse_direction is not None
-        else None,
+        pulse_start_frequency=(
+            metadata_models.DoubleWithUnit(
+                pulse.pulse_start_frequency,
+                translate_unit_to_model(pulse.pulse_start_frequency_unit),
+            )
+            if pulse.pulse_start_frequency is not None
+            else None
+        ),
+        pulse_start_phase=(
+            metadata_models.DoubleWithUnit(
+                pulse.pulse_start_phase,
+                translate_unit_to_model(pulse.pulse_start_phase_unit),
+            )
+            if pulse.pulse_start_phase is not None
+            else None
+        ),
+        direction=(
+            translate_pulse_direction_to_model(pulse.pulse_direction)
+            if pulse.pulse_direction is not None
+            else None
+        ),
     )
 
 

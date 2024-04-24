@@ -55,9 +55,7 @@ def read_debug(filename):
         try:
             dtype = _CELLTYPE_TO_DTYPE_MAP[celltype]
         except KeyError as exc:
-            raise TypeError(
-                "Unknown cell type (cell type id = {})".format(celltype)
-            ) from exc
+            raise TypeError(f"Unknown cell type (cell type id = {celltype})") from exc
 
         if samples == 0 or lines == 0:
             return np.empty((lines, samples), dtype)

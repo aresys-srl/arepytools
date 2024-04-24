@@ -14,7 +14,6 @@ from typing import Union
 import numpy as np
 import numpy.typing as npt
 
-from arepytools.constants import SECONDS_IN_A_DAY
 from arepytools.geometry._geodetic import compute_geodetic_point
 from arepytools.geometry.rotation import RotationOrder, compute_rotation
 
@@ -30,7 +29,8 @@ class ReferenceFrame(Enum):
 ReferenceFrameLike = Union[str, ReferenceFrame]
 """:class:`ReferenceFrame` like type hint """
 
-_earth_angular_velocity = 2.0 * np.pi / SECONDS_IN_A_DAY
+_SIDEREAL_DAY = 86164.09054
+_earth_angular_velocity = 2.0 * np.pi / _SIDEREAL_DAY
 
 
 def compute_sensor_local_axis(
@@ -125,12 +125,14 @@ def compute_zerodoppler_reference_frame(
 
     if sensor_position.shape != sensor_velocity.shape:
         raise ValueError(
-            f"sensor_position and sensor_velocity have different shapes {sensor_position.shape} != {sensor_velocity.shape}"
+            "sensor_position and sensor_velocity have different shapes "
+            + f"{sensor_position.shape} != {sensor_velocity.shape}"
         )
 
     if sensor_position.ndim > 2 or sensor_position.shape[-1] != 3:
         raise ValueError(
-            f"sensor_position has invalid shape: {sensor_position.shape}, it should be (3,) or (N, 3)"
+            "sensor_position has invalid shape: "
+            + f"{sensor_position.shape}, it should be (3,) or (N, 3)"
         )
 
     versor_x = sensor_velocity / np.linalg.norm(sensor_velocity, axis=-1, keepdims=True)
@@ -254,7 +256,8 @@ def compute_geodetic_reference_frame(
 
     if sensor_position.shape != sensor_velocity.shape:
         raise ValueError(
-            f"sensor_position and sensor_velocity have different shapes {sensor_position.shape} != {sensor_velocity.shape}"
+            "sensor_position and sensor_velocity have different shapes "
+            + f"{sensor_position.shape} != {sensor_velocity.shape}"
         )
 
     if sensor_position.ndim > 2 or sensor_position.shape[-1] != 3:

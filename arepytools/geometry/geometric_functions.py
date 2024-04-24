@@ -25,9 +25,9 @@ from arepytools.timing.precisedatetime import PreciseDateTime
 def compute_incidence_angles_from_trajectory(
     trajectory: TwiceDifferentiable3DCurve,
     azimuth_time: PreciseDateTime,
-    range_times: np.ndarray,
+    range_times: Union[float, npt.ArrayLike],
     look_direction: Union[str, GeocodingSide],
-) -> np.ndarray:
+) -> Union[float, np.ndarray]:
     """Compute incidence angles from a trajectory curve compliant with the TwiceDifferentiable3DCurve protocol.
 
     Parameters
@@ -36,14 +36,14 @@ def compute_incidence_angles_from_trajectory(
         trajectory 3D curve protocol-compliant
     azimuth_time : PreciseDateTime
         azimuth time
-    range_times : np.ndarray
-        range times array
+    range_times : Union[float, npt.ArrayLike]
+        range times array like or float
     look_direction : Union[str, GeocodingSide]
         sensor look direction
 
     Returns
     -------
-    np.ndarray
+    Union[float, np.ndarray]
         incidence angles for each range time computed at the given azimuth time
     """
     look_direction = GeocodingSide(look_direction)
@@ -66,9 +66,9 @@ def compute_incidence_angles_from_trajectory(
 def compute_look_angles_from_trajectory(
     trajectory: TwiceDifferentiable3DCurve,
     azimuth_time: PreciseDateTime,
-    range_times: np.ndarray,
+    range_times: Union[float, npt.ArrayLike],
     look_direction: Union[str, GeocodingSide],
-) -> np.ndarray:
+) -> Union[float, np.ndarray]:
     """Compute look angles from a trajectory curve compliant with the TwiceDifferentiable3DCurve protocol.
 
     Parameters
@@ -77,14 +77,14 @@ def compute_look_angles_from_trajectory(
         trajectory 3D curve protocol-compliant
     azimuth_time : PreciseDateTime
         azimuth time
-    range_times : np.ndarray
-        range times array
+    range_times : Union[float, npt.ArrayLike]
+        range times array like or float
     look_direction : Union[str, GeocodingSide]
         sensor look direction
 
     Returns
     -------
-    np.ndarray
+    Union[float, np.ndarray]
         look angles for each range time computed at the given azimuth time
     """
     look_direction = GeocodingSide(look_direction)

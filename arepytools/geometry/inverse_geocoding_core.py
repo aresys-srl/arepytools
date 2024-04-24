@@ -7,12 +7,12 @@ Inverse geocoding core functionalities
 """
 
 
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
+from scipy.constants import speed_of_light
 
-from arepytools.constants import LIGHT_SPEED
 from arepytools.geometry.curve_protocols import TwiceDifferentiable3DCurve
 from arepytools.geometry.geometric_functions import doppler_equation
 from arepytools.math.axis import Axis
@@ -136,7 +136,7 @@ def inverse_geocoding_attitude_core(
     # re-evaluating slant range
     sensor_pos_curr = trajectory.evaluate(azimuth_times)
     line_of_sight = ground_points - sensor_pos_curr
-    slant_range = np.linalg.norm(line_of_sight, axis=-1) * 2 / LIGHT_SPEED
+    slant_range = np.linalg.norm(line_of_sight, axis=-1) * 2 / speed_of_light
 
     return azimuth_times, slant_range
 
@@ -147,7 +147,7 @@ def inverse_geocoding_monostatic_core(
     initial_guesses: Union[PreciseDateTime, npt.ArrayLike],
     frequencies_doppler_centroid: Union[float, npt.ArrayLike],
     wavelength: float,
-    scene_velocity: npt.ArrayLike = None,
+    scene_velocity: Optional[npt.ArrayLike] = None,
     abs_time_tolerance: float = 1e-8,
     max_iter: int = 8,
 ) -> Tuple[Union[PreciseDateTime, np.ndarray], Union[float, np.ndarray]]:
@@ -291,7 +291,7 @@ def inverse_geocoding_monostatic_core(
     # re-evaluating slant range
     sensor_pos_curr = trajectory.evaluate(azimuth_times)
     line_of_sight = ground_points - sensor_pos_curr
-    slant_range = np.linalg.norm(line_of_sight, axis=-1) * 2 / LIGHT_SPEED
+    slant_range = np.linalg.norm(line_of_sight, axis=-1) * 2 / speed_of_light
 
     return azimuth_times, slant_range
 
@@ -408,7 +408,7 @@ def inverse_geocoding_bistatic_core(
     delay_estimate = (
         np.linalg.norm(position_tx - ground_points, axis=-1, keepdims=True)
         + np.linalg.norm(position_rx - ground_points, axis=-1, keepdims=True)
-    ) / LIGHT_SPEED
+    ) / speed_of_light
     azimuth_times_tx = np.array(azimuth_times_rx - delay_estimate.mean())
 
     # Newton method to solve the equation
@@ -442,7 +442,7 @@ def inverse_geocoding_bistatic_core(
         # computing slant range
         slant_range_rx = np.linalg.norm(position_rx - ground_points, axis=-1)
         slant_range_tx = np.linalg.norm(position_tx - ground_points, axis=-1)
-        slant_range = (azimuth_times_rx - azimuth_times_tx) * LIGHT_SPEED
+        slant_range = (azimuth_times_rx - azimuth_times_tx) * speed_of_light
 
         rng_vel_product_rx = np.sum(line_of_sight_rx * velocity_rx, axis=-1)
         rng_vel_product_tx = np.sum(line_of_sight_tx * velocity_tx, axis=-1)
@@ -460,9 +460,9 @@ def inverse_geocoding_bistatic_core(
         equations = np.vstack([distance_equation_residual, doppler_equation_residual])
 
         # first derivative with respect to rx
-        df1_dt_tx = rng_vel_product_tx / slant_range_tx + LIGHT_SPEED
+        df1_dt_tx = rng_vel_product_tx / slant_range_tx + speed_of_light
         # first derivative with respect to tx
-        df1_dt_rx = rng_vel_product_rx / slant_range_rx - LIGHT_SPEED
+        df1_dt_rx = rng_vel_product_rx / slant_range_rx - speed_of_light
 
         # second derivative with respect to rx
         df2_dt_rx_doppler_freq_term = (

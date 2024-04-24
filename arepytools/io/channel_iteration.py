@@ -5,7 +5,7 @@
 IO Channel Iteration module
 ---------------------------
 """
-from typing import Callable, Iterator, List, Tuple, Union
+from typing import Callable, Iterator, List, Optional, Tuple, Union
 
 from arepytools.io.io_support import read_metadata
 from arepytools.io.metadata import EPolarization, MetaData
@@ -23,7 +23,9 @@ class SwathIDFilter:
     """SwathID filtering class"""
 
     def __init__(
-        self, polarization: Union[EPolLike, List[EPolLike]] = None, swath: str = None
+        self,
+        polarization: Optional[Union[EPolLike, List[EPolLike]]] = None,
+        swath: Optional[str] = None,
     ):
         """Filtering metadata file searching for the selected polarization and/or swath.
 
@@ -75,13 +77,13 @@ class SwathIDFilter:
 
             return pol_condition
 
-        if self.swath is not None:
-            return swath_info.swath == self.swath
+        assert self.swath is not None
+        return swath_info.swath == self.swath
 
 
 def iter_channels_generator(
     product: ProductFolder2,
-    filter_func: MetaDataFilter = None,
+    filter_func: Optional[MetaDataFilter] = None,
 ) -> Iterator[Tuple[int, MetaData]]:
     """Channel iteration generator that yields channel id and channel metadata.
     If a filter MetaDataFilter-like function is provided, the output yielded is restricted only
@@ -115,8 +117,8 @@ def iter_channels_generator(
 
 def iter_channels(
     product: ProductFolder2,
-    polarization: Union[EPolLike, List[EPolLike]] = None,
-    swath: str = None,
+    polarization: Optional[Union[EPolLike, List[EPolLike]]] = None,
+    swath: Optional[str] = None,
 ) -> Iterator[Tuple[int, MetaData]]:
     """Channels iterator with optional SwathID filter pre-configured.
 

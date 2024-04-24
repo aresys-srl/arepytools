@@ -15,8 +15,13 @@ from typing import List, Optional, Tuple, Union
 import numpy as np
 import numpy.typing as npt
 
-from .. import constants
 from ..timing.precisedatetime import PreciseDateTime
+
+SECOND_STR = "s"
+HERTZ_STR = "Hz"
+JOULE_STR = "j"
+RAD_STR = "rad"
+UTC_STR = "Utc"
 
 
 class EByteOrder(enum.Enum):
@@ -473,15 +478,15 @@ class SwathInfo(MetaDataElement):
         self.swath: Optional[str] = swath_i
         self.polarization = polarization_i
         self.acquisition_prf = acquisition_prf_i
-        self.acquisition_prf_unit = "Hz"
+        self.acquisition_prf_unit = HERTZ_STR
         self.swath_acquisition_order = 0
         self.rank = 0
         self.range_delay_bias = 0.0
-        self.range_delay_bias_unit = "s"
+        self.range_delay_bias_unit = SECOND_STR
         self.acquisition_start_time = None
-        self.acquisition_start_time_unit = "Utc"
+        self.acquisition_start_time_unit = UTC_STR
         self.azimuth_steering_rate_reference_time = 0.0
-        self.az_steering_rate_ref_time_unit = "s"
+        self.az_steering_rate_ref_time_unit = SECOND_STR
         self.echoes_per_burst = 0
         self.azimuth_steering_rate_pol = (0, 0, 0)
         self.rx_gain: Optional[float] = None
@@ -541,13 +546,13 @@ class SamplingConstants(MetaDataElement):
 
     def __init__(self, frg_hz_i=None, brg_hz_i=None, faz_hz_i=None, baz_hz_i=None):
         self.frg_hz = frg_hz_i
-        self.frg_hz_unit = "Hz"
+        self.frg_hz_unit = HERTZ_STR
         self.brg_hz = brg_hz_i
-        self.brg_hz_unit = "Hz"
+        self.brg_hz_unit = HERTZ_STR
         self.faz_hz = faz_hz_i
-        self.faz_hz_unit = "Hz"
+        self.faz_hz_unit = HERTZ_STR
         self.baz_hz = baz_hz_i
-        self.baz_hz_unit = "Hz"
+        self.baz_hz_unit = HERTZ_STR
 
 
 class AcquisitionTimeLine(MetaDataElement):
@@ -670,16 +675,16 @@ class AcquisitionTimeLine(MetaDataElement):
         self._prf_changes_values = prf_changes_values_i
 
         # Units:
-        self.missing_lines_azimuth_times_unit = "s"
-        self.duplicated_lines_azimuth_times_unit = "s"
-        self.swst_changes_azimuth_times_unit = "s"
-        self.swst_changes_values_unit = "s"
-        self.noise_packets_azimuth_times_unit = "s"
-        self.internal_calibration_azimuth_times_unit = "s"
-        self.swl_changes_azimuth_times_unit = "s"
-        self.swl_changes_values_unit = "s"
-        self.prf_changes_azimuth_times_unit = "s"
-        self.prf_changes_values_unit = "Hz"
+        self.missing_lines_azimuth_times_unit = SECOND_STR
+        self.duplicated_lines_azimuth_times_unit = SECOND_STR
+        self.swst_changes_azimuth_times_unit = SECOND_STR
+        self.swst_changes_values_unit = SECOND_STR
+        self.noise_packets_azimuth_times_unit = SECOND_STR
+        self.internal_calibration_azimuth_times_unit = SECOND_STR
+        self.swl_changes_azimuth_times_unit = SECOND_STR
+        self.swl_changes_values_unit = SECOND_STR
+        self.prf_changes_azimuth_times_unit = SECOND_STR
+        self.prf_changes_values_unit = HERTZ_STR
 
         self.chirp_period = chirp_period
 
@@ -1056,8 +1061,8 @@ class StateVectors(MetaDataElement):
 
     def __init__(
         self,
-        position_vector: np.ndarray = None,
-        velocity_vector: np.ndarray = None,
+        position_vector: Optional[np.ndarray] = None,
+        velocity_vector: Optional[np.ndarray] = None,
         t_ref_utc=None,
         dt_sv_s=0.0,
     ):
@@ -1244,7 +1249,7 @@ class _Poly2DVector(MetaDataElement):
     TYPE = "Poly2DVector"
     _SINGLE_POLY_TYPE = _Poly2D
 
-    def __init__(self, i_poly2d: list = None):
+    def __init__(self, i_poly2d: Optional[list] = None):
         self._poly_list = i_poly2d if i_poly2d is not None else list()
         assert isinstance(self._poly_list, list), "The input should be a list"
         self._current_poly_index = 0
@@ -1322,7 +1327,7 @@ class DopplerRate(_Poly2D):
         "Hz/s2",
         "Hz/s2",
         "Hz/s3",
-        "Hz/s4",
+        "Hz/s3",
         "Hz/s4",
         "Hz/s5",
         "Hz/s6",
@@ -1689,17 +1694,17 @@ class Pulse(MetaDataElement):
         i_pulse_direction=None,
     ):
         self.pulse_length = i_pulse_length
-        self.pulse_length_unit = constants.SECOND_STR
+        self.pulse_length_unit = SECOND_STR
         self.bandwidth = i_bandwidth
-        self.bandwidth_unit = constants.HERTZ_STR
+        self.bandwidth_unit = HERTZ_STR
         self.pulse_energy = i_pulse_energy
-        self.pulse_energy_unit = constants.JOULE_STR
+        self.pulse_energy_unit = JOULE_STR
         self.pulse_sampling_rate = i_pulse_sampling_rate
-        self.pulse_sampling_rate_unit = constants.HERTZ_STR
+        self.pulse_sampling_rate_unit = HERTZ_STR
         self.pulse_start_frequency = i_pulse_start_frequency
-        self.pulse_start_frequency_unit = constants.HERTZ_STR
+        self.pulse_start_frequency_unit = HERTZ_STR
         self.pulse_start_phase = i_pulse_start_phase
-        self.pulse_start_phase_unit = constants.RAD_STR
+        self.pulse_start_phase_unit = RAD_STR
         self.pulse_direction = i_pulse_direction
 
     @property

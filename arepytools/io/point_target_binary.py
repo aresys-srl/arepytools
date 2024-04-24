@@ -7,7 +7,7 @@ Point Target Binary Module
 """
 
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -226,7 +226,7 @@ class PointSetProduct:
             io_utils.write_metadata(metadata, str(file))
 
     def read_data(
-        self, start: int = 0, num_points: int = None
+        self, start: int = 0, num_points: Optional[int] = None
     ) -> Tuple[np.ndarray, np.ndarray]:
         """Reading Point Target Binary rasters to extract point target data.
 
@@ -369,7 +369,7 @@ class PointSetProduct:
 
 
 def convert_array_to_point_target_structure(
-    coords: np.ndarray, rcs: np.ndarray, point_target_ids: List[str] = None
+    coords: np.ndarray, rcs: np.ndarray, point_target_ids: Optional[List[str]] = None
 ) -> Dict[str, io_utils.NominalPointTarget]:
     """Converting coordinates and rcs arrays to an array of structures, i.e. a dictionary
     of NominalPointTarget dataclasses each one representing a single point target object.

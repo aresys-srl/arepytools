@@ -8,11 +8,11 @@ Axis module
 
 import os
 import typing
+from typing import Optional
 
 import numpy as np
 import scipy.interpolate
 
-from arepytools import _utils
 from arepytools.timing.precisedatetime import PreciseDateTime
 
 # Types
@@ -101,7 +101,7 @@ class Axis:
         """length of the internal part of the axis (N - 1) * step"""
         return abs(self._relative_axis[-1] - self._relative_axis[0])
 
-    def get_array(self, start: int = 0, stop: int = None) -> np.ndarray:
+    def get_array(self, start: int = 0, stop: Optional[int] = None) -> np.ndarray:
         """Get the a portion of the axis
 
         The entire axis is returned by default
@@ -253,9 +253,7 @@ class RegularAxis(Axis):
 
         # relative axis initialization
         start, step, size = relative_axis
-        super(RegularAxis, self).__init__(
-            np.asarray([start + step * k for k in range(size)]), origin
-        )
+        super().__init__(np.asarray([start + step * k for k in range(size)]), origin)
 
     @property
     def step(self) -> RealNumber:
@@ -305,23 +303,20 @@ class RegularAxis(Axis):
 
 def _check_range(start, stop, size):
     if stop > size:
-        raise ValueError(
-            "Stop ({stop}) should be smaller equal than size: ({size})".format(
-                stop=stop, size=size
-            )
-        )
+        raise ValueError(f"Stop ({stop}) should be smaller equal than size: ({size})")
     if start < 0:
-        raise ValueError("Start ({start}) should be positive".format(start=start))
+        raise ValueError(f"Start ({start}) should be positive")
 
 
 def _is_increasing(axis):
     steps = np.diff(axis)
     if (steps > 0).all():
         return True
-    elif (steps < 0).all():
+
+    if (steps < 0).all():
         return False
-    else:
-        raise RuntimeError("Expecting monotone axis")
+
+    raise RuntimeError("Expecting monotone axis")
 
 
 def _get_interval_id_regular_real_axis(
@@ -354,8 +349,8 @@ def _get_interval_id_regular_real_axis(
 
     if isinstance(val, np.ndarray):
         return np.array([to_int_and_clip(v) for v in val])
-    else:
-        return np.array([to_int_and_clip(val)])
+
+    return np.array([to_int_and_clip(val)])
 
 
 def _get_interval_id_not_regular_real_axis(
@@ -378,7 +373,11 @@ def _get_interval_id_not_regular_real_axis(
     np.ndarray
         interval indexes
     """
-    values = _utils.input_data_to_numpy_array_with_checks(values, ndim=1)
+    if isinstance(values, (list, np.ndarray)):
+        values = np.asarray(values)
+    else:
+        values = np.full((1,), values)
+
     out = np.empty((values.size,))
     for k, v in enumerate(values):
         closest_pos = np.argmin(np.abs((array - v)))
@@ -406,24 +405,25 @@ def _validate_uniform_axis(uniform_axis: tuple) -> typing.Tuple[bool, str]:
         )
 
     if not isinstance(uniform_axis[0], (float, int)):  # start
-        return False, "start of relative axis {} should be a real number".format(
-            type(uniform_axis[0])
+        return (
+            False,
+            f"start of relative axis {type(uniform_axis[0])} should be a real number",
         )
 
     if not isinstance(uniform_axis[1], (float, int)):  # step
-        return False, "Step of relative axis {} should be a real number".format(
-            type(uniform_axis[1])
+        return (
+            False,
+            f"Step of relative axis {type(uniform_axis[1])} should be a real number",
         )
 
     if not isinstance(uniform_axis[2], int):  # step
-        return False, "Type of relative axis {} should be an integer".format(
-            type(uniform_axis[2])
+        return (
+            False,
+            f"Type of relative axis {type(uniform_axis[2])} should be an integer",
         )
 
     if uniform_axis[2] < 1:  # step
-        return False, "Size of relative axis {} should be an integer".format(
-            uniform_axis[2]
-        )
+        return False, f"Size of relative axis {uniform_axis[2]} should be an integer"
 
     return True, ""
 
@@ -432,17 +432,16 @@ def _validate_general_axis(general_axis: np.ndarray) -> typing.Tuple[bool, str]:
     if not isinstance(general_axis, np.ndarray):
         return False, "relative axis should be a numpy.ndarray"
 
-    if not ((general_axis.dtype == int) or (general_axis.dtype == float)):
+    if general_axis.dtype not in (int, float):
         return (
             False,
-            "relative axis dtype {} should be a numpy.ndarray of real numbers".format(
-                general_axis.dtype
-            ),
+            f"relative axis dtype {general_axis.dtype} should be a numpy.ndarray of real numbers",
         )
 
     if not general_axis.size == general_axis.shape[0]:
-        return False, "relative axis should be a vector not a matrix {} != {}".format(
-            general_axis.size, general_axis.shape[0]
+        return (
+            False,
+            f"relative axis should be a vector not a matrix {general_axis.size} != {general_axis.shape[0]}",
         )
 
     return True, ""

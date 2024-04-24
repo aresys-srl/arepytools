@@ -9,12 +9,12 @@ Direct geocoding module
 from __future__ import annotations
 
 from enum import Enum
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
+from scipy.constants import speed_of_light
 
-import arepytools.constants as cst
 from arepytools.geometry import conversions as conv
 from arepytools.geometry.ellipsoid import WGS84, compute_line_ellipsoid_intersections
 from arepytools.geometry.reference_frames import (
@@ -147,7 +147,7 @@ def direct_geocoding_attitude(
     range_times: Union[float, np.ndarray],
     geocoding_side: Union[str, GeocodingSide],
     altitude_over_wgs84: float = 0.0,
-    initial_guesses: np.ndarray = None,
+    initial_guesses: Optional[np.ndarray] = None,
 ) -> np.ndarray:
     """Direct geocoding using attitude information.
 
@@ -216,7 +216,7 @@ def direct_geocoding_monostatic(
     wavelength: float,
     geocoding_side: Union[str, GeocodingSide],
     geodetic_altitude: float,
-    initial_guesses: np.ndarray = None,
+    initial_guesses: Optional[np.ndarray] = None,
 ) -> np.ndarray:
     """Perform direct geocoding for monostatic sensor.
 
@@ -265,7 +265,7 @@ def direct_geocoding_monostatic(
     # computation of initial guesses, if not provided
     if initial_guesses is None:
         # computing mid range distance
-        average_input_range = np.median(range_times) * cst.LIGHT_SPEED / 2
+        average_input_range = np.median(range_times) * speed_of_light / 2
         initial_guesses = direct_geocoding_monostatic_init(
             sensor_positions=sensor_positions,
             sensor_velocities=sensor_velocities,
@@ -297,7 +297,7 @@ def direct_geocoding_bistatic(
     wavelength: float,
     geocoding_side: Union[str, GeocodingSide],
     geodetic_altitude: float,
-    initial_guesses: npt.ArrayLike = None,
+    initial_guesses: Optional[npt.ArrayLike] = None,
 ) -> np.ndarray:
     """Perform direct geocoding for bistatic sensors.
 
@@ -341,7 +341,7 @@ def direct_geocoding_bistatic(
     # Optional initial guess
     if initial_guesses is None:
         # computing mid range distance
-        average_input_range = np.median(range_times) * cst.LIGHT_SPEED / 2
+        average_input_range = np.median(range_times) * speed_of_light / 2
         initial_guesses = direct_geocoding_monostatic_init(
             sensor_positions=sensor_positions_rx,
             sensor_velocities=sensor_velocities_rx,
@@ -779,7 +779,7 @@ def _newton_for_direct_geocoding_bistatic(
     tolerance_squared = tolerance * tolerance
 
     # variables and constants computation
-    range_distance_square = (cst.LIGHT_SPEED * range_time) ** 2  # two-way distance
+    range_distance_square = (speed_of_light * range_time) ** 2  # two-way distance
     geoid_r_min = WGS84.semi_minor_axis + geodetic_altitude
     geoid_r_max = WGS84.semi_major_axis + geodetic_altitude
     r_ep2 = geoid_r_min**2
@@ -921,7 +921,7 @@ def _newton_for_direct_geocoding_monostatic(
     tolerance_squared = tolerance * tolerance
 
     # variables and constants computation
-    range_distance_square = (cst.LIGHT_SPEED * range_time / 2.0) ** 2
+    range_distance_square = (speed_of_light * range_time / 2.0) ** 2
     geoid_r_min = WGS84.semi_minor_axis + geodetic_altitude
     geoid_r_max = WGS84.semi_major_axis + geodetic_altitude
     r_ep2 = geoid_r_min**2

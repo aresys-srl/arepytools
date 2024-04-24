@@ -1,0 +1,90 @@
+from typing import Dict, Tuple
+
+import numpy.typing as npt
+
+from arepytools.io import metadata
+from arepytools.io.productfolder import (
+    ProductFolder,
+    remove_product_folder
+)
+
+# open a product folder in read mode
+path = ...
+pf = ProductFolder(path, "r")
+
+drift = {
+    "H/H": 1,
+    "V/V": 2,
+    "H/V": 5,
+    "V/H": 1.6
+}
+
+pf_content: Dict[
+    int,
+    Tuple[
+        metadata.RasterInfo,
+        metadata.SwathInfo,
+        metadata.AcquisitionTimeLine,
+        npt.NDArray,
+    ],
+] = {}
+num_channels = pf.get_number_channels()
+for channel_index in range(num_channels):
+    ch = pf.get_channel(channel_index)
+    swath_info = ch.get_swath_info()
+    raster_info = ch.get_raster_info()
+    acq_timeline = ch.get_acquisition_time_line()
+
+    drift = drift[swath_info.polarization.value]
+    ch_norm_values = ch.read_data() / drift
+
+    pf_content[channel_index] = (
+        raster_info,
+        swath_info,
+        acq_timeline,
+        ch_norm_values,
+    )
+
+# deleting the product folder ...
+remove_product_folder(pf)
+# ... to create it from scratch in write mode
+# because overwrite was not possible
+pf = ProductFolder(path, "w")
+for channel_index, (
+    raster_info,
+    swath_info,
+    acq_timeline,
+    values,
+) in pf_content.items():
+    pf.append_channel(
+        raster_info.lines,
+        raster_info.samples,
+        raster_info.cell_type,
+        raster_info.header_offset_bytes,
+        raster_info.row_prefix_bytes,
+        raster_info.byte_order.value,
+    )
+
+    ch = pf.get_channel(channel_index)
+
+    ch.get_raster_info().set_lines_axis(
+        raster_info.lines_start,
+        raster_info.lines_start_unit,
+        raster_info.lines_step,
+        raster_info.lines_step_unit,
+    )
+
+    ch.get_raster_info().set_samples_axis(
+        raster_info.samples_start,
+        raster_info.samples_start_unit,
+        raster_info.samples_step,
+        raster_info.samples_step_unit,
+    )
+
+    ch_meta = ch.metadata.get_metadata_channels(0)
+    ch_meta.insert_element(swath_info)
+    ch_meta.insert_element(acq_timeline)
+
+    # writing new data and metadata
+    ch.write_metadata()
+    ch.write_data(values)

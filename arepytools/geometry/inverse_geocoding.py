@@ -6,7 +6,7 @@ Inverse geocoding module
 ------------------------
 """
 
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
@@ -24,7 +24,7 @@ def inverse_geocoding_attitude(
     orbit: GeneralSarOrbit,
     attitude: GeneralSarAttitude,
     ground_points: npt.ArrayLike,
-    az_initial_time_guesses: Union[npt.ArrayLike, PreciseDateTime] = None,
+    az_initial_time_guesses: Optional[Union[npt.ArrayLike, PreciseDateTime]] = None,
 ) -> Tuple[Union[PreciseDateTime, np.ndarray], Union[float, np.ndarray]]:
     """Perform monostatic inverse geocoding from attitude information.
 
@@ -81,7 +81,7 @@ def inverse_geocoding_monostatic(
     ground_points: npt.ArrayLike,
     frequencies_doppler_centroid: Union[float, npt.ArrayLike],
     wavelength: float,
-    az_initial_time_guesses: Union[PreciseDateTime, npt.ArrayLike] = None,
+    az_initial_time_guesses: Optional[Union[PreciseDateTime, npt.ArrayLike]] = None,
 ) -> Tuple[Union[PreciseDateTime, np.ndarray], Union[float, np.ndarray]]:
     """Monostatic inverse geocoding computation.
 
@@ -145,7 +145,7 @@ def inverse_geocoding_bistatic(
     ground_points: npt.ArrayLike,
     frequencies_doppler_centroid: Union[float, npt.ArrayLike],
     wavelength: float,
-    az_initial_time_guesses: Union[PreciseDateTime, npt.ArrayLike] = None,
+    az_initial_time_guesses: Optional[Union[PreciseDateTime, npt.ArrayLike]] = None,
 ) -> Tuple[Union[PreciseDateTime, np.ndarray], Union[float, np.ndarray]]:
     """Bistatic inverse geocoding computation.
 

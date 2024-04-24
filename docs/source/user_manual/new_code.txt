@@ -1,0 +1,39 @@
+from arepytools.io import (
+    iter_channels,
+    open_product_folder,
+    read_raster_with_raster_info,
+    write_raster_with_raster_info,
+)
+
+# open an existing product folder
+path = ...
+pf = open_product_folder(path)
+
+drift = {
+    "H/H": 1,
+    "V/V": 2,
+    "H/V": 5,
+    "V/H": 1.6
+}
+
+for ch_idx, ch_meta in iter_channels(pf):
+    swath_info = ch_meta.get_swath_info()
+    raster_info = ch_meta.get_raster_info()
+
+    drift = drift[swath_info.polarization.value]
+    raster_file = pf.get_channel_data(ch_idx)
+
+    # reading raster file data
+    data = read_raster_with_raster_info(
+        raster_file=raster_file,
+        raster_info=raster_info
+    )
+    # editing them
+    channel_normalized_values = data / drift
+
+    # overwriting channels raster files data
+    write_raster_with_raster_info(
+        raster_file=raster_file,
+        data=channel_normalized_values,
+        raster_info=raster_info,
+    )

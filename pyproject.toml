@@ -16,6 +16,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Libraries",
     "Topic :: Utilities",
     "License :: OSI Approved :: MIT License",
@@ -23,6 +24,17 @@ classifiers = [
 requires-python = ">= 3.8"
 dependencies = ["xsdata", "lxml", "python-dateutil", "scipy", "numpy >= 1.20"]
 dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = ['black', 'isort', 'pylint']
+doc = [
+    "ipython",
+    "nbsphinx",
+    "sphinx",
+    "sphinx-design",
+    "sphinx-copybutton",
+    "pydata-sphinx-theme",
+]
 
 [project.readme]
 file = "README.md"
@@ -38,3 +50,25 @@ namespaces = false
 
 [tool.setuptools.dynamic]
 version = { attr = "arepytools.__version__" }
+
+[tool.pylint.MASTER]
+extension-pkg-allow-list = "lxml"
+ignore = [
+    "aresys_types.py",
+    "aresys_generic_metadata.py",
+    "aresys_point_target_models.py",
+    "channel.py",
+    "productfolder.py",
+    "wgs84.py",
+]
+fail-under = 8.0
+
+[tool.pylint.FORMAT]
+max-line-length = 120
+
+[tool.black]
+line-length = 88
+target-version = ["py38", "py39", "py310", "py311", "py312"]
+
+[tool.isort]
+profile = "black"

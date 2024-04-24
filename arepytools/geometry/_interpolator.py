@@ -8,19 +8,18 @@ Geometry interpolator module
 
 import numpy as np
 
-from arepytools import _utils
 
-
-def check_eval_function_input(f):
+def check_eval_function_input(fun):
     """
     Interpolator eval function input checker
     """
 
     def decorated_fun(self, *args_f, **kwargs_f):
-        interpolation_axis = _utils.input_data_to_numpy_array_with_checks(
-            args_f[0], ndim=1, name="Interpolation axis"
-        )
-        return f(self, interpolation_axis, *args_f[1:], **kwargs_f)
+        if isinstance(args_f[0], (list, np.ndarray)):
+            interpolation_axis = np.asarray(args_f[0])
+        else:
+            interpolation_axis = np.full((1,), args_f[0])
+        return fun(self, interpolation_axis, *args_f[1:], **kwargs_f)
 
     return decorated_fun
 

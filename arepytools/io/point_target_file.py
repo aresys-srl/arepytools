@@ -7,7 +7,7 @@ Point Target File Module
 """
 
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -46,7 +46,7 @@ def write_point_targets_file(
     filename: Union[str, Path],
     point_targets: Union[List[support.NominalPointTarget], support.NominalPointTarget],
     target_type: Union[int, support.CoordinatesType],
-    point_targets_ids: Union[IDLike, IDLikeList] = None,
+    point_targets_ids: Optional[Union[IDLike, IDLikeList]] = None,
 ) -> None:
     """Writing PointTargetFile XML to disk based on input point targets data.
 
