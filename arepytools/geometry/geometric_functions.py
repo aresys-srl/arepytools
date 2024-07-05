@@ -13,102 +13,208 @@ from typing import Optional, Union
 import numpy as np
 import numpy.typing as npt
 
-from arepytools.geometry.conversions import llh2xyz, xyz2llh
+from arepytools.geometry import conversions
 from arepytools.geometry.curve_protocols import TwiceDifferentiable3DCurve
 from arepytools.geometry.direct_geocoding import (
     GeocodingSide,
     direct_geocoding_monostatic,
+    direct_geocoding_with_look_angles,
 )
+from arepytools.geometry.reference_frames import ReferenceFrame, ReferenceFrameLike
 from arepytools.timing.precisedatetime import PreciseDateTime
 
 
 def compute_incidence_angles_from_trajectory(
     trajectory: TwiceDifferentiable3DCurve,
     azimuth_time: PreciseDateTime,
-    range_times: Union[float, npt.ArrayLike],
-    look_direction: Union[str, GeocodingSide],
-) -> Union[float, np.ndarray]:
-    """Compute incidence angles from a trajectory curve compliant with the TwiceDifferentiable3DCurve protocol.
+    range_times: npt.ArrayLike,
+    look_direction: str | GeocodingSide,
+    geodetic_altitude: float | None = None,
+    frequencies_doppler_centroid: npt.ArrayLike | None = None,
+    carrier_wavelength: float | None = None,
+) -> npt.ArrayLike:
+    """Compute incidence angles from sensor trajectory (TwiceDifferentiable3DCurve compliant object).
 
     Parameters
     ----------
     trajectory : TwiceDifferentiable3DCurve
-        trajectory 3D curve protocol-compliant
+        sensor trajectory compliant to the TwiceDifferentiable3DCurve protocol
     azimuth_time : PreciseDateTime
-        azimuth time
-    range_times : Union[float, npt.ArrayLike]
-        range times array like or float
-    look_direction : Union[str, GeocodingSide]
-        sensor look direction
+        azimuth time at which compute the incidence a angles corresponding to the input range times
+    range_times : npt.ArrayLike
+        range times where to compute the incidence angles, a float or a (N,) array
+    look_direction : str | GeocodingSide
+        side where to perform geocoding
+    geodetic_altitude : float | None, optional
+        the altitude over wgs84, if None is set to 0, by default None,
+    frequencies_doppler_centroid : npt.ArrayLike | None, optional
+        frequency_doppler_centroid value, if None is set to 0, by default None
+    carrier_wavelength : float | None, optional
+        carrier signal wavelength, if None is set to 1, by default None
 
     Returns
     -------
-    Union[float, np.ndarray]
-        incidence angles for each range time computed at the given azimuth time
+    npt.ArrayLike
+        incidence angles in radians corresponding to the input range times at the given azimuth time
     """
-    look_direction = GeocodingSide(look_direction)
-    sensor_pos = trajectory.evaluate(azimuth_time)
-    sensor_vel = trajectory.evaluate_first_derivatives(azimuth_time)
-
+    sensor_position = trajectory.evaluate(azimuth_time)
+    sensor_velocity = trajectory.evaluate_first_derivatives(azimuth_time)
     ground_points = direct_geocoding_monostatic(
-        sensor_positions=sensor_pos,
-        sensor_velocities=sensor_vel,
+        sensor_positions=sensor_position,
+        sensor_velocities=sensor_velocity,
         range_times=range_times,
-        geocoding_side=look_direction.value,
-        frequencies_doppler_centroid=0,
-        wavelength=1,
-        geodetic_altitude=0,
+        frequencies_doppler_centroid=(
+            frequencies_doppler_centroid
+            if frequencies_doppler_centroid is not None
+            else 0
+        ),
+        wavelength=carrier_wavelength if carrier_wavelength is not None else 1,
+        geocoding_side=GeocodingSide(look_direction),
+        geodetic_altitude=geodetic_altitude if geodetic_altitude is not None else 0,
     )
-
-    return compute_incidence_angles(sensor_positions=sensor_pos, points=ground_points)
+    return compute_incidence_angles(
+        sensor_positions=sensor_position, points=ground_points
+    )
 
 
 def compute_look_angles_from_trajectory(
     trajectory: TwiceDifferentiable3DCurve,
     azimuth_time: PreciseDateTime,
-    range_times: Union[float, npt.ArrayLike],
-    look_direction: Union[str, GeocodingSide],
-) -> Union[float, np.ndarray]:
-    """Compute look angles from a trajectory curve compliant with the TwiceDifferentiable3DCurve protocol.
+    range_times: npt.ArrayLike,
+    look_direction: str | GeocodingSide,
+    geodetic_altitude: float | None = None,
+    frequencies_doppler_centroid: npt.ArrayLike | None = None,
+    carrier_wavelength: float | None = None,
+) -> npt.ArrayLike:
+    """Compute look angles from sensor trajectory (TwiceDifferentiable3DCurve compliant object).
 
     Parameters
     ----------
     trajectory : TwiceDifferentiable3DCurve
-        trajectory 3D curve protocol-compliant
+        sensor trajectory compliant to the TwiceDifferentiable3DCurve protocol
     azimuth_time : PreciseDateTime
-        azimuth time
-    range_times : Union[float, npt.ArrayLike]
-        range times array like or float
-    look_direction : Union[str, GeocodingSide]
-        sensor look direction
+        azimuth time at which compute the look a angles corresponding to the input range times
+    range_times : npt.ArrayLike
+        range times where to compute the look angles, a float or a (N,) array
+    look_direction : str | GeocodingSide
+        side where to perform geocoding
+    geodetic_altitude : float | None, optional
+        the altitude over wgs84, if None is set to 0, by default None,
+    frequencies_doppler_centroid : npt.ArrayLike | None, optional
+        frequency_doppler_centroid value, if None is set to 0, by default None
+    carrier_wavelength : float | None, optional
+        carrier signal wavelength, if None is set to 1, by default None
+
+    Returns
+    -------
+    npt.ArrayLike
+        look angles in radians corresponding to the input range times at the given azimuth time
+    """
+    sensor_position = trajectory.evaluate(azimuth_time)
+    sensor_velocity = trajectory.evaluate_first_derivatives(azimuth_time)
+    ground_points = direct_geocoding_monostatic(
+        sensor_positions=sensor_position,
+        sensor_velocities=sensor_velocity,
+        range_times=range_times,
+        frequencies_doppler_centroid=(
+            frequencies_doppler_centroid
+            if frequencies_doppler_centroid is not None
+            else 0
+        ),
+        wavelength=carrier_wavelength if carrier_wavelength is not None else 1,
+        geocoding_side=GeocodingSide(look_direction),
+        geodetic_altitude=geodetic_altitude if geodetic_altitude is not None else 0,
+    )
+    # TODO move nadir computation directly inside compute_look_angles by default (it depends only on sensor position)
+    nadir = compute_nadir_from_sensor_positions(sensor_positions=sensor_position)
+    return compute_look_angles(
+        sensor_positions=sensor_position, nadir_directions=nadir, points=ground_points
+    )
+
+
+def compute_ground_velocity_from_trajectory(
+    trajectory: TwiceDifferentiable3DCurve,
+    azimuth_time: PreciseDateTime,
+    look_angles_rad: npt.ArrayLike,
+    reference_frame: ReferenceFrameLike = ReferenceFrame.zero_doppler,
+    geodetic_altitude: float = 0,
+    averaging_interval_relative_origin: float = 0,
+    averaging_interval_duration: float = 1,
+    averaging_interval_num_points: int = 11,
+) -> npt.ArrayLike:
+    """Numerically compute the ground velocity at given look angles.
+
+    The algorithm is based on the direct geocoding, via look angles, of points at different
+    azimuth times in a averaging interval.
+
+    Parameters
+    ----------
+    orbit : GeneralSarOrbit
+        orbit
+    time_point : PreciseDateTime
+        a time point
+    look_angles : npt.ArrayLike
+        scalar or (N,) array like of look angles in radians
+    reference_frame : ReferenceFrameLike, optional
+        the reference frames in which the look angles are intended, by default ReferenceFrame.zero_doppler
+    altitude_over_wgs84 : float, optional
+        altitude of the points over wgs84, by default 0
+    averaging_interval_relative_origin : float, optional
+        averaging interval starts at
+        time_point plus averaging_interval_relative_origin, by default 0
+    averaging_interval_duration : float, optional
+        total duration of the averaging interval, by default 1.0
+    averaging_interval_num_points : int, optional
+        number of time points in the averaging interval, by default 11
 
     Returns
     -------
     Union[float, np.ndarray]
-        look angles for each range time computed at the given azimuth time
+        scalar or (N,) np array with the ground velocity
     """
-    look_direction = GeocodingSide(look_direction)
-    sensor_pos = trajectory.evaluate(azimuth_time)
-    sensor_vel = trajectory.evaluate_first_derivatives(azimuth_time)
 
-    ground_points = direct_geocoding_monostatic(
-        sensor_positions=sensor_pos,
-        sensor_velocities=sensor_vel,
-        range_times=range_times,
-        geocoding_side=look_direction.value,
-        frequencies_doppler_centroid=0,
-        wavelength=1,
-        geodetic_altitude=0,
+    # generating the averaging time interval axis
+    averaging_time_axis = (
+        np.linspace(
+            averaging_interval_relative_origin,
+            averaging_interval_duration,
+            averaging_interval_num_points,
+        )
+        + azimuth_time
+    )
+    sensor_positions = trajectory.evaluate(averaging_time_axis)
+    sensor_velocities = trajectory.evaluate_first_derivatives(averaging_time_axis)
+
+    # computing ground points at each sensor position/velocity in the selected averaging time interval, for each
+    # input look angle
+    look_angles = np.atleast_1d(look_angles_rad)
+    ground_points = []
+    for angle in look_angles:
+        ground_points.append(
+            direct_geocoding_with_look_angles(
+                sensor_positions=sensor_positions,
+                sensor_velocities=sensor_velocities,
+                reference_frame=reference_frame,
+                look_angles=angle,
+                altitude_over_wgs84=geodetic_altitude,
+            )
+        )
+    # computing ground velocity components (as ground points coordinates diff) for each time interval, for each
+    # input look angle, and then computing their norm
+    ground_velocities_norm = [
+        np.linalg.norm(np.diff(g, axis=0), axis=-1) for g in ground_points
+    ]
+    ground_velocities = np.array(
+        [
+            np.sum(v, axis=-1) / averaging_interval_duration
+            for v in ground_velocities_norm
+        ]
     )
 
-    sensor_position_ground = xyz2llh(sensor_pos)
-    sensor_position_ground[2] = 0.0
-    sensor_position_ground = llh2xyz(sensor_position_ground).squeeze()
-
-    nadir = sensor_position_ground - sensor_pos
-
-    return compute_look_angles(
-        sensor_positions=sensor_pos, nadir_directions=nadir.T, points=ground_points
+    return (
+        ground_velocities
+        if not isinstance(look_angles_rad, float)
+        else ground_velocities[0]
     )
 
 
@@ -380,3 +486,23 @@ def doppler_equation(
         )
         - frequency_doppler_centroid
     )
+
+
+def compute_nadir_from_sensor_positions(sensor_positions: np.ndarray) -> np.ndarray:
+    """Compute nadir positions from sensor positions.
+
+    Parameters
+    ----------
+    sensor_positions : np.ndarray
+        sensor positions, with shape (3,), (N, 3)
+
+    Returns
+    -------
+    np.ndarray
+        nadir position, with shape (3,), (N, 3)
+    """
+    sensor_position_ground = conversions.xyz2llh(sensor_positions.T)
+    sensor_position_ground[2] = 0.0
+    sensor_position_ground = conversions.llh2xyz(sensor_position_ground).squeeze().T
+
+    return sensor_position_ground - sensor_positions

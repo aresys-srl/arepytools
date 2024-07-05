@@ -86,4 +86,61 @@ def compute_rotation(
     return transform.Rotation.from_euler(euler_sequence, euler_angles)
 
 
-__all__ = ["RotationOrder", "compute_rotation"]
+def compute_euler_angles_from_rotation(
+    order: RotationOrderLike, *, rotation: transform.Rotation
+) -> np.ndarray:
+    """Compute principal axes (YAW, PITCH and ROLL) from the rotation matrix and its rotation order.
+
+    Parameters
+    ----------
+    order : RotationOrderLike
+        rotation order corresponding to the input rotation matrix
+    rotation : transform.Rotation
+        rotation matrix from which compute the euler angles
+
+    Returns
+    -------
+    np.ndarray
+        euler angles array, (N, 3), columns being in the same rotation order provided as input
+
+    Examples
+    --------
+
+    single rotation
+
+    >>> rotation = compute_rotation(RotationOrder.ypr, yaw=0.0, pitch=0.0, roll=0.52359878)
+    >>> print(rotation.as_matrix())
+    [[ 1.         0.         0.       ]
+     [ 0.         0.8660254 -0.5      ]
+     [ 0.         0.5        0.8660254]]
+    >>> euler_angles = compute_euler_angles_from_rotation(RotationOrder.ypr, rotation=rotation)
+    >>> print(euler_angles)
+    array([0.        , 0.        , 0.52359878])
+
+    multiple rotation
+
+    >>> roll = np.deg2rad(np.arange(10,26,5, dtype=float))
+    >>> rotation = compute_rotation(RotationOrder.rpy, yaw=np.zeros_like(roll), pitch=np.zeros_like(roll), roll=roll)
+    >>> print(rotation.as_matrix().shape)
+    (4, 3, 3)
+    >>> euler_angles = compute_euler_angles_from_rotation(RotationOrder.rpy, rotation=rotation)
+    >>> print(euler_angles)
+    array([[0.17453293, 0.        , 0.        ],
+        [0.26179939, 0.        , 0.        ],
+        [0.34906585, 0.        , 0.        ],
+        [0.43633231, 0.        , 0.        ]])
+
+    rotation order as string
+
+    >>> compute_euler_angles_from_rotation("YPR", rotation=rotation)
+    """
+    order = RotationOrder(order)
+
+    # upper case / lower case axis character matters.
+    translation_table = str.maketrans({"Y": "Z", "P": "Y", "R": "X"})
+    euler_sequence = order.value.translate(translation_table)
+
+    return rotation.as_euler(euler_sequence)
+
+
+__all__ = ["RotationOrder", "compute_rotation", "compute_euler_angles_from_rotation"]

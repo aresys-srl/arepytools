@@ -5,15 +5,23 @@ import unittest
 
 import numpy as np
 
-from arepytools.geometry.rotation import RotationOrder, compute_rotation
+from arepytools.geometry.rotation import (
+    RotationOrder,
+    compute_euler_angles_from_rotation,
+    compute_rotation,
+)
 
 
 class RotatedFramesTestCase(unittest.TestCase):
-    yaw = np.deg2rad(10)
-    pitch = np.deg2rad(15)
-    roll = np.deg2rad(20)
+    """Testing compute_rotation function"""
+
+    def setUp(self):
+        self.yaw = np.deg2rad(10)
+        self.pitch = np.deg2rad(15)
+        self.roll = np.deg2rad(20)
 
     def test_compute_rotation(self):
+        """Testing compute rotation, scalar inputs"""
         reference_ypr = np.asarray(
             [
                 [0.951251242564198, -0.075999422127131, 0.298906609756981],
@@ -123,6 +131,7 @@ class RotatedFramesTestCase(unittest.TestCase):
         )
 
     def test_compute_rotation_vectorized(self):
+        """Testing compute_rotation, array inputs"""
         reference_pyr = np.asarray(
             [
                 [0.951251242564198, -0.069094499922630, 0.300577816214889],
@@ -161,6 +170,7 @@ class RotatedFramesTestCase(unittest.TestCase):
         )
 
     def test_compute_rotation_enum_interface(self):
+        """Testing compute_rotation, enum rotation order"""
         rotation_one = compute_rotation(
             "PYR", yaw=self.yaw, pitch=self.pitch, roll=self.roll
         )
@@ -172,6 +182,7 @@ class RotatedFramesTestCase(unittest.TestCase):
         )
 
     def test_compute_rotation_invalid_orders(self):
+        """Testing compute_rotation, invalid rotation orders"""
         with self.assertRaises(ValueError):
             compute_rotation("PPP", yaw=0, pitch=0, roll=0)
 
@@ -186,6 +197,115 @@ class RotatedFramesTestCase(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             compute_rotation("xyz", yaw=0, pitch=0, roll=0)
+
+
+class EulerAnglesTestCase(unittest.TestCase):
+    """Testing compute_euler_angles_from_rotation function"""
+
+    def setUp(self):
+        self.yaw = [np.deg2rad(10), np.deg2rad(20), np.deg2rad(30)]
+        self.pitch = [np.deg2rad(15), np.deg2rad(25), np.deg2rad(35)]
+        self.roll = [np.deg2rad(0), np.deg2rad(30), np.deg2rad(60)]
+        self.tolerance = 1e-9
+
+    def test_compute_euler_angles_scalar(self):
+        """Testing compute_euler_angles for single values of yaw, pitch and roll"""
+        rotation = compute_rotation(
+            "YPR", yaw=self.yaw[0], pitch=self.pitch[0], roll=self.roll[0]
+        )
+        euler_angles = compute_euler_angles_from_rotation("YPR", rotation=rotation)
+
+        np.testing.assert_allclose(
+            self.yaw[0], euler_angles[0], atol=self.tolerance, rtol=0
+        )
+        np.testing.assert_allclose(
+            self.pitch[0], euler_angles[1], atol=self.tolerance, rtol=0
+        )
+        np.testing.assert_allclose(
+            self.roll[0], euler_angles[2], atol=self.tolerance, rtol=0
+        )
+
+    def test_compute_euler_angles_scalar_enum(self):
+        """Testing compute_euler_angles for single values of yaw, pitch and roll"""
+        rotation = compute_rotation(
+            RotationOrder.ypr, yaw=self.yaw[0], pitch=self.pitch[0], roll=self.roll[0]
+        )
+        euler_angles = compute_euler_angles_from_rotation(
+            RotationOrder.ypr, rotation=rotation
+        )
+
+        np.testing.assert_allclose(
+            self.yaw[0], euler_angles[0], atol=self.tolerance, rtol=0
+        )
+        np.testing.assert_allclose(
+            self.pitch[0], euler_angles[1], atol=self.tolerance, rtol=0
+        )
+        np.testing.assert_allclose(
+            self.roll[0], euler_angles[2], atol=self.tolerance, rtol=0
+        )
+
+    def test_compute_euler_angles_vectorized(self):
+        """Testing compute_euler_angles for arrays of yaw, pitch and roll"""
+        rotation = compute_rotation(
+            "YPR", yaw=self.yaw, pitch=self.pitch, roll=self.roll
+        )
+        euler_angles = compute_euler_angles_from_rotation("YPR", rotation=rotation)
+
+        np.testing.assert_allclose(
+            self.yaw, euler_angles[:, 0], atol=self.tolerance, rtol=0
+        )
+        np.testing.assert_allclose(
+            self.pitch, euler_angles[:, 1], atol=self.tolerance, rtol=0
+        )
+        np.testing.assert_allclose(
+            self.roll, euler_angles[:, 2], atol=self.tolerance, rtol=0
+        )
+
+    def test_compute_euler_angles_vectorized_all_rotations(self):
+        """Testing compute_euler_angles for arrays of yaw, pitch and roll, all rotation orders"""
+        for order in RotationOrder:
+            rotation = compute_rotation(
+                order, yaw=self.yaw, pitch=self.pitch, roll=self.roll
+            )
+            euler_angles = compute_euler_angles_from_rotation(order, rotation=rotation)
+            np.testing.assert_allclose(
+                self.yaw,
+                euler_angles[:, order.value.find("Y")],
+                atol=self.tolerance,
+                rtol=0,
+            )
+            np.testing.assert_allclose(
+                self.pitch,
+                euler_angles[:, order.value.find("P")],
+                atol=self.tolerance,
+                rtol=0,
+            )
+            np.testing.assert_allclose(
+                self.roll,
+                euler_angles[:, order.value.find("R")],
+                atol=self.tolerance,
+                rtol=0,
+            )
+
+    def test_compute_euler_angles_invalid_orders(self):
+        """Testing compute_euler_angles with invalid rotation orders"""
+        rotation = compute_rotation(
+            "YPR", yaw=self.yaw, pitch=self.pitch, roll=self.roll
+        )
+        with self.assertRaises(ValueError):
+            compute_euler_angles_from_rotation("PPP", rotation=rotation)
+
+        with self.assertRaises(ValueError):
+            compute_euler_angles_from_rotation("HYX", rotation=rotation)
+
+        with self.assertRaises(ValueError):
+            compute_euler_angles_from_rotation("unknown order", rotation=rotation)
+
+        with self.assertRaises(ValueError):
+            compute_euler_angles_from_rotation(None, rotation=rotation)
+
+        with self.assertRaises(ValueError):
+            compute_euler_angles_from_rotation("xyz", rotation=rotation)
 
 
 if __name__ == "__main__":

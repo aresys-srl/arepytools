@@ -1,6 +1,27 @@
 Changelog
 =========
 
+v1.7.0
+------
+
+**Incompatible changes**
+
+- Dropped support to Python 3.8
+
+**New features**
+
+- Added a new Cubic Spline interpolated ``Orbit`` object to substitute the `GeneralSarOrbit`
+- Added a dedicated ANX time module
+- Added a new `geometry.attitude_utils` module with functionalities to compute yaw, pitch and roll from antenna reference frame and vice-versa
+- Added a ``compute_euler_angles_from_rotation`` function as inverse operation for ``compute_rotation`` in `geometry.rotation` module
+
+**Other Changes**
+
+- ``RasterInfo`` metadata class now has a setter method for the filename field
+- Added support for *AzimuthSteeringAngleReferenceTime / AzimuthSteeringAnglePol* new metadata nodes of the internal product format
+- Documentation updated with new guide on how to use new Orbit and ANX time module
+
+
 v1.6.2
 ------
 

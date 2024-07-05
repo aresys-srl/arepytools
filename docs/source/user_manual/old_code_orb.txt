@@ -1,0 +1,73 @@
+import numpy as np
+
+from arepytools.geometry.generalsarorbit import (
+    compute_ground_velocity,
+    compute_incidence_angles_from_orbit,
+    compute_look_angles_from_orbit,
+    create_general_sar_orbit,
+)
+from arepytools.io.metadata import StateVectors
+from arepytools.timing.precisedatetime import PreciseDateTime
+
+state_vectors = StateVectors(...)
+time_point = PreciseDateTime.from_utc_string(
+    "13-FEB-2023 09:33:57.500000"
+)
+range_times = np.arange(0.0043678, 0.0046678, 2.8e-09)
+
+# creating orbit
+general_sar_orbit = create_general_sar_orbit(state_vectors)
+
+# position, velocity, acceleration
+position = general_sar_orbit.get_position(time_point)
+velocity = general_sar_orbit.get_velocity(time_point)
+acceleration = general_sar_orbit.get_acceleration(time_point)
+
+# compute incidence angles
+incidence_angles = compute_incidence_angles_from_orbit(
+    orbit=general_sar_orbit,
+    azimuth_time=time_point,
+    range_times=range_times,
+    look_direction="RIGHT"
+)
+
+# computing look angles
+look_angles = compute_look_angles_from_orbit(
+    orbit=general_sar_orbit,
+    azimuth_time=time_point,
+    range_times=range_times,
+    look_direction="RIGHT"
+)
+
+# computing ground velocity
+ground_vel = compute_ground_velocity(
+    orbit=general_sar_orbit,
+    time_point=time_point,
+    look_angles=look_angles
+)
+
+# anx times and sensor positions at those times
+anx_times = general_sar_orbit.anx_times
+anx_positions = general_sar_orbit.anx_positions
+
+# time since anx
+rel_times, anx_indexes = general_sar_orbit.get_time_since_anx(
+    time_points=time_point
+)
+
+# direct geocoding
+ground_points = general_sar_orbit.sat2earth(
+    time_point=time_point,
+    range_times=range_times[5:10],
+    look_direction="RIGHT",
+    geodetic_altitude=0,
+    doppler_centroid=0,
+    carrier_wavelength=1,
+)
+
+# inverse geocoding
+sensor_times = general_sar_orbit.earth2sat(
+    earth_point=np.array([4387348.74, 762123.34, 4553067.93]),
+    doppler_centroid=0,
+    carrier_wavelength=1
+)

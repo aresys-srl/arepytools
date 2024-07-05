@@ -6,6 +6,7 @@ User Manual
    :hidden:
 
    input_output_module
+   new_orbit_and_anx
    quickstart/index
 
 This section collects all the detailed explanations, examples, quick-start and user guides needed to better understand

@@ -6,7 +6,7 @@ Curve protocols definition
 --------------------------
 """
 
-from typing import Protocol, Union
+from typing import Any, Protocol, Union, runtime_checkable
 
 import numpy as np
 import numpy.typing as npt
@@ -14,9 +14,14 @@ import numpy.typing as npt
 from arepytools.timing.precisedatetime import PreciseDateTime
 
 
+@runtime_checkable
 class TwiceDifferentiable3DCurve(Protocol):
     """Custom 3D curve container with evaluation method for curve and first two derivatives.
     f: R | PreciseDateTime -> R^3"""
+
+    @property
+    def domain(self) -> tuple[Any, Any]:
+        """Curve domain boundaries, min and max values"""
 
     def evaluate(
         self, coordinates: Union[PreciseDateTime, float, npt.ArrayLike]
@@ -67,6 +72,7 @@ class TwiceDifferentiable3DCurve(Protocol):
         """
 
 
+@runtime_checkable
 class RealTwiceDifferentiableFunction(Protocol):
     """Generic protocol for a f: R -> R function twice differentiable with derivative evaluation methods implemented"""
 

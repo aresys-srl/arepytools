@@ -13,7 +13,11 @@ Geometry package
 
 .. automodule:: arepytools.geometry.generalsarorbit
 
+.. automodule:: arepytools.geometry.orbit
+
 .. automodule:: arepytools.geometry.geometric_functions
+
+.. automodule:: arepytools.geometry.anx_time
 
 .. automodule:: arepytools.geometry.reference_frames
    

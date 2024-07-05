@@ -8,25 +8,27 @@ General SAR orbit module
 
 from __future__ import annotations
 
-import functools
 import os
 from typing import Callable, List, Optional, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
-import scipy.optimize
 
 import arepytools.geometry.inverse_geocoding_core as inverse_core
-from arepytools.geometry import conversions
 from arepytools.geometry._interpolator import GeometryInterpolator
+from arepytools.geometry.anx_time import (
+    _find_anx_time_intervals,
+    compute_anx_times_core,
+    compute_relative_times,
+)
 from arepytools.geometry.direct_geocoding import (
     direct_geocoding_bistatic,
     direct_geocoding_monostatic,
-    direct_geocoding_with_look_angles,
 )
 from arepytools.geometry.geometric_functions import (
-    compute_incidence_angles,
-    compute_look_angles,
+    compute_ground_velocity_from_trajectory,
+    compute_incidence_angles_from_trajectory,
+    compute_look_angles_from_trajectory,
     doppler_equation,
 )
 from arepytools.geometry.reference_frames import ReferenceFrame, ReferenceFrameLike
@@ -47,6 +49,11 @@ class GSO3DCurveWrapper:
 
     def __init__(self, orbit: GeneralSarOrbit) -> None:
         self.orbit = orbit
+
+    @property
+    def domain(self) -> tuple[PreciseDateTime, PreciseDateTime]:
+        """Defining the curve time domain"""
+        return (self.orbit.time_axis_array[0], self.orbit.time_axis_array[-1])
 
     def evaluate(
         self, coordinates: Union[PreciseDateTime, npt.ArrayLike]
@@ -577,7 +584,7 @@ class GeneralSarOrbit:
         Parameters
         ----------
         interpolation_positions : float
-            fracional indexes
+            fractional indexes
 
         Returns
         -------
@@ -589,29 +596,6 @@ class GeneralSarOrbit:
         arepytools.math.axis.Axis.interpolate : time axis interpolation method
         """
         return self._time_axis.interpolate(interpolation_positions)
-
-
-def _identify_anx_time_intervals(reference_time_axis, position_evaluator):
-    number_of_intervals = reference_time_axis.size - 1
-    evaluated_positions = position_evaluator(reference_time_axis)
-
-    anx_intervals = []
-
-    for interval_index in range(number_of_intervals):
-        interval_begin_index, interval_end_index = interval_index, interval_index + 2
-
-        z_start, z_stop = evaluated_positions[
-            2, interval_begin_index:interval_end_index
-        ]
-        is_anx_interval = z_start <= 0 < z_stop
-
-        if is_anx_interval:
-            t_start, t_stop = reference_time_axis[
-                interval_begin_index:interval_end_index
-            ]
-            anx_intervals.append((t_start, t_stop))
-
-    return anx_intervals
 
 
 def compute_anx_times(
@@ -638,52 +622,19 @@ def compute_anx_times(
     -------
     np.ndarray
         (N,) array of ANX times
-
-    Raises
-    ------
-    ValueError
-        in case of invalid input
     """
-    if max_abs_z_error <= 0:
-        raise ValueError("Invalid maximum absolute ANX z-coordinate error value")
-
-    if max_abs_time_error <= 0:
-        raise ValueError("Invalid maximum absolute ANX time error value")
-
-    if max_search_iterations <= 0:
-        raise ValueError("Invalid maximum number of search iterations per ANX")
-
-    anx_time_intervals = _identify_anx_time_intervals(
-        orbit.time_axis_array, orbit.get_position
+    trajectory = GSO3DCurveWrapper(orbit=orbit)
+    try:
+        orbit_step = orbit.dt
+    except RuntimeError:
+        orbit_step = np.mean(np.diff(orbit.time_axis_array))
+    return compute_anx_times_core(
+        trajectory=trajectory,
+        time_sampling_step_s=orbit_step,
+        max_abs_z_error=max_abs_z_error,
+        max_abs_time_error=max_abs_time_error,
+        max_search_iterations=max_search_iterations,
     )
-
-    anx_times = np.empty((len(anx_time_intervals),), dtype=orbit.time_axis_array.dtype)
-
-    def get_z_coordinate(time, origin):
-        return orbit.get_position(origin + time)[2]
-
-    for interval_index, anx_time_interval in enumerate(anx_time_intervals):
-        reference_time = anx_time_interval[0]
-
-        central_time = (
-            reference_time + (anx_time_interval[1] - anx_time_interval[0]) / 2.0
-        )
-        velocity_z = orbit.get_velocity(central_time)[2]
-        xtol = min(max_abs_time_error, max_abs_z_error / abs(velocity_z))
-
-        get_z_coordinate = functools.partial(get_z_coordinate, origin=reference_time)
-
-        anx_time_interval_rel = [t - reference_time for t in anx_time_interval]
-        anx_time_rel = scipy.optimize.bisect(
-            get_z_coordinate,
-            *anx_time_interval_rel,
-            xtol=xtol,
-            maxiter=max_search_iterations,
-        )
-
-        anx_times[interval_index] = reference_time + anx_time_rel
-
-    return anx_times
 
 
 def compute_number_of_anx(orbit: GeneralSarOrbit) -> int:
@@ -699,44 +650,11 @@ def compute_number_of_anx(orbit: GeneralSarOrbit) -> int:
     int
         number of ANX in the orbit
     """
-    anx_time_intervals = _identify_anx_time_intervals(
-        orbit.time_axis_array, orbit.get_position
-    )
+    time_rel_axis = orbit.time_axis_array - orbit.time_axis_array[0]
+    positions = orbit.get_position(orbit.time_axis_array)
+    anx_time_intervals = _find_anx_time_intervals(time_rel_axis, positions.T)
 
     return len(anx_time_intervals)
-
-
-def compute_relative_times(
-    time_points, time_nodes
-) -> Tuple[npt.NDArray[np.floating], npt.NDArray[np.integer]]:
-    """Return the relative time since the greatest node less or equal to absolute time
-
-    Parameters
-    ----------
-    time_points : np.ndarray
-        1D numpy array of length N of absolute time points
-    time_nodes : np.ndarray
-        1D numpy array of sorted absolute times
-
-    Returns
-    -------
-    Tuple[npt.NDArray[np.floating], npt.NDArray[np.integer]]
-        a tuple of two 1D numpy arrays of relative times and related time_nodes indices,
-        nan value and not valid index are returned when previous time node is not available
-    """
-    relative_times = np.empty_like(time_points, dtype=float)
-    node_indices = np.empty_like(time_points, dtype=int)
-
-    for time_index, time_value in np.ndenumerate(time_points):
-        lower_time_nodes = time_nodes[time_nodes <= time_value]
-        if len(lower_time_nodes) > 0:
-            relative_times[time_index] = time_value - lower_time_nodes[-1]
-            node_indices[time_index] = len(lower_time_nodes) - 1
-        else:
-            relative_times[time_index] = np.nan
-            node_indices[time_index] = len(time_nodes)
-
-    return relative_times, node_indices
 
 
 def create_general_sar_orbit(
@@ -813,25 +731,16 @@ def compute_look_angles_from_orbit(
         scalar or (N,) look angles in radians
     """
 
-    points = orbit.sat2earth(
-        azimuth_time,
-        range_times,
-        look_direction,
-        altitude_over_wgs84,
-        doppler_centroid,
-        carrier_wavelength,
-    ).T
-    points = points.reshape(np.shape(range_times) + (3,))
-
-    sensor_position = orbit.get_position(azimuth_time).squeeze()
-
-    sensor_position_ground = conversions.xyz2llh(sensor_position)
-    sensor_position_ground[2] = 0.0
-    sensor_position_ground = conversions.llh2xyz(sensor_position_ground).squeeze()
-
-    nadir = sensor_position_ground - sensor_position
-
-    return compute_look_angles(sensor_position.T, nadir.T, points)
+    trajectory = GSO3DCurveWrapper(orbit=orbit)
+    return compute_look_angles_from_trajectory(
+        trajectory=trajectory,
+        azimuth_time=azimuth_time,
+        range_times=range_times,
+        look_direction=look_direction,
+        geodetic_altitude=altitude_over_wgs84,
+        frequencies_doppler_centroid=doppler_centroid,
+        carrier_wavelength=carrier_wavelength,
+    )
 
 
 def compute_incidence_angles_from_orbit(
@@ -868,19 +777,17 @@ def compute_incidence_angles_from_orbit(
     Union[float, np.ndarray]
         scalar or (N,) incidence angles in radians
     """
-    points = orbit.sat2earth(
-        azimuth_time,
-        range_times,
-        look_direction,
-        altitude_over_wgs84,
-        doppler_centroid,
-        carrier_wavelength,
-    ).T
-    points = points.reshape(np.shape(range_times) + (3,))
 
-    sensor_position = orbit.get_position(azimuth_time).T.squeeze()
-
-    return compute_incidence_angles(sensor_position, points)
+    trajectory = GSO3DCurveWrapper(orbit=orbit)
+    return compute_incidence_angles_from_trajectory(
+        trajectory=trajectory,
+        azimuth_time=azimuth_time,
+        range_times=range_times,
+        look_direction=look_direction,
+        geodetic_altitude=altitude_over_wgs84,
+        frequencies_doppler_centroid=doppler_centroid,
+        carrier_wavelength=carrier_wavelength,
+    )
 
 
 def compute_ground_velocity(
@@ -924,36 +831,18 @@ def compute_ground_velocity(
     Union[float, np.ndarray]
         scalar or (N,) np array with the ground velocity
     """
-    look_angles = np.asarray(look_angles)
 
-    averaging_time_axis = (
-        np.linspace(
-            averaging_interval_relative_origin,
-            averaging_interval_duration,
-            averaging_interval_num_points,
-        )
-        + time_point
+    trajectory = GSO3DCurveWrapper(orbit=orbit)
+    return compute_ground_velocity_from_trajectory(
+        trajectory=trajectory,
+        azimuth_time=time_point,
+        look_angles_rad=look_angles,
+        reference_frame=reference_frame,
+        geodetic_altitude=altitude_over_wgs84,
+        averaging_interval_relative_origin=averaging_interval_relative_origin,
+        averaging_interval_duration=averaging_interval_duration,
+        averaging_interval_num_points=averaging_interval_num_points,
     )
-
-    sensor_positions = orbit.get_position(averaging_time_axis).T
-    sensor_velocities = orbit.get_velocity(averaging_time_axis).T
-
-    points = np.empty(look_angles.shape + (averaging_time_axis.size, 3))
-    for look_angle, point in zip(
-        look_angles.reshape((-1,)),
-        points.reshape((-1, averaging_time_axis.size, 3)),
-    ):
-        point[:, :] = direct_geocoding_with_look_angles(
-            sensor_positions,
-            sensor_velocities,
-            reference_frame,
-            look_angle,
-            altitude_over_wgs84=altitude_over_wgs84,
-        )
-
-    points_difference = np.diff(points, axis=-2)
-    distances = np.linalg.norm(points_difference, axis=-1)
-    return np.sum(distances, axis=-1) / averaging_interval_duration
 
 
 def _check_sat2earth_input(

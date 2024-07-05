@@ -5,4 +5,4 @@
 ArePyTools: the Python toolkit for SAR data processing
 """
 
-__version__ = "1.6.2"
+__version__ = "1.7.0"

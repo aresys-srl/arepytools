@@ -16,6 +16,9 @@ import numpy.typing as npt
 
 from arepytools.geometry import curve
 from arepytools.geometry._interpolator import GeometryInterpolator
+from arepytools.geometry.attitude_utils import (
+    compute_antenna_reference_frame_from_euler_angles,
+)
 from arepytools.geometry.direct_geocoding import direct_geocoding_with_looking_direction
 from arepytools.geometry.generalsarorbit import (
     GeneralSarOrbit,
@@ -367,15 +370,13 @@ def compute_antenna_reference_frame(
         sensor_position, sensor_velocity, attitude.reference_frame
     )
 
-    yaw = np.deg2rad(attitude.get_yaw(time_points_as_1d_array).reshape(shape_1d))
-    pitch = np.deg2rad(attitude.get_pitch(time_points_as_1d_array).reshape(shape_1d))
-    roll = np.deg2rad(attitude.get_roll(time_points_as_1d_array).reshape(shape_1d))
-
-    rotation = compute_rotation(
-        attitude.rotation_order, yaw=yaw, pitch=pitch, roll=roll
+    return compute_antenna_reference_frame_from_euler_angles(
+        order=attitude.rotation_order,
+        initial_reference_frame_axis=initial_frame,
+        yaw=np.deg2rad(attitude.get_yaw(time_points_as_1d_array).reshape(shape_1d)),
+        pitch=np.deg2rad(attitude.get_pitch(time_points_as_1d_array).reshape(shape_1d)),
+        roll=np.deg2rad(attitude.get_roll(time_points_as_1d_array).reshape(shape_1d)),
     )
-
-    return np.matmul(initial_frame, rotation.as_matrix())
 
 
 def compute_pointing_directions(

@@ -677,6 +677,12 @@ class RasterInfoTestCase(unittest.TestCase):
             self.raster_info_model,
         )
 
+    def test_filename_change_after_instantiation(self):
+        raster_info = translate_raster_info_from_model(self.raster_info_model)
+        new_filename = "test_filename_change.tiff"
+        raster_info.file_name = new_filename
+        self.assertEqual(raster_info.file_name, new_filename)
+
 
 class DataSetInfoTestCase(unittest.TestCase):
     def assertEqualDataSetInfo(
@@ -930,16 +936,81 @@ class SwathInfoTestCase(unittest.TestCase):
             info_b.azimuth_steering_rate_reference_time,
         )
         self.assertEqual(
+            info_a.azimuth_steering_angle_reference_time,
+            info_b.azimuth_steering_angle_reference_time,
+        )
+        self.assertEqual(
             info_a.az_steering_rate_ref_time_unit, info_b.az_steering_rate_ref_time_unit
+        )
+        self.assertEqual(
+            info_a.az_steering_angle_ref_time_unit,
+            info_b.az_steering_angle_ref_time_unit,
         )
         self.assertEqual(info_a.echoes_per_burst, info_b.echoes_per_burst)
         self.assertEqual(
             info_a.azimuth_steering_rate_pol, info_b.azimuth_steering_rate_pol
         )
+        self.assertEqual(
+            info_a.azimuth_steering_angle_pol, info_b.azimuth_steering_angle_pol
+        )
         self.assertEqual(info_a.rx_gain, info_b.rx_gain)
         self.assertEqual(info_a.channel_delay, info_b.channel_delay)
 
-    def test_translate_swath_info(self):
+    def test_translate_swath_info_steering_angle(self):
+        swath_info_model = models.SwathInfoType(
+            swath=models.SwathInfoType.Swath("swath_name"),
+            swath_acquisition_order=models.SwathInfoType.SwathAcquisitionOrder(4),
+            polarization=models.PolarizationType.H_H,
+            rank=models.SwathInfoType.Rank(15),
+            range_delay_bias=models.SwathInfoType.RangeDelayBias(
+                0.5, unit=models.Units.S
+            ),
+            acquisition_start_time=models.SwathInfoType.AcquisitionStartTime(
+                "01-JAN-2020 00:00:00.000000000000", models.Units.UTC
+            ),
+            azimuth_steering_angle_reference_time=models.DoubleWithUnit(
+                1.0, models.Units.S
+            ),
+            azimuth_steering_angle_pol=models.SwathInfoType.AzimuthSteeringAnglePol(
+                [
+                    models.SwathInfoType.AzimuthSteeringAnglePol.Val(0.1, n=1),
+                    models.SwathInfoType.AzimuthSteeringAnglePol.Val(0.2, n=2),
+                    models.SwathInfoType.AzimuthSteeringAnglePol.Val(0.3, n=3),
+                    models.SwathInfoType.AzimuthSteeringAnglePol.Val(0.4, n=4),
+                ]
+            ),
+            acquisition_prf=1000.0,
+            echoes_per_burst=153,
+            channel_delay=0.5,
+            rx_gain=85.2,
+        )
+
+        swath_info_metadata = metadata.SwathInfo(
+            swath_i="swath_name",
+            polarization_i=metadata.EPolarization.hh,
+            acquisition_prf_i=1000.0,
+        )
+        swath_info_metadata.swath_acquisition_order = 4
+        swath_info_metadata.rank = 15
+        swath_info_metadata.range_delay_bias = 0.5
+        swath_info_metadata.acquisition_start_time = PreciseDateTime.from_utc_string(
+            "01-JAN-2020 00:00:00.000000000000"
+        )
+        swath_info_metadata.azimuth_steering_angle_reference_time = 1.0
+        swath_info_metadata.azimuth_steering_angle_pol = (0.1, 0.2, 0.3, 0.4)
+        swath_info_metadata.echoes_per_burst = 153
+        swath_info_metadata.channel_delay = 0.5
+        swath_info_metadata.rx_gain = 85.2
+
+        self.assertEqualSwathInfo(
+            translate_swath_info_from_model(swath_info_model), swath_info_metadata
+        )
+
+        self.assertEqual(
+            translate_swath_info_to_model(swath_info_metadata), swath_info_model
+        )
+
+    def test_translate_swath_info_steering_rate(self):
         swath_info_model = models.SwathInfoType(
             swath=models.SwathInfoType.Swath("swath_name"),
             swath_acquisition_order=models.SwathInfoType.SwathAcquisitionOrder(4),

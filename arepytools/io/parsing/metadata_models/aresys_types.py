@@ -3023,6 +3023,11 @@ class SwathInfoType(TreeElementBaseType):
     :ivar rank: Rank
     :ivar range_delay_bias: Range delay bias [s]
     :ivar acquisition_start_time: Acquisition start time [Utc]
+    :ivar azimuth_steering_angle_reference_time: Azimuth antenna steering
+        polynomial reference time [s]
+    :ivar azimuth_steering_angle_pol: Azimuth antenna steering polynomial
+        coefficients: const [rad], az [rad/s], az^2 [rad/s^2], az^3
+        [rad/s^3]
     :ivar azimuth_steering_rate_reference_time: Azimuth antenna steering
         rate polynomial reference time [s]
     :ivar azimuth_steering_rate_pol: Azimuth antenna steering rate
@@ -3089,13 +3094,30 @@ class SwathInfoType(TreeElementBaseType):
             "required": True,
         },
     )
+    azimuth_steering_angle_reference_time: Optional[DoubleWithUnit] = field(
+        default=None,
+        metadata={
+            "name": "AzimuthSteeringAngleReferenceTime",
+            "type": "Element",
+            "namespace": "",
+        },
+    )
+    azimuth_steering_angle_pol: Optional["SwathInfoType.AzimuthSteeringAnglePol"] = (
+        field(
+            default=None,
+            metadata={
+                "name": "AzimuthSteeringAnglePol",
+                "type": "Element",
+                "namespace": "",
+            },
+        )
+    )
     azimuth_steering_rate_reference_time: Optional[DoubleWithUnit] = field(
         default=None,
         metadata={
             "name": "AzimuthSteeringRateReferenceTime",
             "type": "Element",
             "namespace": "",
-            "required": True,
         },
     )
     azimuth_steering_rate_pol: Optional["SwathInfoType.AzimuthSteeringRatePol"] = field(
@@ -3104,7 +3126,6 @@ class SwathInfoType(TreeElementBaseType):
             "name": "AzimuthSteeringRatePol",
             "type": "Element",
             "namespace": "",
-            "required": True,
         },
     )
     acquisition_prf: Optional[float] = field(
@@ -3216,6 +3237,40 @@ class SwathInfoType(TreeElementBaseType):
                 "type": "Attribute",
             },
         )
+
+    @dataclass
+    class AzimuthSteeringAnglePol:
+        val: List["SwathInfoType.AzimuthSteeringAnglePol.Val"] = field(
+            default_factory=list,
+            metadata={
+                "type": "Element",
+                "namespace": "",
+                "min_occurs": 4,
+                "max_occurs": 4,
+            },
+        )
+
+        @dataclass
+        class Val:
+            value: Optional[float] = field(
+                default=None,
+                metadata={
+                    "required": True,
+                },
+            )
+            n: Optional[int] = field(
+                default=None,
+                metadata={
+                    "name": "N",
+                    "type": "Attribute",
+                },
+            )
+            unit: Optional[Units] = field(
+                default=None,
+                metadata={
+                    "type": "Attribute",
+                },
+            )
 
     @dataclass
     class AzimuthSteeringRatePol:

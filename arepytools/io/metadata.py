@@ -238,6 +238,10 @@ class RasterInfo(MetaDataElement):
     def file_name(self):
         return self._file_name
 
+    @file_name.setter
+    def file_name(self, filename):
+        self._file_name = filename
+
     @property
     def lines(self):
         return self._lines
@@ -485,10 +489,19 @@ class SwathInfo(MetaDataElement):
         self.range_delay_bias_unit = SECOND_STR
         self.acquisition_start_time = None
         self.acquisition_start_time_unit = UTC_STR
-        self.azimuth_steering_rate_reference_time = 0.0
+        self._azimuth_steering_rate_reference_time: Union[float, None] = 0.0
+        self._azimuth_steering_angle_reference_time: Union[float, None] = None
         self.az_steering_rate_ref_time_unit = SECOND_STR
+        self.az_steering_angle_ref_time_unit = SECOND_STR
         self.echoes_per_burst = 0
-        self.azimuth_steering_rate_pol = (0, 0, 0)
+        self._azimuth_steering_rate_pol: Union[Tuple[float, float, float], None] = (
+            0.0,
+            0.0,
+            0.0,
+        )
+        self._azimuth_steering_angle_pol: Union[
+            Tuple[float, float, float, float], None
+        ] = None
         self.rx_gain: Optional[float] = None
         self.channel_delay: Optional[float] = None
 
@@ -522,19 +535,81 @@ class SwathInfo(MetaDataElement):
             raise TypeError("Acquisition start time has to be a PreciseDateTime")
 
     @property
-    def azimuth_steering_rate_pol(self):
+    def azimuth_steering_rate_reference_time(self) -> Union[float, None]:
+        return self._azimuth_steering_rate_reference_time
+
+    @azimuth_steering_rate_reference_time.setter
+    def azimuth_steering_rate_reference_time(
+        self, i_azimuth_steering_rate_reference_time: Union[float, None]
+    ):
+        self._azimuth_steering_rate_reference_time = (
+            i_azimuth_steering_rate_reference_time
+        )
+        if i_azimuth_steering_rate_reference_time is not None:
+            # forcing the other to None
+            self._azimuth_steering_angle_reference_time = None
+
+    @property
+    def azimuth_steering_angle_reference_time(self) -> Union[float, None]:
+        return self._azimuth_steering_angle_reference_time
+
+    @azimuth_steering_angle_reference_time.setter
+    def azimuth_steering_angle_reference_time(
+        self, i_azimuth_steering_angle_reference_time: Union[float, None]
+    ):
+        self._azimuth_steering_angle_reference_time = (
+            i_azimuth_steering_angle_reference_time
+        )
+        if i_azimuth_steering_angle_reference_time is not None:
+            # forcing the other to None
+            self._azimuth_steering_rate_reference_time = None
+
+    @property
+    def azimuth_steering_rate_pol(self) -> Union[Tuple[float, float, float], None]:
         return self._azimuth_steering_rate_pol
 
     @azimuth_steering_rate_pol.setter
-    def azimuth_steering_rate_pol(self, i_azimuth_steering_pol):
-        if len(i_azimuth_steering_pol) == 3 and isinstance(
-            i_azimuth_steering_pol, tuple
-        ):
-            self._azimuth_steering_rate_pol = i_azimuth_steering_pol
+    def azimuth_steering_rate_pol(
+        self, i_azimuth_steering_rate_pol: Union[Tuple[float, float, float], None]
+    ):
+        if i_azimuth_steering_rate_pol is not None:
+            if len(i_azimuth_steering_rate_pol) == 3 and isinstance(
+                i_azimuth_steering_rate_pol, tuple
+            ):
+                self._azimuth_steering_rate_pol = i_azimuth_steering_rate_pol
+                # forcing the other to None
+                self._azimuth_steering_angle_pol = None
+            else:
+                raise TypeError(
+                    "The azimuth steering rate pol has to be a tuple of 3 elements or None"
+                )
         else:
-            raise TypeError(
-                "The azimuth steering rate pol has to be a tuple of 3 elements"
-            )
+            self._azimuth_steering_rate_pol = None
+
+    @property
+    def azimuth_steering_angle_pol(
+        self,
+    ) -> Union[Tuple[float, float, float, float], None]:
+        return self._azimuth_steering_angle_pol
+
+    @azimuth_steering_angle_pol.setter
+    def azimuth_steering_angle_pol(
+        self,
+        i_azimuth_steering_angle_pol: Union[Tuple[float, float, float, float], None],
+    ):
+        if i_azimuth_steering_angle_pol is not None:
+            if len(i_azimuth_steering_angle_pol) == 4 and isinstance(
+                i_azimuth_steering_angle_pol, tuple
+            ):
+                self._azimuth_steering_angle_pol = i_azimuth_steering_angle_pol
+                # forcing the other to None
+                self._azimuth_steering_rate_pol = None
+            else:
+                raise TypeError(
+                    "The azimuth steering pol has to be a tuple of 4 elements or None"
+                )
+        else:
+            self._azimuth_steering_angle_pol = None
 
 
 class SamplingConstants(MetaDataElement):

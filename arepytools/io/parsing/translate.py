@@ -565,13 +565,19 @@ def translate_swath_info_from_model(
     assert info.rank is not None and info.rank.value is not None
     assert info.range_delay_bias is not None and info.range_delay_bias.value is not None
     assert info.acquisition_start_time is not None
+    # azimuth steering options
     assert (
+        # steering rate
         info.azimuth_steering_rate_reference_time is not None
         and info.azimuth_steering_rate_reference_time.value is not None
-    )
-    assert (
-        info.azimuth_steering_rate_pol is not None
-        and len(info.azimuth_steering_rate_pol.val) == 3
+        and info.azimuth_steering_rate_pol is not None
+        and info.azimuth_steering_rate_pol.val is not None
+    ) or (
+        # steering
+        info.azimuth_steering_angle_reference_time is not None
+        and info.azimuth_steering_angle_reference_time.value is not None
+        and info.azimuth_steering_angle_pol is not None
+        and info.azimuth_steering_angle_pol.val is not None
     )
     assert info.acquisition_prf is not None
     assert info.echoes_per_burst is not None
@@ -587,12 +593,20 @@ def translate_swath_info_from_model(
     swath_info_metadata.acquisition_start_time = PreciseDateTime.from_utc_string(
         info.acquisition_start_time.value
     )
-    swath_info_metadata.azimuth_steering_rate_reference_time = (
-        info.azimuth_steering_rate_reference_time.value
-    )
-    swath_info_metadata.azimuth_steering_rate_pol = tuple(
-        coeff.value for coeff in info.azimuth_steering_rate_pol.val
-    )
+    if info.azimuth_steering_rate_reference_time is not None:
+        swath_info_metadata.azimuth_steering_rate_reference_time = (
+            info.azimuth_steering_rate_reference_time.value
+        )
+        swath_info_metadata.azimuth_steering_rate_pol = tuple(
+            coeff.value for coeff in info.azimuth_steering_rate_pol.val
+        )
+    if info.azimuth_steering_angle_reference_time is not None:
+        swath_info_metadata.azimuth_steering_angle_reference_time = (
+            info.azimuth_steering_angle_reference_time.value
+        )
+        swath_info_metadata.azimuth_steering_angle_pol = tuple(
+            coeff.value for coeff in info.azimuth_steering_angle_pol.val
+        )
     swath_info_metadata.echoes_per_burst = info.echoes_per_burst
     swath_info_metadata.channel_delay = info.channel_delay
     swath_info_metadata.rx_gain = info.rx_gain
@@ -622,22 +636,58 @@ def translate_swath_info_to_model(
             str(info.acquisition_start_time),
             translate_unit_to_model(info.acquisition_start_time_unit),
         ),
-        azimuth_steering_rate_reference_time=metadata_models.DoubleWithUnit(
-            info.azimuth_steering_rate_reference_time,
-            translate_unit_to_model(info.az_steering_rate_ref_time_unit),
+        azimuth_steering_angle_reference_time=(
+            metadata_models.DoubleWithUnit(
+                info.azimuth_steering_angle_reference_time,
+                translate_unit_to_model(info.az_steering_angle_ref_time_unit),
+            )
+            if info.azimuth_steering_angle_reference_time is not None
+            else None
         ),
-        azimuth_steering_rate_pol=metadata_models.SwathInfoType.AzimuthSteeringRatePol(
-            [
-                metadata_models.SwathInfoType.AzimuthSteeringRatePol.Val(
-                    info.azimuth_steering_rate_pol[0], n=1
-                ),
-                metadata_models.SwathInfoType.AzimuthSteeringRatePol.Val(
-                    info.azimuth_steering_rate_pol[1], n=2
-                ),
-                metadata_models.SwathInfoType.AzimuthSteeringRatePol.Val(
-                    info.azimuth_steering_rate_pol[2], n=3
-                ),
-            ]
+        azimuth_steering_angle_pol=(
+            metadata_models.SwathInfoType.AzimuthSteeringAnglePol(
+                [
+                    metadata_models.SwathInfoType.AzimuthSteeringAnglePol.Val(
+                        info.azimuth_steering_angle_pol[0], n=1
+                    ),
+                    metadata_models.SwathInfoType.AzimuthSteeringAnglePol.Val(
+                        info.azimuth_steering_angle_pol[1], n=2
+                    ),
+                    metadata_models.SwathInfoType.AzimuthSteeringAnglePol.Val(
+                        info.azimuth_steering_angle_pol[2], n=3
+                    ),
+                    metadata_models.SwathInfoType.AzimuthSteeringAnglePol.Val(
+                        info.azimuth_steering_angle_pol[3], n=4
+                    ),
+                ]
+            )
+            if info.azimuth_steering_angle_pol is not None
+            else None
+        ),
+        azimuth_steering_rate_reference_time=(
+            metadata_models.DoubleWithUnit(
+                info.azimuth_steering_rate_reference_time,
+                translate_unit_to_model(info.az_steering_rate_ref_time_unit),
+            )
+            if info.azimuth_steering_rate_reference_time is not None
+            else None
+        ),
+        azimuth_steering_rate_pol=(
+            metadata_models.SwathInfoType.AzimuthSteeringRatePol(
+                [
+                    metadata_models.SwathInfoType.AzimuthSteeringRatePol.Val(
+                        info.azimuth_steering_rate_pol[0], n=1
+                    ),
+                    metadata_models.SwathInfoType.AzimuthSteeringRatePol.Val(
+                        info.azimuth_steering_rate_pol[1], n=2
+                    ),
+                    metadata_models.SwathInfoType.AzimuthSteeringRatePol.Val(
+                        info.azimuth_steering_rate_pol[2], n=3
+                    ),
+                ]
+            )
+            if info.azimuth_steering_rate_pol is not None
+            else None
         ),
         acquisition_prf=info.acquisition_prf,
         echoes_per_burst=info.echoes_per_burst,

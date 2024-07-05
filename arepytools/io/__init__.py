@@ -5,6 +5,7 @@
 I/O management package
 """
 from .channel_iteration import iter_channels
+from .create_orbit import create_orbit
 from .io_support import (
     create_new_metadata,
     read_metadata,

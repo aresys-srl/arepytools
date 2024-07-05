@@ -12,7 +12,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -21,8 +20,8 @@ classifiers = [
     "Topic :: Utilities",
     "License :: OSI Approved :: MIT License",
 ]
-requires-python = ">= 3.8"
-dependencies = ["xsdata", "lxml", "python-dateutil", "scipy", "numpy >= 1.20"]
+requires-python = ">= 3.9"
+dependencies = ["xsdata", "lxml", "python-dateutil", "scipy", "numpy<2"]
 dynamic = ["version"]
 
 [project.optional-dependencies]
@@ -68,7 +67,7 @@ max-line-length = 120
 
 [tool.black]
 line-length = 88
-target-version = ["py38", "py39", "py310", "py311", "py312"]
+target-version = ["py39", "py310", "py311", "py312"]
 
 [tool.isort]
 profile = "black"

@@ -20,3 +20,5 @@ I/O package
 .. automodule:: arepytools.io.point_target_file
 
 .. automodule:: arepytools.io.point_target_binary
+
+.. automodule:: arepytools.io.create_orbit

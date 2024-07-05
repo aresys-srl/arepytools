@@ -1,0 +1,98 @@
+import numpy as np
+
+from arepytools.geometry.anx_time import (
+    compute_anx_times_core,
+    compute_relative_times
+)
+from arepytools.geometry.direct_geocoding import (
+    direct_geocoding_monostatic
+)
+from arepytools.geometry.geometric_functions import (
+    compute_ground_velocity_from_trajectory,
+    compute_incidence_angles_from_trajectory,
+    compute_look_angles_from_trajectory,
+)
+from arepytools.geometry.inverse_geocoding_core import (
+    inverse_geocoding_monostatic_core,
+    inverse_geocoding_monostatic_init_core,
+)
+from arepytools.io import create_orbit
+from arepytools.io.metadata import StateVectors
+from arepytools.timing.precisedatetime import PreciseDateTime
+
+state_vectors = StateVectors(...)
+time_point = PreciseDateTime.from_utc_string(
+    "13-FEB-2023 09:33:57.500000"
+)
+range_times = np.arange(0.0043678, 0.0046678, 2.8e-09)
+
+# creating orbit
+trajectory = create_orbit(state_vectors)
+
+# position, velocity, acceleration
+position = trajectory.evaluate(time_point)
+velocity = trajectory.evaluate_first_derivatives(time_point)
+acceleration = trajectory.evaluate_second_derivatives(time_point)
+
+# compute incidence angles
+incidence_angles = compute_incidence_angles_from_trajectory(
+    trajectory=trajectory,
+    azimuth_time=time_point,
+    range_times=range_times,
+    look_direction="RIGHT"
+)
+
+# computing look angles
+look_angles = compute_look_angles_from_trajectory(
+    trajectory=trajectory,
+    azimuth_time=time_point,
+    range_times=range_times,
+    look_direction="RIGHT"
+)
+
+# computing ground velocity
+ground_vel = compute_ground_velocity_from_trajectory(
+    trajectory=trajectory,
+    azimuth_time=time_point,
+    look_angles_rad=look_angles
+)
+
+# anx times and sensor positions at those times
+anx_times = compute_anx_times_core(
+    trajectory=trajectory,
+    time_sampling_step_s=1
+)
+anx_positions = trajectory.evaluate(anx_times)
+
+# time since anx
+rel_times, anx_indexes = compute_relative_times(
+    time_points=time_point,
+    anx_times=anx_times
+)
+
+# direct geocoding
+ground_points = direct_geocoding_monostatic(
+    sensor_positions=trajectory.evaluate(time_point),
+    sensor_velocities=trajectory.evaluate(time_point),
+    range_times=range_times[5:10],
+    geocoding_side="RIGHT",
+    frequencies_doppler_centroid=0,
+    wavelength=1,
+    geodetic_altitude=0,
+)
+
+# inverse geocoding
+init_guess = inverse_geocoding_monostatic_init_core(
+    trajectory=trajectory,
+    time_axis=trajectory.times,
+    ground_points=ground_points,
+    frequencies_doppler_centroid=0,
+    wavelength=1
+)
+sensor_times = inverse_geocoding_monostatic_core(
+    trajectory=trajectory,
+    ground_points=np.array([4387348.74, 762123.34, 4553067.93]),
+    initial_guesses=init_guess,
+    frequencies_doppler_centroid=0,
+    wavelength=1
+)
