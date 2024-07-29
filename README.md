@@ -18,9 +18,3 @@ The package can be installed via pip:
 ```shell
 pip install arepytools
 ```
-
-or via conda:
-
-```shell
-conda install arepytools
-```

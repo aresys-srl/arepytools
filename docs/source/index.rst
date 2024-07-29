@@ -23,4 +23,4 @@ given topic, namely:
 - ``timing``: custom times for SAR time coordinates and dates management
 - ``geometry``: attitudes and orbits, angles computation functions, coordinates conversions, direct and inverse geocoding functionalities
 
-This module is available both via pip and conda installation directly from the internal indexes and channels.
+This module is available via pip editable local installation.
