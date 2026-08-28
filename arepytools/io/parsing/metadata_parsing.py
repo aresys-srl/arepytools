@@ -45,7 +45,5 @@ def parse_metadata(metadata_content: str) -> metadata.MetaData:
     metadata.MetaData
         ArePyTools metadata representation object
     """
-    metadata_model: metadata_models.AresysXmlDoc = parse(
-        metadata_content, metadata_models.AresysXmlDoc
-    )
+    metadata_model: metadata_models.AresysXmlDoc = parse(metadata_content, metadata_models.AresysXmlDoc)
     return translate_metadata_from_model(metadata_model)

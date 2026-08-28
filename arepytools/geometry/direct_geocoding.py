@@ -79,9 +79,7 @@ def direct_geocoding_with_looking_direction(
         inflated_ellipsoid,
     )
 
-    points = np.empty(
-        np.broadcast_shapes(np.shape(looking_directions), np.shape(sensor_positions))
-    )
+    points = np.empty(np.broadcast_shapes(np.shape(looking_directions), np.shape(sensor_positions)))
 
     if points.ndim == 1:
         intersections = (intersections,)
@@ -122,9 +120,7 @@ def direct_geocoding_with_look_angles(
     np.ndarray
         (3,) or (N, 3) points
     """
-    local_axis = compute_sensor_local_axis(
-        sensor_positions, sensor_velocities, reference_frame
-    )
+    local_axis = compute_sensor_local_axis(sensor_positions, sensor_velocities, reference_frame)
 
     rotation = compute_rotation(
         "YPR",
@@ -135,9 +131,7 @@ def direct_geocoding_with_look_angles(
 
     pointing = np.matmul(local_axis, rotation.as_matrix())[..., 2]
 
-    return direct_geocoding_with_looking_direction(
-        sensor_positions, pointing, altitude_over_wgs84=altitude_over_wgs84
-    )
+    return direct_geocoding_with_looking_direction(sensor_positions, pointing, altitude_over_wgs84=altitude_over_wgs84)
 
 
 def direct_geocoding_attitude(
@@ -254,12 +248,8 @@ def direct_geocoding_monostatic(
     # input vectorization
     sensor_positions = np.asarray(sensor_positions)
     sensor_velocities = np.asarray(sensor_velocities)
-    initial_guesses = (
-        np.asarray(initial_guesses) if initial_guesses is not None else None
-    )
-    range_times = (
-        np.asarray(range_times) if not isinstance(range_times, float) else range_times
-    )
+    initial_guesses = np.asarray(initial_guesses) if initial_guesses is not None else None
+    range_times = np.asarray(range_times) if not isinstance(range_times, float) else range_times
     geocoding_side = GeocodingSide(geocoding_side)
 
     # computation of initial guesses, if not provided
@@ -271,6 +261,7 @@ def direct_geocoding_monostatic(
             sensor_velocities=sensor_velocities,
             range_distance=average_input_range,
             geocoding_side=geocoding_side,
+            geodetic_altitude=geodetic_altitude,
         )
 
     # direct geocoding monostatic core
@@ -347,6 +338,7 @@ def direct_geocoding_bistatic(
             sensor_velocities=sensor_velocities_rx,
             range_distance=average_input_range,
             geocoding_side=geocoding_side,
+            geodetic_altitude=geodetic_altitude,
         )
 
     # direct geocoding bistatic core
@@ -406,16 +398,10 @@ def _direct_geocoding_monostatic_core(
         if inputs shapes are ambigous to match, this error is raised
     """
 
-    range_times = (
-        np.asarray(range_times)
-        if not isinstance(range_times, float)
-        else np.asarray([range_times])
-    )
+    range_times = np.asarray(range_times) if not isinstance(range_times, float) else np.asarray([range_times])
 
     try:
-        frequencies_doppler_centroid = np.broadcast_to(
-            frequencies_doppler_centroid, range_times.shape
-        )
+        frequencies_doppler_centroid = np.broadcast_to(frequencies_doppler_centroid, range_times.shape)
     except ValueError as exc:
         raise AmbiguousInputCorrelation(
             f"frequencies {frequencies_doppler_centroid.shape} != range times {range_times.shape}"
@@ -458,11 +444,7 @@ def _direct_geocoding_monostatic_core(
             wavelength=wavelength,
         )
 
-    return (
-        ground_points.squeeze()
-        if not one_size_array_flag
-        else ground_points.squeeze(axis=0)
-    )
+    return ground_points.squeeze() if not one_size_array_flag else ground_points.squeeze(axis=0)
 
 
 def _direct_geocoding_bistatic_core(
@@ -511,15 +493,9 @@ def _direct_geocoding_bistatic_core(
         if inputs shapes are ambigous to match, this error is raised
     """
 
-    range_times = (
-        np.asarray(range_times)
-        if not isinstance(range_times, float)
-        else np.asarray([range_times])
-    )
+    range_times = np.asarray(range_times) if not isinstance(range_times, float) else np.asarray([range_times])
     try:
-        frequencies_doppler_centroid = np.broadcast_to(
-            frequencies_doppler_centroid, range_times.shape
-        )
+        frequencies_doppler_centroid = np.broadcast_to(frequencies_doppler_centroid, range_times.shape)
     except ValueError as excp:
         raise AmbiguousInputCorrelation(
             f"frequencies {frequencies_doppler_centroid.shape} != range times {range_times.shape}"
@@ -527,20 +503,13 @@ def _direct_geocoding_bistatic_core(
 
     one_size_array_flag = 0
     if (sensor_positions_rx.ndim == 2 and sensor_positions_rx.size / 3 == 1) or (
-        sensor_positions_tx.ndim == 2
-        and sensor_positions_tx.size / 3 == 1
-        and sensor_positions_rx.size / 3 == 1
+        sensor_positions_tx.ndim == 2 and sensor_positions_tx.size / 3 == 1 and sensor_positions_rx.size / 3 == 1
     ):
         one_size_array_flag = 1
 
-    if (
-        sensor_positions_tx.ndim == sensor_velocities_tx.ndim == 1
-        and sensor_positions_tx.size // 3 == 1
-    ):
+    if sensor_positions_tx.ndim == sensor_velocities_tx.ndim == 1 and sensor_positions_tx.size // 3 == 1:
         sensor_positions_tx = sensor_positions_tx.reshape(1, sensor_positions_tx.size)
-        sensor_velocities_tx = sensor_velocities_tx.reshape(
-            1, sensor_velocities_tx.size
-        )
+        sensor_velocities_tx = sensor_velocities_tx.reshape(1, sensor_velocities_tx.size)
 
     ground_points = np.zeros((sensor_positions_rx.size // 3, range_times.size, 3))
     looping_items = zip(
@@ -562,11 +531,7 @@ def _direct_geocoding_bistatic_core(
             wavelength=wavelength,
         )
 
-    return (
-        ground_points.squeeze()
-        if not one_size_array_flag
-        else ground_points.squeeze(axis=0)
-    )
+    return ground_points.squeeze() if not one_size_array_flag else ground_points.squeeze(axis=0)
 
 
 def direct_geocoding_monostatic_init(
@@ -574,6 +539,7 @@ def direct_geocoding_monostatic_init(
     sensor_velocities: np.ndarray,
     range_distance: float,
     geocoding_side: Union[str, GeocodingSide],
+    geodetic_altitude: float = 0.0,
 ) -> np.ndarray:
     """Computation of initial guesses for direct geocoding monostatic.
 
@@ -587,6 +553,8 @@ def direct_geocoding_monostatic_init(
         range distance
     geocoding_side : Union[str, GeocodingSide]
         side where to perform geocoding
+    geodetic_altitude : float, optional
+        altitude over the WGS84 ellipsoid, by default 0.0
 
     Returns
     -------
@@ -611,10 +579,8 @@ def direct_geocoding_monostatic_init(
 
     sensor_position_norm = np.linalg.norm(sensor_positions, axis=-1, keepdims=True)
     llh_sat = conv.xyz2llh(sensor_positions.T)
-    xyz_sat = conv.llh2xyz(
-        np.array([llh_sat[0], llh_sat[1], np.zeros(llh_sat.shape[1])])
-    )
-    earth_radius = np.linalg.norm(xyz_sat.T, axis=-1, keepdims=True)
+    xyz_sat = conv.llh2xyz(np.array([llh_sat[0], llh_sat[1], np.zeros(llh_sat.shape[1])]))
+    earth_radius = np.linalg.norm(xyz_sat.T, axis=-1, keepdims=True) + geodetic_altitude
 
     # check earth radius vs range compatibility
     if any(range_distance < sensor_position_norm - earth_radius):
@@ -626,9 +592,7 @@ def direct_geocoding_monostatic_init(
     u_z = np.cross(u_x, u_y)
 
     # x-coordinate
-    coords = (sensor_position_norm**2 + earth_radius**2 - range_distance**2) / (
-        2 * sensor_position_norm
-    )
+    coords = (sensor_position_norm**2 + earth_radius**2 - range_distance**2) / (2 * sensor_position_norm)
 
     # circle radius
     circle_radius = np.sqrt(earth_radius**2 - coords**2)
@@ -699,14 +663,9 @@ def direct_geocoding_monostatic_attitude_init(
     )
     if not solutions:
         raise RuntimeError(
-            "Cannot find initial guess: "
-            + "cannot find intersection between antenna bore sight and WGS84 ellipsoid"
+            "Cannot find initial guess: " + "cannot find intersection between antenna bore sight and WGS84 ellipsoid"
         )
-    ground_point_guesses = (
-        solutions[0]
-        if isinstance(solutions[0], np.ndarray)
-        else np.array([s[0] for s in solutions])
-    )
+    ground_point_guesses = solutions[0] if isinstance(solutions[0], np.ndarray) else np.array([s[0] for s in solutions])
 
     if perturbation_for_nadir_geom:
         # moving the initial guess in the direction orthogonal to Nadir and sensor velocity
@@ -718,9 +677,7 @@ def direct_geocoding_monostatic_attitude_init(
             # invert direction
             perturbation_dir_norm *= -1
 
-        ground_point_guesses = (
-            ground_point_guesses + perturbation_dir_norm * perturbation_length
-        )
+        ground_point_guesses = ground_point_guesses + perturbation_dir_norm * perturbation_length
 
     return ground_point_guesses
 
@@ -812,10 +769,7 @@ def _newton_for_direct_geocoding_bistatic(
         grad_range_equation = (
             -2
             * distance[:, np.newaxis]
-            * (
-                line_of_sight_rx / distance_rx[:, np.newaxis]
-                + line_of_sight_tx / distance_tx[:, np.newaxis]
-            )
+            * (line_of_sight_rx / distance_rx[:, np.newaxis] + line_of_sight_tx / distance_tx[:, np.newaxis])
         )
 
         # doppler equations
@@ -838,9 +792,7 @@ def _newton_for_direct_geocoding_bistatic(
 
         # assembling doppler equations and their gradients
         doppler_equation = (doppler_equation_rx + doppler_equation_tx) / 2
-        grad_doppler_equation = (
-            grad_doppler_equation_rx + grad_doppler_equation_tx
-        ) / 2
+        grad_doppler_equation = (grad_doppler_equation_rx + grad_doppler_equation_tx) / 2
 
         # assembling system of equations to be solved using Newton method
         functions_to_be_solved = [
@@ -857,9 +809,7 @@ def _newton_for_direct_geocoding_bistatic(
             for k in range(3)
         ]
 
-        delta_err = -_inv_3x3_transpose(
-            functions_jacobians, functions_to_be_solved
-        ).squeeze()
+        delta_err = -_inv_3x3_transpose(functions_jacobians, functions_to_be_solved).squeeze()
         ground_points_guess = ground_points_guess + delta_err.T
 
         err_for_convergence = np.dot(delta_err, delta_err.T)
@@ -973,9 +923,7 @@ def _newton_for_direct_geocoding_monostatic(
             for k in range(3)
         ]
 
-        delta_err = (
-            -_inv_3x3_transpose(functions_jacobians, functions_to_be_solved).squeeze().T
-        )
+        delta_err = -_inv_3x3_transpose(functions_jacobians, functions_to_be_solved).squeeze().T
         ground_points_guess = ground_points_guess + delta_err
 
         err_for_convergence = np.sum(delta_err * delta_err, axis=-1)
@@ -986,11 +934,7 @@ def _newton_for_direct_geocoding_monostatic(
             f"Newton did not converge: maximum number of iterations {max_iter} reached. Residual error {delta_err}"
         )
 
-    return (
-        ground_points_guess
-        if not array_size_one_flag
-        else ground_points_guess.squeeze()
-    )
+    return ground_points_guess if not array_size_one_flag else ground_points_guess.squeeze()
 
 
 def _inv_3x3_transpose(jac: np.ndarray, func: np.ndarray) -> np.ndarray:
@@ -1059,9 +1003,7 @@ def _ellipse_equation(coords: np.ndarray, r_ee2: float, r_ep2: float) -> float:
     )
 
 
-def _der_ellipse_equation_xi(
-    coords: np.ndarray, i_coord: int, r_ee2: float, r_ep2: float
-) -> float:
+def _der_ellipse_equation_xi(coords: np.ndarray, i_coord: int, r_ee2: float, r_ep2: float) -> float:
     """Derivative of ellipse equation.
 
     Parameters

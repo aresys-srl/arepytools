@@ -55,9 +55,7 @@ class GSO3DCurveWrapper:
         """Defining the curve time domain"""
         return (self.orbit.time_axis_array[0], self.orbit.time_axis_array[-1])
 
-    def evaluate(
-        self, coordinates: Union[PreciseDateTime, npt.ArrayLike]
-    ) -> np.ndarray:
+    def evaluate(self, coordinates: Union[PreciseDateTime, npt.ArrayLike]) -> np.ndarray:
         """Evaluate x, y, z polynomial at given times.
 
         Parameters
@@ -72,13 +70,9 @@ class GSO3DCurveWrapper:
         """
         if isinstance(coordinates, np.ndarray) and coordinates.ndim == 0:
             coordinates = coordinates.item()
-        return self.orbit.get_position(time_points=coordinates).T.reshape(
-            np.shape(coordinates) + (3,)
-        )
+        return self.orbit.get_position(time_points=coordinates).T.reshape(np.shape(coordinates) + (3,))
 
-    def evaluate_first_derivatives(
-        self, coordinates: Union[PreciseDateTime, npt.ArrayLike]
-    ) -> np.ndarray:
+    def evaluate_first_derivatives(self, coordinates: Union[PreciseDateTime, npt.ArrayLike]) -> np.ndarray:
         """Evaluate x, y, z polynomial first derivatives at given times.
 
         Parameters
@@ -93,13 +87,9 @@ class GSO3DCurveWrapper:
         """
         if isinstance(coordinates, np.ndarray) and coordinates.ndim == 0:
             coordinates = coordinates.item()
-        return self.orbit.get_velocity(time_points=coordinates).T.reshape(
-            np.shape(coordinates) + (3,)
-        )
+        return self.orbit.get_velocity(time_points=coordinates).T.reshape(np.shape(coordinates) + (3,))
 
-    def evaluate_second_derivatives(
-        self, coordinates: Union[PreciseDateTime, npt.ArrayLike]
-    ) -> np.ndarray:
+    def evaluate_second_derivatives(self, coordinates: Union[PreciseDateTime, npt.ArrayLike]) -> np.ndarray:
         """Evaluate x, y, z polynomial second derivatives at given times.
 
         Parameters
@@ -114,9 +104,7 @@ class GSO3DCurveWrapper:
         """
         if isinstance(coordinates, np.ndarray) and coordinates.ndim == 0:
             coordinates = coordinates.item()
-        return self.orbit.get_acceleration(time_points=coordinates).T.reshape(
-            np.shape(coordinates) + (3,)
-        )
+        return self.orbit.get_acceleration(time_points=coordinates).T.reshape(np.shape(coordinates) + (3,))
 
 
 class GeneralSarOrbit:
@@ -146,9 +134,7 @@ class GeneralSarOrbit:
         """Time axis step (if applicable)"""
         if isinstance(self._time_axis, are_ax.RegularAxis):
             return self._time_axis.step
-        raise RuntimeError(
-            "Time step is not available for orbits constructed with non-regular time axis"
-        )
+        raise RuntimeError("Time step is not available for orbits constructed with non-regular time axis")
 
     @property
     def n(self) -> int:
@@ -185,9 +171,7 @@ class GeneralSarOrbit:
         time_axis: Union[np.ndarray, are_ax.Axis],
         state_vectors: np.ndarray,
         last_anx_at_start=None,
-        anx_times_evaluator: Union[
-            Callable[[GeneralSarOrbit], np.ndarray], None, _MISSING_TYPE
-        ] = MISSING,
+        anx_times_evaluator: Union[Callable[[GeneralSarOrbit], np.ndarray], None, _MISSING_TYPE] = MISSING,
     ):
         """
         Parameters
@@ -217,9 +201,7 @@ class GeneralSarOrbit:
             time_axis = are_ax.Axis(relative_time_axis, time_axis_start)
 
         if not isinstance(time_axis.start, PreciseDateTime):
-            raise RuntimeError(
-                f"Input time_axis start type: {type(time_axis.start)} != {PreciseDateTime}"
-            )
+            raise RuntimeError(f"Input time_axis start type: {type(time_axis.start)} != {PreciseDateTime}")
 
         if time_axis.size != state_vectors.size / 3:
             raise RuntimeError(
@@ -235,14 +217,10 @@ class GeneralSarOrbit:
         self._time_axis = time_axis
 
         if state_vectors.ndim > 1:
-            raise RuntimeError(
-                "input state vectors should be in the form [x0,y0,z0,x1,y1,z1,...]"
-            )
+            raise RuntimeError("input state vectors should be in the form [x0,y0,z0,x1,y1,z1,...]")
 
         # state_vector are stored as (3, N) numpy array
-        self._state_vectors = np.vstack(
-            (state_vectors[::3], state_vectors[1::3], state_vectors[2::3])
-        )
+        self._state_vectors = np.vstack((state_vectors[::3], state_vectors[1::3], state_vectors[2::3]))
         self._interpolator = GeometryInterpolator(self._time_axis, self._state_vectors)
 
         anx_times: Optional[np.ndarray] = None
@@ -257,9 +235,7 @@ class GeneralSarOrbit:
                 raise ValueError("Both ANX time and position must be provided")
             else:
                 if last_anx_time_at_start >= self._time_axis.start:
-                    raise ValueError(
-                        "Provided ANX time is not valid: it must be prior to time axis start"
-                    )
+                    raise ValueError("Provided ANX time is not valid: it must be prior to time axis start")
 
                 anx_times = np.array(last_anx_time_at_start).reshape((-1,))
                 anx_positions = np.array(last_anx_position_at_start).reshape((3, -1))
@@ -274,15 +250,11 @@ class GeneralSarOrbit:
                 anx_positions = evaluated_anx_positions
             else:
                 anx_times = np.concatenate((anx_times, evaluated_anx_times))
-                anx_positions = np.concatenate(
-                    (anx_positions, evaluated_anx_positions), axis=1
-                )
+                anx_positions = np.concatenate((anx_positions, evaluated_anx_positions), axis=1)
 
         self._anx_times, self._anx_positions = anx_times, anx_positions
 
-    def get_position(
-        self, time_points, interval_indexes=None
-    ) -> npt.NDArray[np.floating]:
+    def get_position(self, time_points, interval_indexes=None) -> npt.NDArray[np.floating]:
         """Return the sensor positions at the specified time points
 
         Parameters
@@ -299,9 +271,7 @@ class GeneralSarOrbit:
         """
         return self.interpolator.eval(time_points, interval_indexes)
 
-    def get_velocity(
-        self, time_points, interval_indexes=None
-    ) -> npt.NDArray[np.floating]:
+    def get_velocity(self, time_points, interval_indexes=None) -> npt.NDArray[np.floating]:
         """Return the sensor velocities at the specified time points
 
         Velocity is evaluated using the first derivative of the interpolated position
@@ -320,9 +290,7 @@ class GeneralSarOrbit:
         """
         return self.interpolator.eval_first_derivative(time_points, interval_indexes)
 
-    def get_acceleration(
-        self, time_points, interval_indexes=None
-    ) -> npt.NDArray[np.floating]:
+    def get_acceleration(self, time_points, interval_indexes=None) -> npt.NDArray[np.floating]:
         """Return the sensor accelerations at the specified time points
 
         Acceleration is evaluated using the second derivative of the interpolated position
@@ -343,9 +311,7 @@ class GeneralSarOrbit:
 
     def get_time_since_anx(
         self, time_points
-    ) -> Union[
-        Tuple[None, None], Tuple[npt.NDArray[np.floating], npt.NDArray[np.integer]]
-    ]:
+    ) -> Union[Tuple[None, None], Tuple[npt.NDArray[np.floating], npt.NDArray[np.integer]]]:
         """Return the relative times from the previous ANX time
 
         Parameters
@@ -407,9 +373,7 @@ class GeneralSarOrbit:
         )
 
         doppler_centroid_array = (
-            np.zeros(range_times_checked.shape)
-            if doppler_centroid_checked is None
-            else doppler_centroid_checked
+            np.zeros(range_times_checked.shape) if doppler_centroid_checked is None else doppler_centroid_checked
         )
         carrier_wavelength = 1.0 if carrier_wavelength is None else carrier_wavelength
 
@@ -429,9 +393,7 @@ class GeneralSarOrbit:
             ).T
 
         if bistatic_delay:
-            tx_time_points = [
-                time_point - range_time for range_time in range_times_checked
-            ]
+            tx_time_points = [time_point - range_time for range_time in range_times_checked]
         else:
             tx_time_points = [time_point for _ in range_times_checked]
 
@@ -480,9 +442,7 @@ class GeneralSarOrbit:
 
         earth_point = np.asarray(earth_point)
         if earth_point.shape != (3,):
-            raise RuntimeError(
-                f"EarthPoint has wrong shape: {earth_point.shape} != (3,)"
-            )
+            raise RuntimeError(f"EarthPoint has wrong shape: {earth_point.shape} != (3,)")
 
         trajectory_rx = GSO3DCurveWrapper(self)
 
@@ -535,9 +495,7 @@ class GeneralSarOrbit:
         assert isinstance(rg, np.ndarray)
         return (az.tolist(), rg.tolist())
 
-    def evaluate_doppler_equation(
-        self, earth_point: np.ndarray, doppler_centroid, carrier_wavelength
-    ):
+    def evaluate_doppler_equation(self, earth_point: np.ndarray, doppler_centroid, carrier_wavelength):
         """Evaluate the doppler equation over the orbit time axis
 
         .. math::
@@ -570,12 +528,8 @@ class GeneralSarOrbit:
         axis_str = str(self._time_axis)
         state_vec_str = str(self._state_vectors)
 
-        axis_portion = (
-            "Orbit defined on azimuth axis: " + os.linesep + axis_str + os.linesep
-        )
-        state_vectors_portion = (
-            "State vectors: " + os.linesep + state_vec_str + os.linesep
-        )
+        axis_portion = "Orbit defined on azimuth axis: " + os.linesep + axis_str + os.linesep
+        state_vectors_portion = "State vectors: " + os.linesep + state_vec_str + os.linesep
         return axis_portion + state_vectors_portion
 
     def get_interpolated_time_axis(self, interpolation_positions):
@@ -657,9 +611,7 @@ def compute_number_of_anx(orbit: GeneralSarOrbit) -> int:
     return len(anx_time_intervals)
 
 
-def create_general_sar_orbit(
-    state_vectors: StateVectors, ignore_anx_after_orbit_start=False
-) -> GeneralSarOrbit:
+def create_general_sar_orbit(state_vectors: StateVectors, ignore_anx_after_orbit_start=False) -> GeneralSarOrbit:
     """Create general sar orbit object from state vectors metadata
 
     Parameters
@@ -845,9 +797,7 @@ def compute_ground_velocity(
     )
 
 
-def _check_sat2earth_input(
-    azimuth_time, range_times, frequency_doppler_centroid, wavelength
-):
+def _check_sat2earth_input(azimuth_time, range_times, frequency_doppler_centroid, wavelength):
     if not isinstance(azimuth_time, PreciseDateTime):
         raise RuntimeError("Azimuth should be a single absolute time")
 
@@ -859,9 +809,7 @@ def _check_sat2earth_input(
     if (frequency_doppler_centroid is not None and wavelength is None) or (
         wavelength is not None and frequency_doppler_centroid is None
     ):
-        raise RuntimeError(
-            "Frequency doppler centroid and wavelength should be both specified"
-        )
+        raise RuntimeError("Frequency doppler centroid and wavelength should be both specified")
 
     if frequency_doppler_centroid is not None:
         if isinstance(frequency_doppler_centroid, (list, np.ndarray)):
@@ -870,13 +818,10 @@ def _check_sat2earth_input(
             frequency_doppler_centroid = np.full((1,), frequency_doppler_centroid)
 
     if frequency_doppler_centroid is not None and (
-        frequency_doppler_centroid.ndim != 1
-        or frequency_doppler_centroid.shape != range_times.shape
+        frequency_doppler_centroid.ndim != 1 or frequency_doppler_centroid.shape != range_times.shape
     ):
         if frequency_doppler_centroid.size == 1:
-            frequency_doppler_centroid = np.full(
-                range_times.shape, frequency_doppler_centroid[0]
-            )
+            frequency_doppler_centroid = np.full(range_times.shape, frequency_doppler_centroid[0])
         else:
             raise RuntimeError(
                 "Frequency doppler centroid vector should have the same shape of the range times vector: "

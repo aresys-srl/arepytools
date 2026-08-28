@@ -65,7 +65,7 @@ def compute_rotation(
 
     multiple rotation
 
-    >>> roll = np.deg2rad(np.arange(10,26,5, dtype=float))
+    >>> roll = np.deg2rad(np.arange(10, 26, 5, dtype=float))
     >>> rotation = compute_rotation(RotationOrder.ypr, yaw=np.zeros_like(roll), pitch=np.zeros_like(roll), roll=roll)
     >>> print(rotation.as_matrix().shape)
      (4, 3, 3)
@@ -86,9 +86,7 @@ def compute_rotation(
     return transform.Rotation.from_euler(euler_sequence, euler_angles)
 
 
-def compute_euler_angles_from_rotation(
-    order: RotationOrderLike, *, rotation: transform.Rotation
-) -> np.ndarray:
+def compute_euler_angles_from_rotation(order: RotationOrderLike, *, rotation: transform.Rotation) -> np.ndarray:
     """Compute principal axes (YAW, PITCH and ROLL) from the rotation matrix and its rotation order.
 
     Parameters
@@ -119,7 +117,7 @@ def compute_euler_angles_from_rotation(
 
     multiple rotation
 
-    >>> roll = np.deg2rad(np.arange(10,26,5, dtype=float))
+    >>> roll = np.deg2rad(np.arange(10, 26, 5, dtype=float))
     >>> rotation = compute_rotation(RotationOrder.rpy, yaw=np.zeros_like(roll), pitch=np.zeros_like(roll), roll=roll)
     >>> print(rotation.as_matrix().shape)
     (4, 3, 3)

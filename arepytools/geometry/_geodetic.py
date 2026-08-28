@@ -33,14 +33,10 @@ def _ze_xy(x: float, y: float) -> float:
 
 
 def _ze_xx(x: float, y: float) -> float:
-    return -_semi_axis_ratio_sqr / _ze(x, y) + (_semi_axis_ratio_sqr * x) / _ze(
-        x, y
-    ) ** 2 * _ze_x(x, y)
+    return -_semi_axis_ratio_sqr / _ze(x, y) + (_semi_axis_ratio_sqr * x) / _ze(x, y) ** 2 * _ze_x(x, y)
 
 
-def _compute_geodetic_jacobian(
-    point: np.ndarray, sensor_position: np.ndarray
-) -> np.ndarray:
+def _compute_geodetic_jacobian(point: np.ndarray, sensor_position: np.ndarray) -> np.ndarray:
     jac = np.empty(shape=(3, 3), dtype=float)
 
     zed_diff = point[2] - sensor_position[2]
@@ -58,16 +54,10 @@ def _compute_geodetic_jacobian(
     return jac
 
 
-def _compute_geodetic_rhs(
-    point: npt.NDArray[np.floating], sensor_position: npt.NDArray[np.floating]
-) -> np.ndarray:
+def _compute_geodetic_rhs(point: npt.NDArray[np.floating], sensor_position: npt.NDArray[np.floating]) -> np.ndarray:
     rhs = np.empty(shape=(3,), dtype=float)
     los = point - sensor_position
-    rhs[0] = (
-        (point[0] ** 2 + point[1] ** 2) / _major_semi_axis_sqr
-        + point[2] ** 2 / _minor_semi_axis_sqr
-        - 1
-    )
+    rhs[0] = (point[0] ** 2 + point[1] ** 2) / _major_semi_axis_sqr + point[2] ** 2 / _minor_semi_axis_sqr - 1
     rhs[1] = los[0] + los[2] * _ze_x(point[0], point[1])
     rhs[2] = los[1] + los[2] * _ze_x(point[1], point[0])
     return rhs
@@ -83,9 +73,7 @@ def compute_geodetic_point(sensor_positions: npt.ArrayLike) -> np.ndarray:
     sensor_positions = np.asarray(sensor_positions)
 
     if sensor_positions.ndim > 2 or sensor_positions.shape[-1] != 3:
-        raise ValueError(
-            f"sensor_positions has invalid shape: {sensor_positions.shape}, it should be (3,) or (N, 3)"
-        )
+        raise ValueError(f"sensor_positions has invalid shape: {sensor_positions.shape}, it should be (3,) or (N, 3)")
 
     sensor_positions = sensor_positions.copy()
     change_sign = sensor_positions[..., 2] < 0

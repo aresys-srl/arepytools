@@ -28,7 +28,7 @@ from arepytools.geometry.reference_frames import (
     ReferenceFrame,
     compute_sensor_local_axis,
 )
-from arepytools.geometry.rotation import RotationOrder, compute_rotation
+from arepytools.geometry.rotation import RotationOrder
 from arepytools.io.metadata import AttitudeInfo, StateVectors
 from arepytools.math import axis as are_ax
 from arepytools.timing.precisedatetime import PreciseDateTime
@@ -59,9 +59,7 @@ def create_attitude_boresight_normal_curve_wrapper(
     y_spline = curve.SplineWrapper(axis=relative_axis, values=arf_vals[:, 1, 0])
     z_spline = curve.SplineWrapper(axis=relative_axis, values=arf_vals[:, 2, 0])
 
-    return curve.Generic3DCurve(
-        x_spline, y_spline, z_spline, t_start, time_boundaries=(t_start, t_end)
-    )
+    return curve.Generic3DCurve(x_spline, y_spline, z_spline, t_start, time_boundaries=(t_start, t_end))
 
 
 class GeneralSarAttitude:
@@ -93,9 +91,7 @@ class GeneralSarAttitude:
         """Time axis step (if applicable)"""
         if isinstance(self._time_axis, are_ax.RegularAxis):
             return self._time_axis.step
-        raise RuntimeError(
-            "Time step is not available for attitudes constructed with non-regular time axis"
-        )
+        raise RuntimeError("Time step is not available for attitudes constructed with non-regular time axis")
 
     @property
     def n(self) -> int:
@@ -155,9 +151,7 @@ class GeneralSarAttitude:
             time_axis = are_ax.Axis(relative_time_axis, time_axis_start)
 
         if not isinstance(time_axis.start, PreciseDateTime):
-            raise RuntimeError(
-                f"Input time_axis start type: {type(time_axis.start)} != {PreciseDateTime}"
-            )
+            raise RuntimeError(f"Input time_axis start type: {type(time_axis.start)} != {PreciseDateTime}")
 
         if np.shape(ypr_angles) != (3, time_axis.size):
             raise RuntimeError(
@@ -165,10 +159,7 @@ class GeneralSarAttitude:
                 + f"it should be compatible with the number of time axis {time_axis.size}"
             )
 
-        if (
-            np.shape(ypr_angles)[1]
-            < GeneralSarAttitude.get_minimum_number_of_data_points()
-        ):
+        if np.shape(ypr_angles)[1] < GeneralSarAttitude.get_minimum_number_of_data_points():
             raise RuntimeError(
                 "Not enough attitude records provided: "
                 + f"{np.shape(ypr_angles)[1]} < {GeneralSarAttitude.get_minimum_number_of_data_points()}"
@@ -199,9 +190,7 @@ class GeneralSarAttitude:
         np.ndarray
             (C, N) numpy array of interpolated angle values
         """
-        return self.interpolator.eval(
-            time_points, interval_indexes, angles_to_interpolate
-        )
+        return self.interpolator.eval(time_points, interval_indexes, angles_to_interpolate)
 
     def get_yaw(self, time_points, interval_indexes=None) -> np.ndarray:
         """Return the yaw angles at the specified time points
@@ -218,9 +207,7 @@ class GeneralSarAttitude:
         np.ndarray
             1D numpy array of N yaw angles
         """
-        return self._interpolate_angles(
-            time_points, [self._ANGLE_INDEX["Y"]], interval_indexes
-        )
+        return self._interpolate_angles(time_points, [self._ANGLE_INDEX["Y"]], interval_indexes)
 
     def get_pitch(self, time_points, interval_indexes=None) -> np.ndarray:
         """Return the pitch angles at the specified time points
@@ -237,9 +224,7 @@ class GeneralSarAttitude:
         np.ndarray
             1D numpy array of N yaw angles
         """
-        return self._interpolate_angles(
-            time_points, [self._ANGLE_INDEX["P"]], interval_indexes
-        )
+        return self._interpolate_angles(time_points, [self._ANGLE_INDEX["P"]], interval_indexes)
 
     def get_roll(self, time_points, interval_indexes=None) -> np.ndarray:
         """Return the roll angles at the specified time points
@@ -256,9 +241,7 @@ class GeneralSarAttitude:
         np.ndarray
             1D numpy array of N yaw angles
         """
-        return self._interpolate_angles(
-            time_points, [self._ANGLE_INDEX["R"]], interval_indexes
-        )
+        return self._interpolate_angles(time_points, [self._ANGLE_INDEX["R"]], interval_indexes)
 
     def get_arf(self, time_points: Union[PreciseDateTime, npt.ArrayLike]) -> np.ndarray:
         """Return the antenna reference frame matrix at the given time
@@ -313,26 +296,12 @@ class GeneralSarAttitude:
         ypr_str = str(self._ypr_angles)
         gso_str = str(self._orbit)
 
-        axis_portion = (
-            "Attitude defined on azimuth axis: " + os.linesep + axis_str + os.linesep
-        )
-        state_vectors_portion = (
-            "Yaw Pitch Roll matrix: " + os.linesep + ypr_str + os.linesep
-        )
-        rotation_order = (
-            f"Rotation order: {self.rotation_order.name.upper()}" + os.linesep
-        )
-        reference_frame = (
-            f"Reference frame: {self.reference_frame.name.upper()}" + os.linesep
-        )
+        axis_portion = "Attitude defined on azimuth axis: " + os.linesep + axis_str + os.linesep
+        state_vectors_portion = "Yaw Pitch Roll matrix: " + os.linesep + ypr_str + os.linesep
+        rotation_order = f"Rotation order: {self.rotation_order.name.upper()}" + os.linesep
+        reference_frame = f"Reference frame: {self.reference_frame.name.upper()}" + os.linesep
         gso_portion = "Attitude info base on orbit:" + os.linesep + gso_str + os.linesep
-        return (
-            axis_portion
-            + state_vectors_portion
-            + rotation_order
-            + reference_frame
-            + gso_portion
-        )
+        return axis_portion + state_vectors_portion + rotation_order + reference_frame + gso_portion
 
 
 def compute_antenna_reference_frame(
@@ -366,9 +335,7 @@ def compute_antenna_reference_frame(
     sensor_position = orbit.get_position(time_points_as_1d_array).T.reshape(shape_2d)
     sensor_velocity = orbit.get_velocity(time_points_as_1d_array).T.reshape(shape_2d)
 
-    initial_frame = compute_sensor_local_axis(
-        sensor_position, sensor_velocity, attitude.reference_frame
-    )
+    initial_frame = compute_sensor_local_axis(sensor_position, sensor_velocity, attitude.reference_frame)
 
     return compute_antenna_reference_frame_from_euler_angles(
         order=attitude.rotation_order,
@@ -433,19 +400,13 @@ def compute_pointing_directions(
             + f"{elevation_angles.shape}, {antenna_reference_frames.shape}"
         )
 
-    if (
-        azimuth_angles.size > 1
-        and elevation_angles.size > 1
-        and azimuth_angles.size != elevation_angles.size
-    ):
+    if azimuth_angles.size > 1 and elevation_angles.size > 1 and azimuth_angles.size != elevation_angles.size:
         raise ValueError(
             f"Incompatible azimuth_angles and elevation_angles shapes: {azimuth_angles.shape}, {elevation_angles.shape}"
         )
 
     if azimuth_angles.shape != elevation_angles.shape:
-        broadcast_shape = np.broadcast_shapes(
-            azimuth_angles.shape, elevation_angles.shape
-        )
+        broadcast_shape = np.broadcast_shapes(azimuth_angles.shape, elevation_angles.shape)
         azimuth_angles = np.broadcast_to(azimuth_angles, broadcast_shape)
         elevation_angles = np.broadcast_to(elevation_angles, broadcast_shape)
 
@@ -453,9 +414,7 @@ def compute_pointing_directions(
     uy = np.tan(elevation_angles)
     uz = np.ones_like(ux)
     local_directions = np.stack([ux, uy, uz], axis=-1)
-    local_directions = local_directions / np.linalg.norm(
-        local_directions, axis=-1, keepdims=True
-    )
+    local_directions = local_directions / np.linalg.norm(local_directions, axis=-1, keepdims=True)
 
     return np.einsum("...jk,...k->...j", antenna_reference_frames, local_directions)
 
@@ -509,13 +468,9 @@ def direct_geocoding_with_pointing(
             + f"{time_points.shape}, {azimuth_angles.shape} and {elevation_angles.shape}"
         )
 
-    sensor_positions = orbit.get_position(time_points.reshape((-1,))).T.reshape(
-        time_points.shape + (3,)
-    )
+    sensor_positions = orbit.get_position(time_points.reshape((-1,))).T.reshape(time_points.shape + (3,))
     antenna_reference_frames = attitude.get_arf(time_points)
-    pointing_directions = compute_pointing_directions(
-        antenna_reference_frames, azimuth_angles, elevation_angles
-    )
+    pointing_directions = compute_pointing_directions(antenna_reference_frames, azimuth_angles, elevation_angles)
     return direct_geocoding_with_looking_direction(
         sensor_positions, pointing_directions, altitude_over_wgs84=altitude_over_wgs84
     )
@@ -543,18 +498,14 @@ def create_general_sar_attitude(
     GeneralSarAttitude
         the new GeneralSarAttitude object
     """
-    gso = create_general_sar_orbit(
-        state_vectors, ignore_anx_after_orbit_start=ignore_anx_after_orbit_start
-    )
+    gso = create_general_sar_orbit(state_vectors, ignore_anx_after_orbit_start=ignore_anx_after_orbit_start)
 
     if (
         attitude_info.time_step is None
         or attitude_info.attitude_records_number is None
         or attitude_info.reference_time is None
     ):
-        raise ValueError(
-            "Cannot create general sar attitude: incomplete attitude information"
-        )
+        raise ValueError("Cannot create general sar attitude: incomplete attitude information")
 
     time_axis = are_ax.RegularAxis(
         (0, attitude_info.time_step, attitude_info.attitude_records_number),

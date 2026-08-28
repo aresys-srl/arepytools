@@ -5,6 +5,7 @@
 Interpolated Orbit module
 -------------------------
 """
+
 from __future__ import annotations
 
 import numpy as np
@@ -19,9 +20,7 @@ class ExtrapolationNotAllowed(ValueError):
 class Orbit:
     """Orbit object based on a Cubic Spline interpolator keeping continuity up to second derivatives"""
 
-    def __init__(
-        self, times: np.ndarray, positions: np.ndarray, velocities: np.ndarray
-    ) -> None:
+    def __init__(self, times: np.ndarray, positions: np.ndarray, velocities: np.ndarray) -> None:
         """Orbit object creation depending on positions, velocities and time axis.
         Time axis can be specified as relative or absolute (actual dates), while positions and velocities must be
         specified as (N, 3) arrays of floats.
@@ -98,9 +97,7 @@ class Orbit:
             if one or more of the input times is not inside the time boundaries of trajectory definition
         """
         if np.any(times < self._time_origin) or np.any(times > self._last_time):
-            raise ExtrapolationNotAllowed(
-                "One (or more) of the input times is outside of trajectory time boundaries"
-            )
+            raise ExtrapolationNotAllowed("One (or more) of the input times is outside of trajectory time boundaries")
 
     def evaluate(self, times: npt.ArrayLike) -> np.ndarray:
         """Evaluate x, y, z interpolated values at given times.

@@ -35,9 +35,7 @@ def llh2xyz(coordinates: Union[list, np.ndarray]) -> np.ndarray:
     """
     coordinates = np.asarray(coordinates)
     if coordinates.shape[0] != 3:
-        raise RuntimeError(
-            f"Coordinates has wrong shape: {coordinates.shape} not in (3,), (3, 1) or (3, N)"
-        )
+        raise RuntimeError(f"Coordinates has wrong shape: {coordinates.shape} not in (3,), (3, 1) or (3, N)")
 
     if coordinates.ndim == 1:
         coordinates = coordinates.copy()
@@ -47,9 +45,7 @@ def llh2xyz(coordinates: Union[list, np.ndarray]) -> np.ndarray:
     lon = coordinates[1, :]
     h = coordinates[2, :]
 
-    big_n = WGS84.semi_major_axis / np.sqrt(
-        1 - WGS84.eccentricity_square * np.sin(lat) ** 2
-    )
+    big_n = WGS84.semi_major_axis / np.sqrt(1 - WGS84.eccentricity_square * np.sin(lat) ** 2)
     r = (big_n + h) * np.cos(lat)
 
     x = r * np.cos(lon)
@@ -74,9 +70,7 @@ def xyz2llh(coordinates: Union[list, np.ndarray]) -> np.ndarray:
     """
     coordinates = np.asarray(coordinates)
     if coordinates.shape[0] != 3:
-        raise RuntimeError(
-            f"Coordinates has wrong shape: {coordinates.shape} not in (3,), (3, 1) or (3, N)"
-        )
+        raise RuntimeError(f"Coordinates has wrong shape: {coordinates.shape} not in (3,), (3, 1) or (3, N)")
 
     if coordinates.ndim == 1:
         coordinates = coordinates.copy()
@@ -121,10 +115,6 @@ def xyz2llh(coordinates: Union[list, np.ndarray]) -> np.ndarray:
     # Compute height
     sin_phi = np.sin(lat)
     big_n = WGS84.semi_major_axis / np.sqrt(1 - sin_phi**2 * WGS84.eccentricity_square)
-    h = (
-        r * np.cos(lat)
-        + (z + WGS84.eccentricity_square * big_n * sin_phi) * sin_phi
-        - big_n
-    )
+    h = r * np.cos(lat) + (z + WGS84.eccentricity_square * big_n * sin_phi) * sin_phi - big_n
 
     return np.vstack((lat, lon, h)).astype(float)

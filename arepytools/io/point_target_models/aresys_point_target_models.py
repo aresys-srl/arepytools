@@ -5,9 +5,10 @@
 Aresys Point Target File XSD Models
 -----------------------------------
 """
+
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional
+from typing import Optional
 
 
 class PointTargetsTargetType(Enum):
@@ -71,7 +72,7 @@ class Rcstype:
     class Meta:
         name = "RCSType"
 
-    val: List[ValTypeComplex] = field(
+    val: list[ValTypeComplex] = field(
         default_factory=list,
         metadata={
             "type": "Element",
@@ -126,7 +127,7 @@ class TargetTagType:
 
     @dataclass
     class Coord:
-        val: List[ValType] = field(
+        val: list[ValType] = field(
             default_factory=list,
             metadata={
                 "type": "Element",
@@ -162,7 +163,7 @@ class PointTargets:
             "required": True,
         },
     )
-    target: List[TargetTagType] = field(
+    target: list[TargetTagType] = field(
         default_factory=list,
         metadata={
             "name": "Target",

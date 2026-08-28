@@ -45,9 +45,7 @@ class PolynomialWrapper:
         """
         self.poly_coefficients: np.ndarray = np.asarray(coeff)
 
-    def evaluate(
-        self, coords: Union[float, npt.ArrayLike]
-    ) -> Union[float, npt.ArrayLike]:
+    def evaluate(self, coords: Union[float, npt.ArrayLike]) -> Union[float, npt.ArrayLike]:
         """Evaluating the input polynomial at the specified variable values.
 
         Polynomial in the form:
@@ -70,15 +68,11 @@ class PolynomialWrapper:
         coords = np.asarray(coords).astype("float64")
 
         # evaluating variable powers for each term of the polynomial at the input coordinate
-        variable_values = np.flip(
-            [coords**c for c in range(self.poly_coefficients.size)], axis=0
-        )
+        variable_values = np.flip([coords**c for c in range(self.poly_coefficients.size)], axis=0)
 
         return np.dot(self.poly_coefficients, variable_values)
 
-    def evaluate_first_derivative(
-        self, coords: Union[float, npt.ArrayLike]
-    ) -> Union[float, npt.ArrayLike]:
+    def evaluate_first_derivative(self, coords: Union[float, npt.ArrayLike]) -> Union[float, npt.ArrayLike]:
         """Evaluating the input polynomial first derivative at the specified variable values.
         Polynomial derivative in the form:
 
@@ -102,16 +96,12 @@ class PolynomialWrapper:
         poly_der_coeff = np.flip(range(1, self.poly_coefficients.size))
         coeff = self.poly_coefficients[:-1]
         # multiplying each polynomial variable term by its coefficient
-        variable_values = np.flip(
-            [coords**c for c in range(self.poly_coefficients.size - 1)], axis=0
-        )
+        variable_values = np.flip([coords**c for c in range(self.poly_coefficients.size - 1)], axis=0)
 
         # multiplying each polynomial variable term by its derivative coefficient and the polynomial coefficient
         return np.dot(poly_der_coeff * coeff, variable_values)
 
-    def evaluate_second_derivative(
-        self, coords: Union[float, npt.ArrayLike]
-    ) -> Union[float, npt.ArrayLike]:
+    def evaluate_second_derivative(self, coords: Union[float, npt.ArrayLike]) -> Union[float, npt.ArrayLike]:
         """Evaluating the input polynomial second derivative at the specified variable values.
 
         Polynomial derivative in the form:
@@ -140,9 +130,7 @@ class PolynomialWrapper:
 
         # multiplying each polynomial variable term by its coefficient
         # evaluating variable powers for each term of the polynomial evaluated in the point provided
-        variable_values = np.flip(
-            [coords**c for c in range(self.poly_coefficients.size - 2)], axis=0
-        )
+        variable_values = np.flip([coords**c for c in range(self.poly_coefficients.size - 2)], axis=0)
 
         # evaluating variable powers for each term of the polynomial evaluated in the point provided
         # multiplying each polynomial variable term by its derivative coefficient and the polynomial coefficient
@@ -164,9 +152,7 @@ class SplineWrapper:
         """
         self.spline_interpolator = CubicSpline(np.asarray(axis), np.asarray(values))
 
-    def evaluate(
-        self, coords: Union[float, npt.ArrayLike]
-    ) -> Union[float, npt.ArrayLike]:
+    def evaluate(self, coords: Union[float, npt.ArrayLike]) -> Union[float, npt.ArrayLike]:
         """Evaluating the interpolated spline at the specified variable values.
 
         Parameters
@@ -183,9 +169,7 @@ class SplineWrapper:
 
         return self.spline_interpolator(coords, 0, extrapolate=False)
 
-    def evaluate_first_derivative(
-        self, coords: Union[float, npt.ArrayLike]
-    ) -> Union[float, npt.ArrayLike]:
+    def evaluate_first_derivative(self, coords: Union[float, npt.ArrayLike]) -> Union[float, npt.ArrayLike]:
         """Evaluating the interpolated spline first derivative at the specified variable values.
 
         Parameters
@@ -202,9 +186,7 @@ class SplineWrapper:
 
         return self.spline_interpolator(coords, 1, extrapolate=False)
 
-    def evaluate_second_derivative(
-        self, coords: Union[float, npt.ArrayLike]
-    ) -> Union[float, npt.ArrayLike]:
+    def evaluate_second_derivative(self, coords: Union[float, npt.ArrayLike]) -> Union[float, npt.ArrayLike]:
         """Evaluating the interpolated spline second derivative at the specified variable values.
 
         Parameters
@@ -258,9 +240,7 @@ class Generic3DCurve:
         if not self.time_boundaries[1] > self.time_boundaries[0]:
             raise InvertedTimeBoundaries("Wrong time boundaries order")
 
-    def evaluate(
-        self, coordinates: Union[PreciseDateTime, npt.ArrayLike]
-    ) -> np.ndarray:
+    def evaluate(self, coordinates: Union[PreciseDateTime, npt.ArrayLike]) -> np.ndarray:
         """Evaluate x, y, z polynomial at given times.
 
         Parameters
@@ -289,9 +269,7 @@ class Generic3DCurve:
             axis=-1,
         )
 
-    def evaluate_first_derivatives(
-        self, coordinates: Union[PreciseDateTime, npt.ArrayLike]
-    ) -> np.ndarray:
+    def evaluate_first_derivatives(self, coordinates: Union[PreciseDateTime, npt.ArrayLike]) -> np.ndarray:
         """Evaluate x, y, z polynomial first derivatives at given times.
 
         Parameters
@@ -320,9 +298,7 @@ class Generic3DCurve:
             axis=-1,
         )
 
-    def evaluate_second_derivatives(
-        self, coordinates: Union[PreciseDateTime, npt.ArrayLike]
-    ) -> np.ndarray:
+    def evaluate_second_derivatives(self, coordinates: Union[PreciseDateTime, npt.ArrayLike]) -> np.ndarray:
         """Evaluate x, y, z polynomial second derivatives at given times.
 
         Parameters
@@ -364,10 +340,5 @@ class Generic3DCurve:
         PolynomialInterpolationOutOfBoundaries
             if relative time is out of validity boundaries this error is raised (interpolation cannot be performed)
         """
-        if ~np.any(
-            (relative_times > self.time_boundaries[0])
-            & (relative_times < self.time_boundaries[1])
-        ):
-            raise InterpolationOutOfBoundaries(
-                "Interpolation failed. Times are outside domain"
-            )
+        if ~np.any((relative_times > self.time_boundaries[0]) & (relative_times < self.time_boundaries[1])):
+            raise InterpolationOutOfBoundaries("Interpolation failed. Times are outside domain")

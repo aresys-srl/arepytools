@@ -20,9 +20,7 @@ IDLike = Union[int, str]
 IDLikeList = Union[IDLike, List[IDLike]]
 
 
-def read_point_targets_file(
-    xml_file: Union[str, Path]
-) -> Dict[str, support.NominalPointTarget]:
+def read_point_targets_file(xml_file: Union[str, Path]) -> Dict[str, support.NominalPointTarget]:
     """Reading a point target xml file to retrieve information about point target location, radiation cross
     sections and delay.
 
@@ -144,12 +142,7 @@ def _translate_point_target_file_from_model(
     coord_type = support.CoordinatesType(data_model.target_type.value)
     targets = data_model.target
 
-    targets = dict(
-        [
-            _convert_xml_model_to_custom_dataclass(target, coord_type=coord_type)
-            for target in targets
-        ]
-    )
+    targets = dict([_convert_xml_model_to_custom_dataclass(target, coord_type=coord_type) for target in targets])
 
     return targets
 
@@ -204,9 +197,7 @@ def _convert_xml_model_to_custom_dataclass(
     return (str(target.number), point_target)
 
 
-def _convert_custom_dataclass_to_xml_model(
-    data: support.NominalPointTarget, data_id: int
-) -> models.TargetTagType:
+def _convert_custom_dataclass_to_xml_model(data: support.NominalPointTarget, data_id: int) -> models.TargetTagType:
     """Converting custom NominalPointTarget dataclass to xsdata TargetType model dataclass for writing purposes.
 
     Parameters
@@ -223,24 +214,15 @@ def _convert_custom_dataclass_to_xml_model(
     """
 
     coord_node = models.TargetTagType.Coord(
-        [
-            models.ValType(value=item, n=n + 1)
-            for n, item in enumerate(data.xyz_coordinates)
-        ]
+        [models.ValType(value=float(item), n=n + 1) for n, item in enumerate(data.xyz_coordinates)]
     )
     rcs_h = data.rcs_hh, data.rcs_hv
     rcs_h_node = models.Rcstype(
-        [
-            models.ValTypeComplex(re=item.real, im=item.imag, n=n + 1)
-            for n, item in enumerate(rcs_h)
-        ]
+        [models.ValTypeComplex(re=float(item.real), im=float(item.imag), n=n + 1) for n, item in enumerate(rcs_h)]
     )
     rcs_v = data.rcs_vv, data.rcs_vh
     rcs_v_node = models.Rcstype(
-        [
-            models.ValTypeComplex(re=item.real, im=item.imag, n=n + 1)
-            for n, item in enumerate(rcs_v)
-        ]
+        [models.ValTypeComplex(re=float(item.real), im=float(item.imag), n=n + 1) for n, item in enumerate(rcs_v)]
     )
     delay_node = models.TargetTagType.Delay(models.ValType(value=data.delay, n=1))
 

@@ -52,12 +52,8 @@ class Manifest:
         if self.description is not None:
             etree.SubElement(manifest_xml, "ProductDescription").text = self.description
 
-        assert self.datafile_extension is not None and isinstance(
-            self.datafile_extension, RasterExtensions
-        )
-        etree.SubElement(manifest_xml, "DataFileExtension").text = (
-            self.datafile_extension.value
-        )
+        assert self.datafile_extension is not None and isinstance(self.datafile_extension, RasterExtensions)
+        etree.SubElement(manifest_xml, "DataFileExtension").text = self.datafile_extension.value
 
         tree = etree.ElementTree(manifest_xml)
         tree.write(
@@ -99,8 +95,6 @@ class Manifest:
         except AttributeError:
             extension = RasterExtensions.RAW
 
-        manifest = Manifest(
-            version=version, description=description, datafile_extension=extension
-        )
+        manifest = Manifest(version=version, description=description, datafile_extension=extension)
 
         return manifest

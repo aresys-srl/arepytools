@@ -99,14 +99,10 @@ class ProductFolderLayout:
         try:
             channel_id = int(channel_id)
         except ValueError as exc:
-            raise InvalidChannelNumber(
-                f"Channel id {channel_id} is not an integer"
-            ) from exc
+            raise InvalidChannelNumber(f"Channel id {channel_id} is not an integer") from exc
 
         if channel_id > _MAX_CHANNEL_NUMBER:
-            raise InvalidChannelNumber(
-                f"Channel id {channel_id} is above upper boundary {_MAX_CHANNEL_NUMBER}"
-            )
+            raise InvalidChannelNumber(f"Channel id {channel_id} is above upper boundary {_MAX_CHANNEL_NUMBER}")
 
         if channel_id < 0:
             raise InvalidChannelNumber("Negative channel numbers are not supported")
@@ -151,9 +147,7 @@ class ProductFolderLayout:
         channel_metadata = self._format_channel(channel_id) + METADATA_EXTENSION
         return self._pf_path.joinpath(channel_metadata)
 
-    def get_channel_data_path(
-        self, channel_id: int, extension: RasterExtensions
-    ) -> Path:
+    def get_channel_data_path(self, channel_id: int, extension: RasterExtensions) -> Path:
         """Retrieving the channel data full path for the given channel number.
 
         Parameters
@@ -171,9 +165,7 @@ class ProductFolderLayout:
         channel_data = self._format_channel(channel_id) + extension.value
         return self._pf_path.joinpath(channel_data)
 
-    def get_channel_quicklook_path(
-        self, channel_id: int, extension: QuicklookExtensions
-    ) -> Path:
+    def get_channel_quicklook_path(self, channel_id: int, extension: QuicklookExtensions) -> Path:
         """Retrieving the channel quicklook full path for the given channel number.
 
         Parameters

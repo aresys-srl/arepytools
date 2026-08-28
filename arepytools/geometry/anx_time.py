@@ -45,25 +45,18 @@ def compute_anx_times_core(
     """
 
     time_axis_origin = trajectory.domain[0]
-    time_axis_rel = np.arange(
-        0, trajectory.domain[1] - trajectory.domain[0], time_sampling_step_s
-    )
+    time_axis_rel = np.arange(0, trajectory.domain[1] - trajectory.domain[0], time_sampling_step_s)
     evaluated_positions = trajectory.evaluate(time_axis_rel + time_axis_origin)
 
-    anx_time_rel_intervals = _find_anx_time_intervals(
-        time_axis_rel=time_axis_rel, positions=evaluated_positions
-    )
+    anx_time_rel_intervals = _find_anx_time_intervals(time_axis_rel=time_axis_rel, positions=evaluated_positions)
 
     def get_z_coordinate_bisecting_func(time, origin):
         return trajectory.evaluate(origin + time)[-1]
 
     anx_times = []
     for interval in anx_time_rel_intervals:
-
         central_time = interval[0] + (interval[1] - interval[0]) / 2.0
-        velocity_z = trajectory.evaluate_first_derivatives(
-            central_time + time_axis_origin
-        )[-1]
+        velocity_z = trajectory.evaluate_first_derivatives(central_time + time_axis_origin)[-1]
         x_tol = min(max_abs_time_error, max_abs_z_error / abs(velocity_z))
 
         get_z_coordinate_bisecting_func = functools.partial(
@@ -83,9 +76,7 @@ def compute_anx_times_core(
     return np.array(anx_times) + time_axis_origin
 
 
-def compute_relative_times(
-    time_points: np.ndarray, anx_times: np.ndarray
-) -> tuple[np.ndarray, np.ndarray]:
+def compute_relative_times(time_points: np.ndarray, anx_times: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """Return the relative time since the greatest node less or equal to absolute time.
 
     Parameters
@@ -102,22 +93,11 @@ def compute_relative_times(
         nan value and not valid index are returned when previous time node is not available
     """
     relative_times = np.array(
-        [
-            (
-                t - anx_times[anx_times <= t][-1]
-                if len(anx_times[anx_times <= t]) > 0
-                else np.nan
-            )
-            for t in time_points
-        ]
+        [(t - anx_times[anx_times <= t][-1] if len(anx_times[anx_times <= t]) > 0 else np.nan) for t in time_points]
     )
     anx_indices = np.array(
         [
-            (
-                len(anx_times[anx_times <= t]) - 1
-                if len(anx_times[anx_times <= t]) > 0
-                else len(anx_times)
-            )
+            (len(anx_times[anx_times <= t]) - 1 if len(anx_times[anx_times <= t]) > 0 else len(anx_times))
             for t in time_points
         ]
     ).astype(int)
@@ -125,9 +105,7 @@ def compute_relative_times(
     return relative_times, anx_indices
 
 
-def _find_anx_time_intervals(
-    time_axis_rel: np.ndarray, positions: np.ndarray
-) -> list[tuple[float, float]]:
+def _find_anx_time_intervals(time_axis_rel: np.ndarray, positions: np.ndarray) -> list[tuple[float, float]]:
     """Finding ANX time intervals for the input relative time axis and the corresponding sensor's positions.
 
     Parameters

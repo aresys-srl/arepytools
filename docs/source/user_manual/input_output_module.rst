@@ -275,7 +275,7 @@ The following code example shows how to read Point Target products based on thei
 		path=path_to_binary_folder,
 		mode="r"
 	)
-	# output: coordinates array (N, 3), rcs array (N, 4) (HH, HV, VV, VH)
+	# output: coordinates array (N, 3), rcs array (N, 4) (HH, HV, VH, VV)
 	# data can easily be read by blocks by specifying a start reading byte and the number of
 	# bytes to be read
 	coordinates_array, rcs_array = point_target_manager.read_data(start=0, num_points=None)

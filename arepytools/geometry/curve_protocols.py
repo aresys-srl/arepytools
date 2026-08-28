@@ -23,9 +23,7 @@ class TwiceDifferentiable3DCurve(Protocol):
     def domain(self) -> tuple[Any, Any]:
         """Curve domain boundaries, min and max values"""
 
-    def evaluate(
-        self, coordinates: Union[PreciseDateTime, float, npt.ArrayLike]
-    ) -> np.ndarray:
+    def evaluate(self, coordinates: Union[PreciseDateTime, float, npt.ArrayLike]) -> np.ndarray:
         """Evaluate curve value at given input coordinates.
 
         Parameters
@@ -39,9 +37,7 @@ class TwiceDifferentiable3DCurve(Protocol):
             values of the curve at given input values (N, 3)
         """
 
-    def evaluate_first_derivatives(
-        self, coordinates: Union[PreciseDateTime, float, npt.ArrayLike]
-    ) -> np.ndarray:
+    def evaluate_first_derivatives(self, coordinates: Union[PreciseDateTime, float, npt.ArrayLike]) -> np.ndarray:
         """Evaluate curve first derivatives values at given input coordinates.
 
         Parameters
@@ -55,9 +51,7 @@ class TwiceDifferentiable3DCurve(Protocol):
             values of the curve derivatives at given input values (N, 3)
         """
 
-    def evaluate_second_derivatives(
-        self, coordinates: Union[PreciseDateTime, float, npt.ArrayLike]
-    ) -> np.ndarray:
+    def evaluate_second_derivatives(self, coordinates: Union[PreciseDateTime, float, npt.ArrayLike]) -> np.ndarray:
         """Evaluate curve second derivatives values at given input coordinates.
 
         Parameters
@@ -76,9 +70,7 @@ class TwiceDifferentiable3DCurve(Protocol):
 class RealTwiceDifferentiableFunction(Protocol):
     """Generic protocol for a f: R -> R function twice differentiable with derivative evaluation methods implemented"""
 
-    def evaluate(
-        self, coordinates: Union[float, npt.ArrayLike]
-    ) -> Union[float, npt.ArrayLike]:
+    def evaluate(self, coordinates: Union[float, npt.ArrayLike]) -> Union[float, npt.ArrayLike]:
         """Evaluate function value at given coordinates.
 
         Parameters
@@ -92,9 +84,7 @@ class RealTwiceDifferentiableFunction(Protocol):
             value of function at each input coordinate
         """
 
-    def evaluate_first_derivative(
-        self, coordinates: Union[float, npt.ArrayLike]
-    ) -> Union[float, npt.ArrayLike]:
+    def evaluate_first_derivative(self, coordinates: Union[float, npt.ArrayLike]) -> Union[float, npt.ArrayLike]:
         """Evaluate function first derivative at given coordinates.
 
         Parameters
@@ -108,9 +98,7 @@ class RealTwiceDifferentiableFunction(Protocol):
             values of function first derivative at each input coordinate
         """
 
-    def evaluate_second_derivative(
-        self, coordinates: Union[float, npt.ArrayLike]
-    ) -> Union[float, npt.ArrayLike]:
+    def evaluate_second_derivative(self, coordinates: Union[float, npt.ArrayLike]) -> Union[float, npt.ArrayLike]:
         """Evaluate function second derivative at given coordinates.
 
         Parameters

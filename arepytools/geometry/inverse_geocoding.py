@@ -55,15 +55,11 @@ def inverse_geocoding_attitude(
         az_initial_time_guesses = np.asarray(az_initial_time_guesses)
     else:
         # computing initial guesses
-        az_initial_time_guesses = inverse_geocoding_monostatic_init(
-            orbit, ground_points, 0, 1
-        )
+        az_initial_time_guesses = inverse_geocoding_monostatic_init(orbit, ground_points, 0, 1)
 
     # instantiating orbit and boresight normal curves
     gso_curve = GSO3DCurveWrapper(orbit=orbit)
-    gsa_boresight_normal_spline = create_attitude_boresight_normal_curve_wrapper(
-        attitude=attitude
-    )
+    gsa_boresight_normal_spline = create_attitude_boresight_normal_curve_wrapper(attitude=attitude)
 
     # computing actual inverse geocoding
     az_times, rng_times = core.inverse_geocoding_attitude_core(

@@ -114,11 +114,7 @@ class ProductFolder2:
 
         files = [f.name for f in self._path.iterdir()]
 
-        headers = [
-            f
-            for f in files
-            if f.startswith(self._path.name) and f.endswith(METADATA_EXTENSION)
-        ]
+        headers = [f for f in files if f.startswith(self._path.name) and f.endswith(METADATA_EXTENSION)]
         headers = [h.rstrip(METADATA_EXTENSION) for h in headers]
         channels = [h.split("_")[-1] for h in headers]
 
@@ -152,9 +148,7 @@ class ProductFolder2:
         Path
             Path to the selected channel's raster file
         """
-        return self._layout.get_channel_data_path(
-            channel_id=channel, extension=self._raster_extension
-        )
+        return self._layout.get_channel_data_path(channel_id=channel, extension=self._raster_extension)
 
     def get_config_file(self) -> Path:
         """Getter method for retrieving Product Folder config file path.
@@ -177,9 +171,7 @@ class ProductFolder2:
         return self._layout.get_overlay_path()
 
 
-def get_channel_quicklook(
-    pf: ProductFolder2, ext: Union[str, QuicklookExtensions], channel_id: int
-) -> Path:
+def get_channel_quicklook(pf: ProductFolder2, ext: Union[str, QuicklookExtensions], channel_id: int) -> Path:
     """Get quicklook full path for the selected channel.
 
     Parameters
@@ -243,9 +235,7 @@ def create_product_folder(
 
     # creating ProductFolder2 object and manifest
     product_folder = ProductFolder2(path=pf_path, raster_extension=raster_extension)
-    manifest = Manifest(
-        description=product_folder_description, datafile_extension=raster_extension
-    )
+    manifest = Manifest(description=product_folder_description, datafile_extension=raster_extension)
 
     if pf_path.exists():
         # path already exist but no overwrite permission
@@ -258,9 +248,7 @@ def create_product_folder(
 
         # path already exist, overwrite permission but no valid ProductFolder2
         if not is_product_folder(pf_path):
-            raise InvalidProductFolder(
-                f"Path {pf_path} does not " + "correspond to a valid Product Folder"
-            )
+            raise InvalidProductFolder(f"Path {pf_path} does not " + "correspond to a valid Product Folder")
 
         # path already exist, overwrite permission and valid ProductFolder2
         delete_product_folder_content(product_folder)
@@ -303,14 +291,10 @@ def open_product_folder(
 
     # check if path corresponds to a valid Product Folder
     if not is_valid_product_folder(pf_path):
-        raise InvalidProductFolder(
-            f"Path {pf_path} does not " + "correspond to a valid Product Folder"
-        )
+        raise InvalidProductFolder(f"Path {pf_path} does not " + "correspond to a valid Product Folder")
 
     # reading manifest and creating ProductFolder2 object
-    manifest = Manifest.from_file(
-        ProductFolderLayout.generate_manifest_path(pf_path=pf_path)
-    )
+    manifest = Manifest.from_file(ProductFolderLayout.generate_manifest_path(pf_path=pf_path))
     product_folder = ProductFolder2(
         path=pf_path,
         raster_extension=manifest.datafile_extension,
@@ -387,14 +371,10 @@ def is_valid_product_folder(pf_path: Union[str, Path]) -> bool:
     except Exception:
         return False
 
-    return _check_channel_data_pairing_condition(
-        pf_path, raster_extension=manifest.datafile_extension
-    )
+    return _check_channel_data_pairing_condition(pf_path, raster_extension=manifest.datafile_extension)
 
 
-def _check_channel_data_pairing_condition(
-    path: Path, raster_extension: RasterExtensions
-) -> bool:
+def _check_channel_data_pairing_condition(path: Path, raster_extension: RasterExtensions) -> bool:
     """Determining if the pairing condition between Product Folder channel data
     and metadata is met, aka there is a metadata .xml header file for each raster file.
 
@@ -417,22 +397,10 @@ def _check_channel_data_pairing_condition(
     try:
         # detect headers and raster files inside directory
         # searching for .XML files only
-        headers_on_disk = [
-            f
-            for f in files
-            if f.startswith(path.name) and f.endswith(METADATA_EXTENSION)
-        ]
+        headers_on_disk = [f for f in files if f.startswith(path.name) and f.endswith(METADATA_EXTENSION)]
         # searching for all files in folder without an extension
-        raw_raster_on_disk = [
-            f
-            for f in files
-            if f.startswith(path.name) and "." not in f.replace(path.name, "")
-        ]
-        tiff_raster_on_disk = [
-            f
-            for f in files
-            if f.startswith(path.name) and f.endswith(RasterExtensions.TIFF.value)
-        ]
+        raw_raster_on_disk = [f for f in files if f.startswith(path.name) and "." not in f.replace(path.name, "")]
+        tiff_raster_on_disk = [f for f in files if f.startswith(path.name) and f.endswith(RasterExtensions.TIFF.value)]
 
         # found tiff files on disk, but manifest extension is RAW
         if tiff_raster_on_disk and raster_extension == RasterExtensions.RAW:
@@ -440,11 +408,7 @@ def _check_channel_data_pairing_condition(
         # found RAW files on disk, but manifest extension is TIFF
         if raw_raster_on_disk and raster_extension == RasterExtensions.TIFF:
             return False
-        raster_on_disk = (
-            tiff_raster_on_disk
-            if raster_extension == RasterExtensions.TIFF
-            else raw_raster_on_disk
-        )
+        raster_on_disk = tiff_raster_on_disk if raster_extension == RasterExtensions.TIFF else raw_raster_on_disk
 
         # check matching between headers filenames and rasters filenames
         headers_clean = [h.rsplit(".", 1)[0] for h in headers_on_disk]
@@ -512,9 +476,7 @@ def delete_product_folder_content(product_folder: ProductFolder2) -> None:
         product_folder.path.rmdir()
 
 
-def rename_product_folder(
-    current_folder: Union[str, Path], new_folder: Union[str, Path]
-) -> None:
+def rename_product_folder(current_folder: Union[str, Path], new_folder: Union[str, Path]) -> None:
     """Renaming a Product Folder keeping all files and properly renaming them.
     Channel metadata are edited to replace the old Filename field with the new one.
 
@@ -530,19 +492,13 @@ def rename_product_folder(
     new_folder = Path(new_folder)
 
     if not current_folder.exists():
-        raise InvalidProductFolder(
-            f"Current Product Folder does not exist {current_folder}"
-        )
+        raise InvalidProductFolder(f"Current Product Folder does not exist {current_folder}")
 
     if not current_folder.is_dir():
-        raise InvalidProductFolder(
-            f"Current Product Folder is not a directory {current_folder}"
-        )
+        raise InvalidProductFolder(f"Current Product Folder is not a directory {current_folder}")
 
     if new_folder.exists():
-        raise InvalidProductFolder(
-            f"New Product Folder location already exist {new_folder}"
-        )
+        raise InvalidProductFolder(f"New Product Folder location already exist {new_folder}")
 
     old_name = current_folder.name
     new_name = new_folder.name
@@ -556,9 +512,7 @@ def rename_product_folder(
         if old_name in str(file):
             if file.suffix == METADATA_EXTENSION:
                 # editing the Filename field inside channel metadata XML files
-                _update_metadata_filename_field(
-                    file=file, old_name=old_name, new_name=new_name
-                )
+                _update_metadata_filename_field(file=file, old_name=old_name, new_name=new_name)
             old_filename = file.name
             file.rename(file.with_name(old_filename.replace(old_name, new_name)))
 

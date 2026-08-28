@@ -4,9 +4,10 @@
 """
 I/O management package
 """
-from .channel_iteration import iter_channels
-from .create_orbit import create_orbit
-from .io_support import (
+
+from arepytools.io.channel_iteration import iter_channels
+from arepytools.io.create_orbit import create_orbit
+from arepytools.io.io_support import (
     create_new_metadata,
     read_metadata,
     read_raster,
@@ -15,12 +16,12 @@ from .io_support import (
     write_raster,
     write_raster_with_raster_info,
 )
-from .point_target_binary import (
+from arepytools.io.point_target_binary import (
     PointSetProduct,
     convert_array_to_point_target_structure,
 )
-from .point_target_file import read_point_targets_file, write_point_targets_file
-from .productfolder2 import create_product_folder, open_product_folder
+from arepytools.io.point_target_file import read_point_targets_file, write_point_targets_file
+from arepytools.io.productfolder2 import create_product_folder, open_product_folder
 
 
 class ChannelDeprecationWarning(Warning):
@@ -37,3 +38,22 @@ class RenameProductFolderDeprecationWarning(ProductFolderDeprecationWarning):
 
 class RemoveProductFolderDeprecationWarning(ProductFolderDeprecationWarning):
     """Custom deprecation warning for the remove_product_folder function"""
+
+
+__all__ = [
+    "iter_channels",
+    "create_orbit",
+    "create_new_metadata",
+    "read_metadata",
+    "read_raster",
+    "read_raster_with_raster_info",
+    "write_metadata",
+    "write_raster",
+    "write_raster_with_raster_info",
+    "PointSetProduct",
+    "convert_array_to_point_target_structure",
+    "read_point_targets_file",
+    "write_point_targets_file",
+    "create_product_folder",
+    "open_product_folder",
+]

@@ -92,9 +92,7 @@ def compute_sensor_local_axis(
     raise ValueError("Unknown reference frame")  # pragma: no cover
 
 
-def compute_zerodoppler_reference_frame(
-    sensor_position: npt.ArrayLike, sensor_velocity: npt.ArrayLike
-) -> np.ndarray:
+def compute_zerodoppler_reference_frame(sensor_position: npt.ArrayLike, sensor_velocity: npt.ArrayLike) -> np.ndarray:
     """Compute the ZeroDoppler reference frame
 
     Reference frame
@@ -131,8 +129,7 @@ def compute_zerodoppler_reference_frame(
 
     if sensor_position.ndim > 2 or sensor_position.shape[-1] != 3:
         raise ValueError(
-            "sensor_position has invalid shape: "
-            + f"{sensor_position.shape}, it should be (3,) or (N, 3)"
+            "sensor_position has invalid shape: " + f"{sensor_position.shape}, it should be (3,) or (N, 3)"
         )
 
     versor_x = sensor_velocity / np.linalg.norm(sensor_velocity, axis=-1, keepdims=True)
@@ -150,9 +147,7 @@ def compute_zerodoppler_reference_frame(
     return np.stack([versor_x, versor_y, versor_z], axis=-1)
 
 
-def compute_inertial_velocity(
-    sensor_position: npt.ArrayLike, sensor_velocity: npt.ArrayLike
-) -> np.ndarray:
+def compute_inertial_velocity(sensor_position: npt.ArrayLike, sensor_velocity: npt.ArrayLike) -> np.ndarray:
     """Compute the sensor inertial velocity
 
     Parameters
@@ -180,9 +175,7 @@ def compute_inertial_velocity(
     return intertial_velocity
 
 
-def compute_geocentric_reference_frame(
-    sensor_position: npt.ArrayLike, sensor_velocity: npt.ArrayLike
-) -> np.ndarray:
+def compute_geocentric_reference_frame(sensor_position: npt.ArrayLike, sensor_velocity: npt.ArrayLike) -> np.ndarray:
     """Computed the geocentric frame of reference
 
     Parameters
@@ -209,13 +202,12 @@ def compute_geocentric_reference_frame(
 
     if sensor_position.shape != sensor_velocity.shape:
         raise ValueError(
-            f"sensor_position and sensor_velocity have different shapes {sensor_position.shape} != {sensor_velocity.shape}"
+            f"sensor_position and sensor_velocity have different shapes {sensor_position.shape} != "
+            + f"{sensor_velocity.shape}"
         )
 
     if sensor_position.ndim > 2 or sensor_position.shape[-1] != 3:
-        raise ValueError(
-            f"sensor_position has invalid shape: {sensor_position.shape}, it should be (3,) or (N, 3)"
-        )
+        raise ValueError(f"sensor_position has invalid shape: {sensor_position.shape}, it should be (3,) or (N, 3)")
 
     versor_z = -sensor_position
     versor_z = versor_z / np.linalg.norm(versor_z, axis=-1, keepdims=True)
@@ -231,9 +223,7 @@ def compute_geocentric_reference_frame(
     return np.stack([versor_x, versor_y, versor_z], axis=-1)
 
 
-def compute_geodetic_reference_frame(
-    sensor_position: npt.ArrayLike, sensor_velocity: npt.ArrayLike
-) -> np.ndarray:
+def compute_geodetic_reference_frame(sensor_position: npt.ArrayLike, sensor_velocity: npt.ArrayLike) -> np.ndarray:
     """Computed the geodetic frame of reference
 
     Parameters
@@ -261,18 +251,14 @@ def compute_geodetic_reference_frame(
         )
 
     if sensor_position.ndim > 2 or sensor_position.shape[-1] != 3:
-        raise ValueError(
-            f"sensor_position has invalid shape: {sensor_position.shape}, it should be (3,) or (N, 3)"
-        )
+        raise ValueError(f"sensor_position has invalid shape: {sensor_position.shape}, it should be (3,) or (N, 3)")
 
     geodetic_point = compute_geodetic_point(sensor_position)
 
     versor_z = geodetic_point - sensor_position
     versor_z = versor_z / np.linalg.norm(versor_z, axis=-1, keepdims=True)
 
-    geocentric_frame = compute_geocentric_reference_frame(
-        sensor_position, sensor_velocity
-    )
+    geocentric_frame = compute_geocentric_reference_frame(sensor_position, sensor_velocity)
 
     z_geocentric = np.einsum("...jk, ...j->...k", geocentric_frame, versor_z)
     z_geocentric = z_geocentric / np.linalg.norm(z_geocentric, axis=-1, keepdims=True)
@@ -292,9 +278,7 @@ def compute_geodetic_reference_frame(
     z_rotated = z_rotated / np.linalg.norm(z_rotated, axis=-1, keepdims=True)
     xsi = np.arctan2(z_rotated[..., 0], z_rotated[..., 2])
 
-    second_rotation = compute_rotation(
-        RotationOrder.ypr, yaw=np.zeros_like(xsi), pitch=xsi, roll=np.zeros_like(xsi)
-    )
+    second_rotation = compute_rotation(RotationOrder.ypr, yaw=np.zeros_like(xsi), pitch=xsi, roll=np.zeros_like(xsi))
 
     return np.matmul(rotated_frame, second_rotation.as_matrix())
 

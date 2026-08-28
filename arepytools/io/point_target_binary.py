@@ -60,27 +60,18 @@ class PointSetProduct:
 
         # generating full paths for metadata and raster files
         self._coords_metadata_files = [
-            self._path.joinpath(c + METADATA_EXTENSION)
-            for c in _COORDINATES_RASTER_FILENAMES
+            self._path.joinpath(c + METADATA_EXTENSION) for c in _COORDINATES_RASTER_FILENAMES
         ]
-        self._coords_raster_files = [
-            self._path.joinpath(c) for c in _COORDINATES_RASTER_FILENAMES
-        ]
-        self._rcs_metadata_files = [
-            self._path.joinpath(r + METADATA_EXTENSION) for r in _RCS_RASTER_FILENAMES
-        ]
+        self._coords_raster_files = [self._path.joinpath(c) for c in _COORDINATES_RASTER_FILENAMES]
+        self._rcs_metadata_files = [self._path.joinpath(r + METADATA_EXTENSION) for r in _RCS_RASTER_FILENAMES]
         self._rcs_raster_files = [self._path.joinpath(r) for r in _RCS_RASTER_FILENAMES]
 
         if self._open_mode == io_utils.OpenMode.READ:
             # reading mode, asserting existence and being a directory
             if not self._path.exists():
-                raise io_utils.InvalidPointTargetError(
-                    f"Path does not exist {self._path}"
-                )
+                raise io_utils.InvalidPointTargetError(f"Path does not exist {self._path}")
             if not self._path.is_dir():
-                raise io_utils.InvalidPointTargetError(
-                    f"Path is not a directory {self._path}"
-                )
+                raise io_utils.InvalidPointTargetError(f"Path is not a directory {self._path}")
             # reading number of targets from files
             self._raster_infos, self._num_targets = self._read_num_lines()
 
@@ -128,9 +119,7 @@ class PointSetProduct:
             if raster_info.samples != 1:
                 raise RuntimeError("Number of samples is not 1")
 
-        assert (
-            len(set(lines)) == 1
-        ), "Metadata files are not consistent: different numbers of lines"
+        assert len(set(lines)) == 1, "Metadata files are not consistent: different numbers of lines"
         return raster_infos, lines[0]
 
     def _read_rasters(self, start: int, stop: int) -> Tuple[np.ndarray, np.ndarray]:
@@ -157,9 +146,7 @@ class PointSetProduct:
         assert start >= 0
 
         data = []
-        for index, file in enumerate(
-            self._coords_raster_files + self._rcs_raster_files
-        ):
+        for index, file in enumerate(self._coords_raster_files + self._rcs_raster_files):
             data.append(
                 io_utils.read_raster_with_raster_info(
                     raster_file=file,
@@ -171,9 +158,7 @@ class PointSetProduct:
         return np.hstack(data[:3]), np.hstack(data[-4:])
 
     @staticmethod
-    def _write_rasters(
-        data: np.ndarray, filenames: List[Path], data_type: mtd.ECellType
-    ) -> None:
+    def _write_rasters(data: np.ndarray, filenames: List[Path], data_type: mtd.ECellType) -> None:
         """Writing input data to raster files using the specified data type.
 
         Parameters
@@ -196,9 +181,7 @@ class PointSetProduct:
             )
 
     @staticmethod
-    def _write_metadata(
-        filenames: List[Path], num_points: int, data_type: mtd.ECellType
-    ) -> None:
+    def _write_metadata(filenames: List[Path], num_points: int, data_type: mtd.ECellType) -> None:
         """Writing metadata files corresponding to raster files.
 
         Parameters
@@ -218,16 +201,12 @@ class PointSetProduct:
                 filename=file.stem,
             )
 
-            metadata = io_utils.create_new_metadata(
-                description="Aresys XML metadata file"
-            )
+            metadata = io_utils.create_new_metadata(description="Aresys XML metadata file")
             metadata.insert_element(raster_info)
 
             io_utils.write_metadata(metadata, str(file))
 
-    def read_data(
-        self, start: int = 0, num_points: Optional[int] = None
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def read_data(self, start: int = 0, num_points: Optional[int] = None) -> Tuple[np.ndarray, np.ndarray]:
         """Reading Point Target Binary rasters to extract point target data.
 
         Parameters
@@ -242,7 +221,7 @@ class PointSetProduct:
         -------
         Tuple[np.ndarray, np.ndarray]
             coordinates array in the form (N, 3),
-            rcs array (HH, HV, VV, VH) in the form (N, 4)
+            rcs array (HH, HV, VH, VV) in the form (N, 4)
 
         Raises
         ------
@@ -264,14 +243,10 @@ class PointSetProduct:
         stop = start + num_points
 
         if start < 0:
-            raise io_utils.InvalidRasterBlockError(
-                f"Starting block cannot be negative {start}"
-            )
+            raise io_utils.InvalidRasterBlockError(f"Starting block cannot be negative {start}")
 
         if num_points <= 0:
-            raise io_utils.InvalidRasterBlockError(
-                f"Number of blocks to be read cannot be 0 or negative {num_points}"
-            )
+            raise io_utils.InvalidRasterBlockError(f"Number of blocks to be read cannot be 0 or negative {num_points}")
 
         if stop > self._num_targets:
             raise io_utils.InvalidRasterBlockError(
@@ -282,14 +257,12 @@ class PointSetProduct:
 
         if start > self._num_targets:
             raise io_utils.InvalidRasterBlockError(
-                "Starting block exceeds total number of blocks: "
-                + f"{start} > {self._num_targets}"
+                "Starting block exceeds total number of blocks: " + f"{start} > {self._num_targets}"
             )
 
         if num_points > self._num_targets:
             raise io_utils.InvalidRasterBlockError(
-                "Number of blocks to be read exceeds total number of blocks: "
-                + f"{num_points} > {self._num_targets}"
+                "Number of blocks to be read exceeds total number of blocks: " + f"{num_points} > {self._num_targets}"
             )
 
         return self._read_rasters(start=start, stop=stop)
@@ -308,7 +281,7 @@ class PointSetProduct:
         coords : np.ndarray
             point target coordinates, in the form (N, 3)
         rcs : np.ndarray
-            point target radar cross section values, in the form (N, 4)
+            point target radar cross section values, in the form (N, 4) (HH,HV,VH,VV)
         coords_data_type : Union[str, mtd.ECellType], optional
             data type to be used in writing coordinates rasters, by default mtd.ECellType.float64
         rcs_data_type : Union[str, mtd.ECellType], optional
@@ -351,9 +324,7 @@ class PointSetProduct:
             filenames=self._coords_raster_files,
             data_type=coords_data_type,
         )
-        self._write_rasters(
-            data=rcs.T, filenames=self._rcs_raster_files, data_type=rcs_data_type
-        )
+        self._write_rasters(data=rcs.T, filenames=self._rcs_raster_files, data_type=rcs_data_type)
 
         # writing coordinates and rcs raster metadata
         self._write_metadata(
@@ -379,7 +350,7 @@ def convert_array_to_point_target_structure(
     coords : np.ndarray
         point target coordinates, in the form (N, 3)
     rcs : np.ndarray
-        point target rcs values (HH, HV, VV, VH), in the form (N, 4)
+        point target rcs values (HH, HV, VH, VV), in the form (N, 4)
     point_target_ids : List[str], optional
         optional list of point target id labels, by default None
 
@@ -428,8 +399,8 @@ def convert_array_to_point_target_structure(
             xyz_coordinates=coord,
             rcs_hh=rcs[index][0],
             rcs_hv=rcs[index][1],
-            rcs_vv=rcs[index][2],
-            rcs_vh=rcs[index][3],
+            rcs_vh=rcs[index][2],
+            rcs_vv=rcs[index][3],
         )
 
     return out

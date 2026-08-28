@@ -5,6 +5,7 @@
 Aresys Point Target File XSD Models
 -----------------------------------
 """
+
 from arepytools.io.point_target_models.aresys_point_target_models import (
     PointTargets,
     PointTargetsTargetType,

@@ -14,6 +14,8 @@
 #
 import os
 import sys
+import arepytools
+from arepytools.timing.precisedatetime import PreciseDateTime
 
 sys.path.insert(0, os.path.abspath("../.."))
 
@@ -23,8 +25,6 @@ sys.path.insert(0, os.path.abspath("../.."))
 project = "ArePyTools"
 copyright = "2024, Aresys S.R.L."
 author = "Aresys S.R.L."
-
-import arepytools
 
 arepytools_version = arepytools.__version__
 # The short X.Y version
@@ -217,9 +217,6 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
 }
-
-
-from arepytools.timing.precisedatetime import PreciseDateTime
 
 rst_prolog = """
 .. |PRECISEDATETIME_REFERENCE_TIME| replace:: ``{PRECISEDATE_TIME_REFERENCE_TIME}``

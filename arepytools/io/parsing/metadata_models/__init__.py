@@ -5,6 +5,7 @@
 Metadata models
 ---------------
 """
+
 from arepytools.io.parsing.metadata_models.aresys_generic_metadata import (
     AresysXmlDoc,
     AresysXmlDocType,
@@ -28,6 +29,7 @@ from arepytools.io.parsing.metadata_models.aresys_types import (
     Endianity,
     GlobalPolarizationType,
     GroundCornersPointsType,
+    ImageQuantityType,
     LeftRightType,
     PointType,
     PolarizationType,
@@ -68,6 +70,7 @@ __all__ = [
     "Endianity",
     "GlobalPolarizationType",
     "GroundCornersPointsType",
+    "ImageQuantityType",
     "LeftRightType",
     "PointType",
     "PolarizationType",

@@ -6,7 +6,6 @@ Inverse geocoding core functionalities
 --------------------------------------
 """
 
-
 from typing import List, Optional, Tuple, Union
 
 import numpy as np
@@ -99,9 +98,7 @@ def inverse_geocoding_attitude_core(
         sensor_vel_curr = trajectory.evaluate_first_derivatives(azimuth_times)
 
         arf1_curr = boresight_normal.evaluate(azimuth_times)
-        arf1_derivative_curr = boresight_normal.evaluate_first_derivatives(
-            azimuth_times
-        )
+        arf1_derivative_curr = boresight_normal.evaluate_first_derivatives(azimuth_times)
 
         # slant range correspondent to the actual position of satellite
         line_of_sight = ground_points - sensor_pos_curr
@@ -114,8 +111,7 @@ def inverse_geocoding_attitude_core(
         # derivative equation: df = [-sensor_velocity*arf1 + (earth_point - sensor_pos) * arf1_derivative] / slant_range
         func_der = (
             np.sum(
-                -sensor_vel_curr * arf1_curr
-                + (ground_points - sensor_pos_curr) * arf1_derivative_curr,
+                -sensor_vel_curr * arf1_curr + (ground_points - sensor_pos_curr) * arf1_derivative_curr,
                 axis=-1,
             )
             / slant_range
@@ -129,8 +125,7 @@ def inverse_geocoding_attitude_core(
             break
     else:
         raise NewtonMethodConvergenceError(
-            "Newton did not converge: maximum number of iterations"
-            + f"{max_iter} reached. Residual error {delta_err}"
+            "Newton did not converge: maximum number of iterations" + f"{max_iter} reached. Residual error {delta_err}"
         )
 
     # re-evaluating slant range
@@ -257,10 +252,7 @@ def inverse_geocoding_monostatic_core(
         # equation:
         # f = [(earth_point - sensor_position) * (scene_velocity - sat_velocity)] + doppler_term
         doppler_term = wavelength * frequencies_doppler_centroid / 2.0 * slant_range
-        func = (
-            np.sum((line_of_sight * (scene_velocity - sensor_velocity)), axis=-1)
-            + doppler_term
-        )
+        func = np.sum((line_of_sight * (scene_velocity - sensor_velocity)), axis=-1) + doppler_term
 
         # derivative equation:
         # df = [-sensor_velocity*(sensor_velocity - scene_velocity) - (earth_point - sensor_pos) * sensor_acceleration -
@@ -284,8 +276,8 @@ def inverse_geocoding_monostatic_core(
 
     else:
         raise NewtonMethodConvergenceError(
-            "Newton did not converge: maximum number of iterations"
-            + f"{max_iter} reached. Residual error {delta_err}"
+            "Newton did not converge: maximum number of iterations "
+            + f"'{max_iter}' reached. Residual error {delta_err}"
         )
 
     # re-evaluating slant range
@@ -379,9 +371,7 @@ def inverse_geocoding_bistatic_core(
         num_points = ground_points.size // 3
 
     if np.size(frequencies_doppler_centroid) > ground_points.size // 3 == 1:
-        ground_points = np.full(
-            (np.size(frequencies_doppler_centroid), 3), ground_points
-        )
+        ground_points = np.full((np.size(frequencies_doppler_centroid), 3), ground_points)
         num_points = ground_points.size // 3
 
     if np.size(initial_guesses) != ground_points.size // 3 and not (
@@ -449,9 +439,7 @@ def inverse_geocoding_bistatic_core(
 
         # equation residuals
         distance_equation_residual = slant_range_rx + slant_range_tx - slant_range
-        doppler_equation_freq_term = (
-            wavelength * frequencies_doppler_centroid * slant_range_rx * slant_range_tx
-        )
+        doppler_equation_freq_term = wavelength * frequencies_doppler_centroid * slant_range_rx * slant_range_tx
         doppler_equation_residual = (
             -rng_vel_product_tx * slant_range_rx - rng_vel_product_rx * slant_range_tx
         ) + doppler_equation_freq_term
@@ -468,14 +456,10 @@ def inverse_geocoding_bistatic_core(
         df2_dt_rx_doppler_freq_term = (
             rng_vel_product_rx
             / slant_range_rx
-            * (
-                rng_vel_product_tx
-                + wavelength * frequencies_doppler_centroid * slant_range_tx
-            )
+            * (rng_vel_product_tx + wavelength * frequencies_doppler_centroid * slant_range_tx)
         )
         df2_dt_rx = (
-            slant_range_tx
-            * (norm_vel_rx_square - np.sum(line_of_sight_rx * acceleration_rx, axis=-1))
+            slant_range_tx * (norm_vel_rx_square - np.sum(line_of_sight_rx * acceleration_rx, axis=-1))
             + df2_dt_rx_doppler_freq_term
         )
 
@@ -483,14 +467,10 @@ def inverse_geocoding_bistatic_core(
         df2_dt_tx_doppler_freq_term = (
             rng_vel_product_tx
             / slant_range_tx
-            * (
-                rng_vel_product_rx
-                + wavelength * frequencies_doppler_centroid * slant_range_rx
-            )
+            * (rng_vel_product_rx + wavelength * frequencies_doppler_centroid * slant_range_rx)
         )
         df2_dt_tx = (
-            slant_range_rx
-            * (norm_vel_tx_square - np.sum(line_of_sight_tx * acceleration_tx, axis=-1))
+            slant_range_rx * (norm_vel_tx_square - np.sum(line_of_sight_tx * acceleration_tx, axis=-1))
             + df2_dt_tx_doppler_freq_term
         )
 
@@ -524,8 +504,8 @@ def inverse_geocoding_bistatic_core(
 
     else:
         raise NewtonMethodConvergenceError(
-            "Newton did not converge: maximum number of iterations"
-            + f"{max_iter} reached. Residual error {delta_err}"
+            "Newton did not converge: maximum number of iterations "
+            + f"'{max_iter}' reached. Residual error {delta_err}"
         )
 
     if one_size_array:
@@ -591,9 +571,7 @@ def inverse_geocoding_monostatic_init_core(
         points = np.full((frequencies_doppler_centroid.size, 3), points)
     # otherwise do the opposite
     if frequencies_doppler_centroid.size == 1 and points.size // 3 > 1:
-        frequencies_doppler_centroid = np.repeat(
-            frequencies_doppler_centroid, points.size // 3
-        )
+        frequencies_doppler_centroid = np.repeat(frequencies_doppler_centroid, points.size // 3)
 
     # creating time axis if input is numpy array
     if isinstance(time_axis, np.ndarray):
@@ -603,9 +581,7 @@ def inverse_geocoding_monostatic_init_core(
     for id_point, point in enumerate(points):
         doppler_centroid_equation = doppler_equation(
             sensor_position=trajectory.evaluate(time_axis.get_array()).T,
-            sensor_velocity=trajectory.evaluate_first_derivatives(
-                time_axis.get_array()
-            ).T,
+            sensor_velocity=trajectory.evaluate_first_derivatives(time_axis.get_array()).T,
             point=point.reshape(-1, 1),
             frequency_doppler_centroid=frequencies_doppler_centroid[id_point],
             wavelength=wavelength,
@@ -615,9 +591,7 @@ def inverse_geocoding_monostatic_init_core(
 
         interval_index = []
         if zero_crossing_indexes:
-            azimuth_time = time_axis.interpolate(
-                np.asarray(zero_crossing_indexes) - 0.5
-            )
+            azimuth_time = time_axis.interpolate(np.asarray(zero_crossing_indexes) - 0.5)
             interval_index = time_axis.get_interval_id(azimuth_time).tolist()
 
         else:
@@ -691,9 +665,7 @@ def inverse_geocoding_bistatic_init_core(
     frequencies_doppler_centroid = np.atleast_1d(frequencies_doppler_centroid)
 
     if points.size // 3 > np.size(frequencies_doppler_centroid) == 1:
-        frequencies_doppler_centroid = np.repeat(
-            float(frequencies_doppler_centroid), points.size // 3
-        )
+        frequencies_doppler_centroid = np.repeat(float(frequencies_doppler_centroid), points.size // 3)
 
     if np.size(frequencies_doppler_centroid) != points.size // 3 and not (
         points.size // 3 == 1 or np.size(frequencies_doppler_centroid) == 1
@@ -780,11 +752,7 @@ def inverse_geocoding_bistatic_init_core(
         zero_crossing_pts_idx.append(zero_crossing_indexes[0])
 
     azimuth_init_guesses = common_time_axis[zero_crossing_pts_idx]
-    if (
-        azimuth_init_guesses.size == 1
-        and ground_points.ndim == 1
-        and array_one_dim == 0
-    ):
+    if azimuth_init_guesses.size == 1 and ground_points.ndim == 1 and array_one_dim == 0:
         azimuth_init_guesses = azimuth_init_guesses[0]
 
     return azimuth_init_guesses
@@ -803,11 +771,19 @@ def _compute_zero_downcrossings(values: npt.ArrayLike) -> List[int]:
     List[int]
         list of indexes after a descending zero crossing
     """
-    return [
-        k
-        for k in range(1, len(values))
-        if (values[k] * values[k - 1] <= 0 and values[k] < values[k - 1])
-    ]
+    indexes = []
+    for k in range(1, np.size(values)):
+        curr: float = values[k]
+        prev: float = values[k - 1]
+        descending = curr < prev
+        if descending:
+            curr_zero = curr == 0
+            prev_zero = prev == 0
+            sign_change = curr * prev < 0
+            last_index = k == np.size(values) - 1
+            if sign_change or prev_zero or (curr_zero and last_index):
+                indexes.append(k)
+    return indexes
 
 
 def _convert_to_axis(axis_array: np.ndarray) -> Axis:

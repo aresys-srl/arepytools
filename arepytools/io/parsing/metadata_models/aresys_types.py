@@ -5,9 +5,10 @@
 Aresys metadata types
 ---------------------
 """
+
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional
+from typing import Optional
 
 __NAMESPACE__ = "aresysTypes"
 
@@ -82,6 +83,12 @@ class Endianity(Enum):
 class GlobalPolarizationType(Enum):
     SINGLE_POL = "SINGLE POL"
     DUAL_POL = "DUAL POL"
+
+
+class ImageQuantityType(Enum):
+    BETA = "BETA"
+    GAMMA = "GAMMA"
+    SIGMA = "SIGMA"
 
 
 class LeftRightType(Enum):
@@ -268,9 +275,7 @@ class AcquisitionTimelineType(TreeElementBaseType):
             "required": True,
         },
     )
-    missing_lines_azimuthtimes: Optional[
-        "AcquisitionTimelineType.MissingLinesAzimuthtimes"
-    ] = field(
+    missing_lines_azimuthtimes: Optional["AcquisitionTimelineType.MissingLinesAzimuthtimes"] = field(
         default=None,
         metadata={
             "name": "MissingLines_azimuthtimes",
@@ -287,9 +292,7 @@ class AcquisitionTimelineType(TreeElementBaseType):
             "namespace": "",
         },
     )
-    duplicated_lines_azimuthtimes: Optional[
-        "AcquisitionTimelineType.DuplicatedLinesAzimuthtimes"
-    ] = field(
+    duplicated_lines_azimuthtimes: Optional["AcquisitionTimelineType.DuplicatedLinesAzimuthtimes"] = field(
         default=None,
         metadata={
             "name": "DuplicatedLines_azimuthtimes",
@@ -305,9 +308,7 @@ class AcquisitionTimelineType(TreeElementBaseType):
             "namespace": "",
         },
     )
-    prf_changes_azimuthtimes: Optional[
-        "AcquisitionTimelineType.PrfChangesAzimuthtimes"
-    ] = field(
+    prf_changes_azimuthtimes: Optional["AcquisitionTimelineType.PrfChangesAzimuthtimes"] = field(
         default=None,
         metadata={
             "name": "PRF_changes_azimuthtimes",
@@ -332,9 +333,7 @@ class AcquisitionTimelineType(TreeElementBaseType):
             "required": True,
         },
     )
-    swst_changes_azimuthtimes: Optional[
-        "AcquisitionTimelineType.SwstChangesAzimuthtimes"
-    ] = field(
+    swst_changes_azimuthtimes: Optional["AcquisitionTimelineType.SwstChangesAzimuthtimes"] = field(
         default=None,
         metadata={
             "name": "Swst_changes_azimuthtimes",
@@ -360,9 +359,7 @@ class AcquisitionTimelineType(TreeElementBaseType):
             "required": True,
         },
     )
-    noise_packets_azimuthtimes: Optional[
-        "AcquisitionTimelineType.NoisePacketsAzimuthtimes"
-    ] = field(
+    noise_packets_azimuthtimes: Optional["AcquisitionTimelineType.NoisePacketsAzimuthtimes"] = field(
         default=None,
         metadata={
             "type": "Element",
@@ -379,9 +376,7 @@ class AcquisitionTimelineType(TreeElementBaseType):
             "required": True,
         },
     )
-    internal_calibration_azimuthtimes: Optional[
-        "AcquisitionTimelineType.InternalCalibrationAzimuthtimes"
-    ] = field(
+    internal_calibration_azimuthtimes: Optional["AcquisitionTimelineType.InternalCalibrationAzimuthtimes"] = field(
         default=None,
         metadata={
             "name": "Internal_calibration_azimuthtimes",
@@ -398,9 +393,7 @@ class AcquisitionTimelineType(TreeElementBaseType):
             "namespace": "",
         },
     )
-    swl_changes_azimuthtimes: Optional[
-        "AcquisitionTimelineType.SwlChangesAzimuthtimes"
-    ] = field(
+    swl_changes_azimuthtimes: Optional["AcquisitionTimelineType.SwlChangesAzimuthtimes"] = field(
         default=None,
         metadata={
             "name": "Swl_changes_azimuthtimes",
@@ -427,7 +420,7 @@ class AcquisitionTimelineType(TreeElementBaseType):
 
     @dataclass
     class MissingLinesAzimuthtimes:
-        val: List["AcquisitionTimelineType.MissingLinesAzimuthtimes.Val"] = field(
+        val: list["AcquisitionTimelineType.MissingLinesAzimuthtimes.Val"] = field(
             default_factory=list,
             metadata={
                 "type": "Element",
@@ -459,7 +452,7 @@ class AcquisitionTimelineType(TreeElementBaseType):
 
     @dataclass
     class DuplicatedLinesAzimuthtimes:
-        val: List["AcquisitionTimelineType.DuplicatedLinesAzimuthtimes.Val"] = field(
+        val: list["AcquisitionTimelineType.DuplicatedLinesAzimuthtimes.Val"] = field(
             default_factory=list,
             metadata={
                 "type": "Element",
@@ -491,7 +484,7 @@ class AcquisitionTimelineType(TreeElementBaseType):
 
     @dataclass
     class PrfChangesAzimuthtimes:
-        val: List["AcquisitionTimelineType.PrfChangesAzimuthtimes.Val"] = field(
+        val: list["AcquisitionTimelineType.PrfChangesAzimuthtimes.Val"] = field(
             default_factory=list,
             metadata={
                 "type": "Element",
@@ -523,7 +516,7 @@ class AcquisitionTimelineType(TreeElementBaseType):
 
     @dataclass
     class PrfChangesValues:
-        val: List["AcquisitionTimelineType.PrfChangesValues.Val"] = field(
+        val: list["AcquisitionTimelineType.PrfChangesValues.Val"] = field(
             default_factory=list,
             metadata={
                 "type": "Element",
@@ -555,7 +548,7 @@ class AcquisitionTimelineType(TreeElementBaseType):
 
     @dataclass
     class SwstChangesAzimuthtimes:
-        val: List["AcquisitionTimelineType.SwstChangesAzimuthtimes.Val"] = field(
+        val: list["AcquisitionTimelineType.SwstChangesAzimuthtimes.Val"] = field(
             default_factory=list,
             metadata={
                 "type": "Element",
@@ -587,7 +580,7 @@ class AcquisitionTimelineType(TreeElementBaseType):
 
     @dataclass
     class SwstChangesValues:
-        val: List["AcquisitionTimelineType.SwstChangesValues.Val"] = field(
+        val: list["AcquisitionTimelineType.SwstChangesValues.Val"] = field(
             default_factory=list,
             metadata={
                 "type": "Element",
@@ -619,7 +612,7 @@ class AcquisitionTimelineType(TreeElementBaseType):
 
     @dataclass
     class NoisePacketsAzimuthtimes:
-        val: List["AcquisitionTimelineType.NoisePacketsAzimuthtimes.Val"] = field(
+        val: list["AcquisitionTimelineType.NoisePacketsAzimuthtimes.Val"] = field(
             default_factory=list,
             metadata={
                 "type": "Element",
@@ -651,14 +644,12 @@ class AcquisitionTimelineType(TreeElementBaseType):
 
     @dataclass
     class InternalCalibrationAzimuthtimes:
-        val: List["AcquisitionTimelineType.InternalCalibrationAzimuthtimes.Val"] = (
-            field(
-                default_factory=list,
-                metadata={
-                    "type": "Element",
-                    "namespace": "",
-                },
-            )
+        val: list["AcquisitionTimelineType.InternalCalibrationAzimuthtimes.Val"] = field(
+            default_factory=list,
+            metadata={
+                "type": "Element",
+                "namespace": "",
+            },
         )
 
         @dataclass
@@ -685,7 +676,7 @@ class AcquisitionTimelineType(TreeElementBaseType):
 
     @dataclass
     class SwlChangesAzimuthtimes:
-        val: List["AcquisitionTimelineType.SwlChangesAzimuthtimes.Val"] = field(
+        val: list["AcquisitionTimelineType.SwlChangesAzimuthtimes.Val"] = field(
             default_factory=list,
             metadata={
                 "type": "Element",
@@ -717,7 +708,7 @@ class AcquisitionTimelineType(TreeElementBaseType):
 
     @dataclass
     class SwlChangesValues:
-        val: List["AcquisitionTimelineType.SwlChangesValues.Val"] = field(
+        val: list["AcquisitionTimelineType.SwlChangesValues.Val"] = field(
             default_factory=list,
             metadata={
                 "type": "Element",
@@ -936,7 +927,7 @@ class AttitudeInfoType(TreeElementBaseType):
 
     @dataclass
     class YawDeg:
-        val: List["AttitudeInfoType.YawDeg.Val"] = field(
+        val: list["AttitudeInfoType.YawDeg.Val"] = field(
             default_factory=list,
             metadata={
                 "type": "Element",
@@ -968,7 +959,7 @@ class AttitudeInfoType(TreeElementBaseType):
 
     @dataclass
     class PitchDeg:
-        val: List["AttitudeInfoType.PitchDeg.Val"] = field(
+        val: list["AttitudeInfoType.PitchDeg.Val"] = field(
             default_factory=list,
             metadata={
                 "type": "Element",
@@ -1000,7 +991,7 @@ class AttitudeInfoType(TreeElementBaseType):
 
     @dataclass
     class RollDeg:
-        val: List["AttitudeInfoType.RollDeg.Val"] = field(
+        val: list["AttitudeInfoType.RollDeg.Val"] = field(
             default_factory=list,
             metadata={
                 "type": "Element",
@@ -1298,6 +1289,7 @@ class DataSetInfoType(TreeElementBaseType):
         FOCUSED
     :ivar projection: Image projection: SLANT RANGE, GROUND RANGE
     :ivar projection_parameters:
+    :ivar image_quantity:
     :ivar acquisition_station: Image acquisition station
     :ivar processing_center: Image processing center
     :ivar processing_date: Image processing date
@@ -1367,6 +1359,14 @@ class DataSetInfoType(TreeElementBaseType):
         default=None,
         metadata={
             "name": "ProjectionParameters",
+            "type": "Element",
+            "namespace": "",
+        },
+    )
+    image_quantity: Optional[ImageQuantityType] = field(
+        default=None,
+        metadata={
+            "name": "ImageQuantity",
             "type": "Element",
             "namespace": "",
         },
@@ -1622,7 +1622,7 @@ class DataSetInfoType(TreeElementBaseType):
 
 @dataclass
 class PointType:
-    val: List["PointType.Val"] = field(
+    val: list["PointType.Val"] = field(
         default_factory=list,
         metadata={
             "type": "Element",
@@ -1867,7 +1867,7 @@ class StateVectorDataType(TreeElementBaseType):
 
     @dataclass
     class PSvM:
-        val: List["StateVectorDataType.PSvM.Val"] = field(
+        val: list["StateVectorDataType.PSvM.Val"] = field(
             default_factory=list,
             metadata={
                 "type": "Element",
@@ -1899,7 +1899,7 @@ class StateVectorDataType(TreeElementBaseType):
 
     @dataclass
     class VSvMOs:
-        val: List["StateVectorDataType.VSvMOs.Val"] = field(
+        val: list["StateVectorDataType.VSvMOs.Val"] = field(
             default_factory=list,
             metadata={
                 "type": "Element",
@@ -1961,7 +1961,7 @@ class StateVectorDataType(TreeElementBaseType):
 
     @dataclass
     class AscendingNodeCoords:
-        val: List["StateVectorDataType.AscendingNodeCoords.Val"] = field(
+        val: list["StateVectorDataType.AscendingNodeCoords.Val"] = field(
             default_factory=list,
             metadata={
                 "type": "Element",
@@ -2066,7 +2066,7 @@ class PolyCoregType(TreeElementBaseType):
 
     @dataclass
     class PolRg:
-        val: List["PolyCoregType.PolRg.Val"] = field(
+        val: list["PolyCoregType.PolRg.Val"] = field(
             default_factory=list,
             metadata={
                 "type": "Element",
@@ -2100,7 +2100,7 @@ class PolyCoregType(TreeElementBaseType):
 
     @dataclass
     class PolAz:
-        val: List["PolyCoregType.PolAz.Val"] = field(
+        val: list["PolyCoregType.PolAz.Val"] = field(
             default_factory=list,
             metadata={
                 "type": "Element",
@@ -2205,7 +2205,7 @@ class PolyType(TreeElementBaseType):
 
     @dataclass
     class Pol:
-        val: List["PolyType.Pol.Val"] = field(
+        val: list["PolyType.Pol.Val"] = field(
             default_factory=list,
             metadata={
                 "type": "Element",
@@ -2626,7 +2626,7 @@ class DataStatisticsType(TreeElementBaseType):
 
     @dataclass
     class StatisticsList:
-        data_block_statistic: List[DataBlockStatisticsType] = field(
+        data_block_statistic: list[DataBlockStatisticsType] = field(
             default_factory=list,
             metadata={
                 "name": "DataBlockStatistic",
@@ -3023,11 +3023,11 @@ class SwathInfoType(TreeElementBaseType):
     :ivar rank: Rank
     :ivar range_delay_bias: Range delay bias [s]
     :ivar acquisition_start_time: Acquisition start time [Utc]
-    :ivar azimuth_steering_angle_reference_time: Azimuth antenna steering
-        polynomial reference time [s]
-    :ivar azimuth_steering_angle_pol: Azimuth antenna steering polynomial
-        coefficients: const [rad], az [rad/s], az^2 [rad/s^2], az^3
-        [rad/s^3]
+    :ivar azimuth_steering_angle_reference_time: Azimuth antenna
+        steering angle polynomial reference time [s]
+    :ivar azimuth_steering_angle_pol: Azimuth antenna steering angle
+        polynomial coefficients: const [rad], az [rad/s], az^2
+        [rad/s^2], az^3 [rad/s^3]
     :ivar azimuth_steering_rate_reference_time: Azimuth antenna steering
         rate polynomial reference time [s]
     :ivar azimuth_steering_rate_pol: Azimuth antenna steering rate
@@ -3102,15 +3102,13 @@ class SwathInfoType(TreeElementBaseType):
             "namespace": "",
         },
     )
-    azimuth_steering_angle_pol: Optional["SwathInfoType.AzimuthSteeringAnglePol"] = (
-        field(
-            default=None,
-            metadata={
-                "name": "AzimuthSteeringAnglePol",
-                "type": "Element",
-                "namespace": "",
-            },
-        )
+    azimuth_steering_angle_pol: Optional["SwathInfoType.AzimuthSteeringAnglePol"] = field(
+        default=None,
+        metadata={
+            "name": "AzimuthSteeringAnglePol",
+            "type": "Element",
+            "namespace": "",
+        },
     )
     azimuth_steering_rate_reference_time: Optional[DoubleWithUnit] = field(
         default=None,
@@ -3240,7 +3238,7 @@ class SwathInfoType(TreeElementBaseType):
 
     @dataclass
     class AzimuthSteeringAnglePol:
-        val: List["SwathInfoType.AzimuthSteeringAnglePol.Val"] = field(
+        val: list["SwathInfoType.AzimuthSteeringAnglePol.Val"] = field(
             default_factory=list,
             metadata={
                 "type": "Element",
@@ -3274,7 +3272,7 @@ class SwathInfoType(TreeElementBaseType):
 
     @dataclass
     class AzimuthSteeringRatePol:
-        val: List["SwathInfoType.AzimuthSteeringRatePol.Val"] = field(
+        val: list["SwathInfoType.AzimuthSteeringRatePol.Val"] = field(
             default_factory=list,
             metadata={
                 "type": "Element",
@@ -3336,15 +3334,13 @@ class BurstInfoType(TreeElementBaseType):
             "namespace": "",
         },
     )
-    lines_per_burst_change_list: Optional["BurstInfoType.LinesPerBurstChangeList"] = (
-        field(
-            default=None,
-            metadata={
-                "name": "LinesPerBurstChangeList",
-                "type": "Element",
-                "namespace": "",
-            },
-        )
+    lines_per_burst_change_list: Optional["BurstInfoType.LinesPerBurstChangeList"] = field(
+        default=None,
+        metadata={
+            "name": "LinesPerBurstChangeList",
+            "type": "Element",
+            "namespace": "",
+        },
     )
     burst_repetition_frequency: Optional[DoubleWithUnit] = field(
         default=None,
@@ -3355,7 +3351,7 @@ class BurstInfoType(TreeElementBaseType):
             "required": True,
         },
     )
-    burst: List[BurstType] = field(
+    burst: list[BurstType] = field(
         default_factory=list,
         metadata={
             "name": "Burst",
@@ -3367,7 +3363,7 @@ class BurstInfoType(TreeElementBaseType):
 
     @dataclass
     class LinesPerBurstChangeList:
-        lines: List["BurstInfoType.LinesPerBurstChangeList.Lines"] = field(
+        lines: list["BurstInfoType.LinesPerBurstChangeList.Lines"] = field(
             default_factory=list,
             metadata={
                 "name": "Lines",

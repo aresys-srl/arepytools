@@ -33,18 +33,13 @@ data_type_dict = {
     "INT8": "b",
     "UINT8": "B",
     "INT16_COMPLEX": "i2, i2",
+    "INT_COMPLEX": "i4, i4",
     "DOUBLE_COMPLEX": "c16",
     "FLOAT64": "f8",
     "INT8_COMPLEX": "i1, i1",
 }
 
 byte_order_dict = {"BIGENDIAN": ">", "LITTLEENDIAN": "<"}
-
-_UNSUPPORTED_TYPES = ("INT8_COMPLEX", "INT16_COMPLEX")
-
-
-class UnsupportedDataType(RuntimeError):
-    """Specified data type is not supported"""
 
 
 class InvalidDataType(RuntimeError):
@@ -145,7 +140,8 @@ def read_raster_with_raster_info(
 
     if raster_file.name != raster_info.file_name:
         warnings.warn(
-            f"Raster file name {raster_file.name} differs from raster info file name {raster_info.file_name}"
+            f"Raster file name {raster_file.name} differs from raster info file name {raster_info.file_name}",
+            stacklevel=1,
         )
 
     return read_raster(
@@ -231,20 +227,13 @@ def read_raster(
     if row_prefix < 0:
         raise InvalidRowPrefix("row_prefix should be non-negative")
 
-    if data_type.value in _UNSUPPORTED_TYPES:
-        raise UnsupportedDataType(
-            f"Read data from raster of type {data_type.value} currently not supported."
-        )
-
     if data_type.value in data_type_dict:
         data_type_numpy_value = data_type_dict[data_type.value]
         data_type = np.dtype(data_type_dict[data_type.value])
     else:
         raise InvalidDataType(f"Unknown data type id: {data_type.value}")
 
-    file_data_type = np.dtype(
-        byte_order_dict[binary_ordering_mode.value] + data_type_numpy_value
-    )
+    file_data_type = np.dtype(byte_order_dict[binary_ordering_mode.value] + data_type_numpy_value)
 
     # Compute the items to read
     if block_to_read is None:
@@ -279,9 +268,7 @@ def read_raster(
     # Read data from file
     with open(raster_file_name, "rb") as fdesc:
         if samples_to_read == num_of_samples and row_prefix == 0:
-            offset_byte = (
-                header_offset + first_line * num_of_samples * data_type.itemsize
-            )
+            offset_byte = header_offset + first_line * num_of_samples * data_type.itemsize
             data = np.fromfile(
                 fdesc,
                 dtype=file_data_type,
@@ -300,15 +287,11 @@ def read_raster(
         )
         fdesc.seek(offset_byte, 0)
 
-        offset_line_byte = (
-            num_of_samples - samples_to_read
-        ) * data_type.itemsize + row_prefix
+        offset_line_byte = (num_of_samples - samples_to_read) * data_type.itemsize + row_prefix
 
         for line in range(lines_to_read):
             offset_byte = offset_line_byte if line > 0 else 0
-            data[line, :] = np.fromfile(
-                fdesc, dtype=file_data_type, count=samples_to_read, offset=offset_byte
-            )
+            data[line, :] = np.fromfile(fdesc, dtype=file_data_type, count=samples_to_read, offset=offset_byte)
 
         return data
 
@@ -341,7 +324,8 @@ def write_raster_with_raster_info(
 
     if raster_file.name != raster_info.file_name:
         warnings.warn(
-            f"Raster file name {raster_file.name} differs from raster info file name {raster_info.file_name}"
+            f"Raster file name {raster_file.name} differs from raster info file name {raster_info.file_name}",
+            stacklevel=1,
         )
 
     max_lines = data.shape[0] + start_point[0]
@@ -428,20 +412,13 @@ def write_raster(
     if len(writing_point) != 2 or writing_point[0] < 0 or writing_point[1] < 0:
         raise InvalidWritingPoint("Writing point should have two non-negative elements")
 
-    if data_type.value in _UNSUPPORTED_TYPES:
-        raise UnsupportedDataType(
-            f"Write data to raster of type {data_type.value} currently not supported."
-        )
-
     if data_type.value in data_type_dict:
         data_type_numpy_value = data_type_dict[data_type.value]
         data_type = np.dtype(data_type_dict[data_type.value])
     else:
         raise InvalidDataType(f"Unknown data type id: {data_type.value}")
 
-    file_data_type = np.dtype(
-        byte_order_dict[binary_ordering_mode.value] + data_type_numpy_value
-    )
+    file_data_type = np.dtype(byte_order_dict[binary_ordering_mode.value] + data_type_numpy_value)
 
     # Convert data to data type
     data_to_write = np.array(data, dtype=file_data_type)
@@ -462,9 +439,7 @@ def write_raster(
 
     with open(raster_file_name, open_mode) as fdesc:
         raster_size = int(
-            header_offset
-            + row_prefix * num_of_lines
-            + data_type.itemsize * num_of_samples * num_of_lines
+            header_offset + row_prefix * num_of_lines + data_type.itemsize * num_of_samples * num_of_lines
         )
 
         # check raster has the correct size
@@ -484,11 +459,7 @@ def write_raster(
             absolute_line = line + first_line
             absolute_position = first_sample + num_of_samples * absolute_line
             past_row_prefix_size = row_prefix * (line + first_line + 1)
-            write_position = int(
-                absolute_position * data_type.itemsize
-                + header_offset
-                + past_row_prefix_size
-            )
+            write_position = int(absolute_position * data_type.itemsize + header_offset + past_row_prefix_size)
             fdesc.seek(write_position)
 
             # Write
@@ -517,9 +488,7 @@ def read_metadata(metadata_file: Union[str, Path]) -> metadata.MetaData:
     return parse_metadata(metadata_content)
 
 
-def write_metadata(
-    metadata_obj: metadata.MetaData, metadata_file: Union[str, Path]
-) -> None:
+def write_metadata(metadata_obj: metadata.MetaData, metadata_file: Union[str, Path]) -> None:
     """Write metadata to XML file
 
     Parameters
@@ -534,9 +503,7 @@ def write_metadata(
     Path(metadata_file).write_text(metadata_content, encoding="utf-8")
 
 
-def create_new_metadata(
-    num_metadata_channels: int = 1, description: Optional[str] = None
-) -> metadata.MetaData:
+def create_new_metadata(num_metadata_channels: int = 1, description: Optional[str] = None) -> metadata.MetaData:
     """Create a new empty MetaData object with the selected number of metadata channels.
 
     Parameters
@@ -561,9 +528,7 @@ def create_new_metadata(
     return meta_data
 
 
-def read_binary_header_with_raster_info(
-    raster_file: Union[str, Path], raster_info: metadata.RasterInfo
-) -> bytes:
+def read_binary_header_with_raster_info(raster_file: Union[str, Path], raster_info: metadata.RasterInfo) -> bytes:
     """Read raster binary header using information from a RasterInfo metadata object.
 
     Parameters
@@ -613,9 +578,7 @@ def write_binary_header_with_raster_info(
     header_size = len(header)
     offset_size = raster_info.header_offset_bytes
     if offset_size != header_size:
-        raise InvalidHeaderOffset(
-            f"Header size incompatible with header offset: {header_size} != {offset_size}"
-        )
+        raise InvalidHeaderOffset(f"Header size incompatible with header offset: {header_size} != {offset_size}")
 
     with open(raster_file, "wb") as file:
         file.write(header)
@@ -699,9 +662,7 @@ def write_row_prefix_with_raster_info(
         file.write(row_prefix)
 
 
-def get_line_size(
-    samples: int, cell_type: metadata.ECellType, row_prefix_size: int
-) -> int:
+def get_line_size(samples: int, cell_type: metadata.ECellType, row_prefix_size: int) -> int:
     """Get the size in bytes of a line in the raster (including row prefix).
 
     Parameters

@@ -22,8 +22,8 @@ class Ellipsoid:
 
     Examples
     --------
-    >>> ellipsoid = Ellipsoid(1., 3.)
-    >>> ellipsoid = Ellipsoid(3., 1.)
+    >>> ellipsoid = Ellipsoid(1.0, 3.0)
+    >>> ellipsoid = Ellipsoid(3.0, 1.0)
 
     See also
     --------
@@ -58,18 +58,10 @@ class Ellipsoid:
         if first_semi_axis <= 0 or second_semi_axis <= 0:
             raise ValueError("Non-positive input axes")
 
-        object.__setattr__(
-            self, "semi_major_axis", max(first_semi_axis, second_semi_axis)
-        )
-        object.__setattr__(
-            self, "semi_minor_axis", min(first_semi_axis, second_semi_axis)
-        )
-        object.__setattr__(
-            self, "semi_axes_ratio_min_max", self.semi_minor_axis / self.semi_major_axis
-        )
-        object.__setattr__(
-            self, "eccentricity_square", 1 - self.semi_axes_ratio_min_max**2
-        )
+        object.__setattr__(self, "semi_major_axis", max(first_semi_axis, second_semi_axis))
+        object.__setattr__(self, "semi_minor_axis", min(first_semi_axis, second_semi_axis))
+        object.__setattr__(self, "semi_axes_ratio_min_max", self.semi_minor_axis / self.semi_major_axis)
+        object.__setattr__(self, "eccentricity_square", 1 - self.semi_axes_ratio_min_max**2)
         object.__setattr__(self, "eccentricity", np.sqrt(self.eccentricity_square))
         object.__setattr__(self, "ep2", 1.0 / self.semi_axes_ratio_min_max**2 - 1)
 
@@ -83,7 +75,7 @@ class Ellipsoid:
 
         Examples
         --------
-        >>> a = Ellipsoid(1., 3.)
+        >>> a = Ellipsoid(1.0, 3.0)
         >>> b = a.inflate(2)
         >>> print(b)
         Ellipsoid(semi_major_axis=5.0, semi_minor_axis=3.0,
@@ -184,18 +176,12 @@ def compute_line_ellipsoid_intersections(
     ndim = max(line_origins.ndim, line_directions.ndim)
 
     if line_directions.shape[-1] != 3:
-        raise ValueError(
-            f"Invalid line_direction shape: {line_directions.shape} should be (3,) or (N,3)"
-        )
+        raise ValueError(f"Invalid line_direction shape: {line_directions.shape} should be (3,) or (N,3)")
 
     if line_origins.shape[-1] != 3:
-        raise ValueError(
-            f"Invalid line_origin shape: {line_origins.shape} should be (3,) or (N,3)"
-        )
+        raise ValueError(f"Invalid line_origin shape: {line_origins.shape} should be (3,) or (N,3)")
 
-    line_directions = line_directions / np.linalg.norm(
-        line_directions, axis=-1, keepdims=True
-    )
+    line_directions = line_directions / np.linalg.norm(line_directions, axis=-1, keepdims=True)
 
     # line: x = line_origin + t * line_direction
     # equation: t ** 2 + b t + c  = 0
@@ -229,20 +215,13 @@ def compute_line_ellipsoid_intersections(
     linear_terms = np.broadcast_to(linear_terms, (num_lines,))
     constant_terms = np.broadcast_to(constant_terms, (num_lines,))
 
-    polynomials = (
-        np.polynomial.Polynomial(coeffs)
-        for coeffs in zip(constant_terms, linear_terms, quadratic_terms)
-    )
+    polynomials = (np.polynomial.Polynomial(coeffs) for coeffs in zip(constant_terms, linear_terms, quadratic_terms))
 
     line_origins = np.broadcast_to(line_origins, (num_lines, 3))
     line_directions = np.broadcast_to(line_directions, (num_lines, 3))
 
     def solve_equation(poly: np.polynomial.Polynomial) -> tuple:
-        return tuple(
-            sorted(
-                np.unique([root for root in poly.roots() if np.isreal(root)]), key=abs
-            )
-        )
+        return tuple(sorted(np.unique([root for root in poly.roots() if np.isreal(root)]), key=abs))
 
     assert isinstance(line_directions, np.ndarray)
     assert isinstance(line_origins, np.ndarray)

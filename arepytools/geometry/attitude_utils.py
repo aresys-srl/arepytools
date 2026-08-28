@@ -5,11 +5,11 @@
 Attitude-related utilities
 --------------------------
 """
+
 import numpy as np
 import numpy.typing as npt
 from scipy.spatial import transform
 
-from arepytools.geometry.reference_frames import ReferenceFrameLike
 from arepytools.geometry.rotation import (
     RotationOrderLike,
     compute_euler_angles_from_rotation,
@@ -75,15 +75,14 @@ def compute_euler_angles_from_antenna_reference_frame(
     """
     if initial_reference_frame_axis.shape != antenna_reference_frame.shape:
         raise RuntimeError(
-            f"input shape mismatch: init ref frame {initial_reference_frame_axis.shape} != arf {antenna_reference_frame.shape}"
+            f"input shape mismatch: init ref frame {initial_reference_frame_axis.shape} != arf "
+            + f"{antenna_reference_frame.shape}"
         )
     init_ref_frame = (
         np.transpose(initial_reference_frame_axis, (0, 2, 1))
         if initial_reference_frame_axis.ndim == 3
         else initial_reference_frame_axis.T
     )
-    rotation = transform.Rotation.from_matrix(
-        np.matmul(init_ref_frame, antenna_reference_frame)
-    )
+    rotation = transform.Rotation.from_matrix(np.matmul(init_ref_frame, antenna_reference_frame))
 
     return compute_euler_angles_from_rotation(order=order, rotation=rotation)

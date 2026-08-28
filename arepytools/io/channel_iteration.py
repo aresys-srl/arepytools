@@ -5,6 +5,7 @@
 IO Channel Iteration module
 ---------------------------
 """
+
 from typing import Callable, Iterator, List, Optional, Tuple, Union
 
 from arepytools.io.io_support import read_metadata
@@ -46,11 +47,7 @@ class SwathIDFilter:
 
         if not isinstance(polarization, list) and polarization is not None:
             polarization = [polarization]
-        self.polarization = (
-            [EPolarization(p) for p in polarization]
-            if polarization is not None
-            else None
-        )
+        self.polarization = [EPolarization(p) for p in polarization] if polarization is not None else None
 
         self.swath = swath
 

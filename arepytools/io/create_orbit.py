@@ -5,6 +5,7 @@
 Create Orbit object from State Vectors
 --------------------------------------
 """
+
 import numpy as np
 
 from arepytools.geometry.orbit import Orbit
@@ -25,12 +26,7 @@ def create_orbit(state_vectors: StateVectors) -> Orbit:
         interpolated Orbit object from given StateVectors
     """
     time_axis = (
-        np.arange(
-            0,
-            state_vectors.number_of_state_vectors * state_vectors.time_step,
-            state_vectors.time_step,
-        )
-        + state_vectors.reference_time
+        np.arange(state_vectors.number_of_state_vectors) * state_vectors.time_step + state_vectors.reference_time
     )
     return Orbit(
         times=time_axis,

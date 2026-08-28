@@ -33,8 +33,7 @@ class GenericPoly:
 
         self.reference_values = reference_values
         self.poly = [
-            (coefficient, powers[index_coefficients])
-            for index_coefficients, coefficient in enumerate(coefficients)
+            (coefficient, powers[index_coefficients]) for index_coefficients, coefficient in enumerate(coefficients)
         ]
 
     def __repr__(self):
@@ -64,9 +63,7 @@ class GenericPoly:
         for coefficient, powers in self.poly:
             current_result = 1
             for index_dimensions, ref_val in enumerate(self.reference_values):
-                current_result *= (values[index_dimensions] - ref_val) ** powers[
-                    index_dimensions
-                ]
+                current_result *= (values[index_dimensions] - ref_val) ** powers[index_dimensions]
             result += coefficient * current_result
 
         return result
@@ -110,9 +107,7 @@ class SortedPolyList:
         self._sort_poly_list()
 
     def _sort_poly_list(self):
-        self._sorted_poly_list.sort(
-            key=lambda x: x.reference_values[self.reference_index]
-        )
+        self._sorted_poly_list.sort(key=lambda x: x.reference_values[self.reference_index])
 
     def evaluate(self, values):
         """Evaluate the composite polynomial for the values provided
@@ -129,10 +124,7 @@ class SortedPolyList:
         """
         previous_poly = self._sorted_poly_list[0]
         for poly in self._sorted_poly_list:
-            if (
-                poly.reference_values[self.reference_index]
-                > values[self.reference_index]
-            ):
+            if poly.reference_values[self.reference_index] > values[self.reference_index]:
                 break
             previous_poly = poly
         return previous_poly.evaluate(values)
@@ -160,6 +152,4 @@ def create_sorted_poly_list(poly2d_vector: _Poly2DVector):
     SortedPolyList
         the corresponding composite polynomial
     """
-    return SortedPolyList(
-        list_generic_poly=[_create_generic_poly(p) for p in poly2d_vector]
-    )
+    return SortedPolyList(list_generic_poly=[_create_generic_poly(p) for p in poly2d_vector])

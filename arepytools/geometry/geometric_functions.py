@@ -63,18 +63,12 @@ def compute_incidence_angles_from_trajectory(
         sensor_positions=sensor_position,
         sensor_velocities=sensor_velocity,
         range_times=range_times,
-        frequencies_doppler_centroid=(
-            frequencies_doppler_centroid
-            if frequencies_doppler_centroid is not None
-            else 0
-        ),
+        frequencies_doppler_centroid=(frequencies_doppler_centroid if frequencies_doppler_centroid is not None else 0),
         wavelength=carrier_wavelength if carrier_wavelength is not None else 1,
         geocoding_side=GeocodingSide(look_direction),
         geodetic_altitude=geodetic_altitude if geodetic_altitude is not None else 0,
     )
-    return compute_incidence_angles(
-        sensor_positions=sensor_position, points=ground_points
-    )
+    return compute_incidence_angles(sensor_positions=sensor_position, points=ground_points)
 
 
 def compute_look_angles_from_trajectory(
@@ -116,20 +110,14 @@ def compute_look_angles_from_trajectory(
         sensor_positions=sensor_position,
         sensor_velocities=sensor_velocity,
         range_times=range_times,
-        frequencies_doppler_centroid=(
-            frequencies_doppler_centroid
-            if frequencies_doppler_centroid is not None
-            else 0
-        ),
+        frequencies_doppler_centroid=(frequencies_doppler_centroid if frequencies_doppler_centroid is not None else 0),
         wavelength=carrier_wavelength if carrier_wavelength is not None else 1,
         geocoding_side=GeocodingSide(look_direction),
         geodetic_altitude=geodetic_altitude if geodetic_altitude is not None else 0,
     )
     # TODO move nadir computation directly inside compute_look_angles by default (it depends only on sensor position)
     nadir = compute_nadir_from_sensor_positions(sensor_positions=sensor_position)
-    return compute_look_angles(
-        sensor_positions=sensor_position, nadir_directions=nadir, points=ground_points
-    )
+    return compute_look_angles(sensor_positions=sensor_position, nadir_directions=nadir, points=ground_points)
 
 
 def compute_ground_velocity_from_trajectory(
@@ -201,21 +189,10 @@ def compute_ground_velocity_from_trajectory(
         )
     # computing ground velocity components (as ground points coordinates diff) for each time interval, for each
     # input look angle, and then computing their norm
-    ground_velocities_norm = [
-        np.linalg.norm(np.diff(g, axis=0), axis=-1) for g in ground_points
-    ]
-    ground_velocities = np.array(
-        [
-            np.sum(v, axis=-1) / averaging_interval_duration
-            for v in ground_velocities_norm
-        ]
-    )
+    ground_velocities_norm = [np.linalg.norm(np.diff(g, axis=0), axis=-1) for g in ground_points]
+    ground_velocities = np.array([np.sum(v, axis=-1) / averaging_interval_duration for v in ground_velocities_norm])
 
-    return (
-        ground_velocities
-        if not isinstance(look_angles_rad, float)
-        else ground_velocities[0]
-    )
+    return ground_velocities if not isinstance(look_angles_rad, float) else ground_velocities[0]
 
 
 def compute_look_angles(
@@ -277,29 +254,19 @@ def compute_look_angles(
     points = np.asarray(points)
 
     if sensor_positions.ndim > 2 or sensor_positions.shape[-1] != 3:
-        raise ValueError(
-            f"sensor_positions has invalid shape: {sensor_positions.shape}, it should be (3,) or (N, 3)"
-        )
+        raise ValueError(f"sensor_positions has invalid shape: {sensor_positions.shape}, it should be (3,) or (N, 3)")
 
     if nadir_directions.ndim > 2 or nadir_directions.shape[-1] != 3:
-        raise ValueError(
-            f"nadir_directions has invalid shape: {nadir_directions.shape}, it should be (3,) or (N, 3)"
-        )
+        raise ValueError(f"nadir_directions has invalid shape: {nadir_directions.shape}, it should be (3,) or (N, 3)")
 
     if points.ndim > 2 or points.shape[-1] != 3:
-        raise ValueError(
-            f"points has invalid shape: {points.shape}, it should be (3,) or (N, 3)"
-        )
+        raise ValueError(f"points has invalid shape: {points.shape}, it should be (3,) or (N, 3)")
 
     los_directions = points - sensor_positions
-    los_directions = los_directions / np.linalg.norm(
-        los_directions, axis=-1, keepdims=True
-    )
+    los_directions = los_directions / np.linalg.norm(los_directions, axis=-1, keepdims=True)
 
     if not assume_nadir_directions_normalized:
-        nadir_directions = nadir_directions / np.linalg.norm(
-            nadir_directions, axis=-1, keepdims=True
-        )
+        nadir_directions = nadir_directions / np.linalg.norm(nadir_directions, axis=-1, keepdims=True)
 
     look_angle_cosinuses = np.sum(nadir_directions * los_directions, axis=-1)
 
@@ -373,35 +340,25 @@ def compute_incidence_angles(
     points = np.asarray(points)
 
     if sensor_positions.ndim > 2 or sensor_positions.shape[-1] != 3:
-        raise ValueError(
-            f"sensor_positions has invalid shape: {sensor_positions.shape}, it should be (3,) or (N, 3)"
-        )
+        raise ValueError(f"sensor_positions has invalid shape: {sensor_positions.shape}, it should be (3,) or (N, 3)")
 
     if points.ndim > 2 or points.shape[-1] != 3:
-        raise ValueError(
-            f"points has invalid shape: {points.shape}, it should be (3,) or (N, 3)"
-        )
+        raise ValueError(f"points has invalid shape: {points.shape}, it should be (3,) or (N, 3)")
 
     if surface_normals is not None:
         surface_normals = np.asarray(surface_normals)
         if surface_normals.ndim > 2 or surface_normals.shape[-1] != 3:
-            raise ValueError(
-                f"surface_normals has invalid shape: {surface_normals.shape}, it should be (3,) or (N, 3)"
-            )
+            raise ValueError(f"surface_normals has invalid shape: {surface_normals.shape}, it should be (3,) or (N, 3)")
 
     los_directions = points - sensor_positions
-    los_directions = los_directions / np.linalg.norm(
-        los_directions, axis=-1, keepdims=True
-    )
+    los_directions = los_directions / np.linalg.norm(los_directions, axis=-1, keepdims=True)
 
     if surface_normals is None:
         surface_normals = points
         assume_surface_normals_normalized = False
 
     if not assume_surface_normals_normalized:
-        surface_normals = surface_normals / np.linalg.norm(
-            surface_normals, axis=-1, keepdims=True
-        )
+        surface_normals = surface_normals / np.linalg.norm(surface_normals, axis=-1, keepdims=True)
 
     incidence_angle_cosinus = -1.0 * np.sum(surface_normals * los_directions, axis=-1)
 
@@ -437,20 +394,50 @@ def get_geometric_squint(
 
     # evaluating squint angle
     line_of_sight = ground_points - sensor_positions
-    line_of_sight = line_of_sight / np.linalg.norm(
-        line_of_sight, axis=-1, keepdims=True
-    )
-    sensor_velocity_norm = sensor_velocities / np.linalg.norm(
-        sensor_velocities, axis=-1, keepdims=True
-    )
+    line_of_sight = line_of_sight / np.linalg.norm(line_of_sight, axis=-1, keepdims=True)
+    sensor_velocity_norm = sensor_velocities / np.linalg.norm(sensor_velocities, axis=-1, keepdims=True)
     squint_angle = np.arcsin(np.sum(line_of_sight * sensor_velocity_norm, axis=-1))
 
     return squint_angle
 
 
-def doppler_equation(
-    point, sensor_position, sensor_velocity, frequency_doppler_centroid, wavelength
-):
+def get_geometric_doppler_centroid(
+    sensor_positions: npt.ArrayLike,
+    sensor_velocities: npt.ArrayLike,
+    ground_points: npt.ArrayLike,
+    wavelength: float,
+) -> float:
+    """Calculating doppler centroid (geometrically) from squint angle.
+
+    Parameters
+    ----------
+    sensor_positions : npt.ArrayLike
+        sensor positions array, in the form (3,) or (N, 3)
+    sensor_velocities : npt.ArrayLike
+        sensor velocities array, in the form (3,) or (N, 3)
+    ground_points : npt.ArrayLike
+        ground points array, in the form (3,) or (N, 3)
+    wavelength : int
+        carrier signal wavelength in meters
+
+    Returns
+    -------
+    float
+        doppler centroid in Hz
+    """
+
+    # evaluating squint
+    squint_angles = get_geometric_squint(
+        sensor_positions=sensor_positions,
+        sensor_velocities=sensor_velocities,
+        ground_points=ground_points,
+    )
+    sensor_velocity_norm = np.linalg.norm(sensor_velocities, axis=-1)
+
+    return 2 * sensor_velocity_norm * np.sin(squint_angles) / wavelength
+
+
+def doppler_equation(point, sensor_position, sensor_velocity, frequency_doppler_centroid, wavelength):
     """Evaluate doppler equation
 
     Parameters
@@ -460,7 +447,7 @@ def doppler_equation(
     sensor_position : np.ndarray
         sensor position
     sensor_velocity : np.ndarray
-        sensor velociy
+        sensor velocity
     frequency_doppler_centroid : float
         doppler frequency
     wavelength : float
@@ -475,9 +462,7 @@ def doppler_equation(
     distance = np.linalg.norm(point2sensor, axis=0)
 
     def col_wise_scalar_product(matrix_a, matrix_b):
-        return np.einsum(
-            "ij,ij->j", matrix_a, matrix_b
-        )  # Einstein notation -- col wise dot product.
+        return np.einsum("ij,ij->j", matrix_a, matrix_b)  # Einstein notation -- col wise dot product.
 
     return (
         np.divide(

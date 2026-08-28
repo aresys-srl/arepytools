@@ -5,8 +5,9 @@
 Aresys metadata
 ---------------
 """
+
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import Optional
 
 from arepytools.io.parsing.metadata_models.aresys_types import (
     AcquisitionTimelineType,
@@ -64,7 +65,7 @@ class AresysXmlDocType:
             "required": True,
         },
     )
-    channel: List["AresysXmlDocType.Channel"] = field(
+    channel: list["AresysXmlDocType.Channel"] = field(
         default_factory=list,
         metadata={
             "name": "Channel",
@@ -130,49 +131,49 @@ class AresysXmlDocType:
                 "type": "Element",
             },
         )
-        doppler_centroid: List[PolyType] = field(
+        doppler_centroid: list[PolyType] = field(
             default_factory=list,
             metadata={
                 "name": "DopplerCentroid",
                 "type": "Element",
             },
         )
-        doppler_rate: List[PolyType] = field(
+        doppler_rate: list[PolyType] = field(
             default_factory=list,
             metadata={
                 "name": "DopplerRate",
                 "type": "Element",
             },
         )
-        tops_azimuth_modulation_rate: List[PolyType] = field(
+        tops_azimuth_modulation_rate: list[PolyType] = field(
             default_factory=list,
             metadata={
                 "name": "TopsAzimuthModulationRate",
                 "type": "Element",
             },
         )
-        slant_to_ground: List[PolyType] = field(
+        slant_to_ground: list[PolyType] = field(
             default_factory=list,
             metadata={
                 "name": "SlantToGround",
                 "type": "Element",
             },
         )
-        ground_to_slant: List[PolyType] = field(
+        ground_to_slant: list[PolyType] = field(
             default_factory=list,
             metadata={
                 "name": "GroundToSlant",
                 "type": "Element",
             },
         )
-        slant_to_incidence: List[PolyType] = field(
+        slant_to_incidence: list[PolyType] = field(
             default_factory=list,
             metadata={
                 "name": "SlantToIncidence",
                 "type": "Element",
             },
         )
-        slant_to_elevation: List[PolyType] = field(
+        slant_to_elevation: list[PolyType] = field(
             default_factory=list,
             metadata={
                 "name": "SlantToElevation",
@@ -200,7 +201,7 @@ class AresysXmlDocType:
                 "type": "Element",
             },
         )
-        coreg_poly: List[PolyCoregType] = field(
+        coreg_poly: list[PolyCoregType] = field(
             default_factory=list,
             metadata={
                 "name": "CoregPoly",

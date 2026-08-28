@@ -48,9 +48,7 @@ class Axis:
         self._relative_axis = relative_axis
 
         if not isinstance(origin, (PreciseDateTime, int, float)):
-            raise ValueError(
-                "origin should be either a PreciseDateTime or a real number"
-            )
+            raise ValueError("origin should be either a PreciseDateTime or a real number")
 
         self._origin = origin
 
@@ -158,9 +156,7 @@ class Axis:
         --------
         get_interval_id_from_relative : for relative values
         """
-        return _get_interval_id_not_regular_real_axis(
-            self._relative_axis, self.increasing, values - self._origin
-        )
+        return _get_interval_id_not_regular_real_axis(self._relative_axis, self.increasing, values - self._origin)
 
     def get_interval_id_from_relative(self, values) -> np.ndarray:
         """For each relative value, find the containing axis interval
@@ -201,10 +197,7 @@ class Axis:
         AxisStartType
             the value of the axis at the fraction index
         """
-        return (
-            scipy.interpolate.interp1d(range(self.size), self._relative_axis)(position)
-            + self._origin
-        )
+        return scipy.interpolate.interp1d(range(self.size), self._relative_axis)(position) + self._origin
 
     def __repr__(self):
         """string representation of the object"""
@@ -296,9 +289,7 @@ class RegularAxis(Axis):
         --------
         Axis.get_interval_id_from_relative : for relative values
         """
-        return _get_interval_id_regular_real_axis(
-            self._relative_axis[0], self.step, self.size, values - self._origin
-        )
+        return _get_interval_id_regular_real_axis(self._relative_axis[0], self.step, self.size, values - self._origin)
 
 
 def _check_range(start, stop, size):
@@ -319,9 +310,7 @@ def _is_increasing(axis):
     raise RuntimeError("Expecting monotone axis")
 
 
-def _get_interval_id_regular_real_axis(
-    start: RealNumber, step: RealNumber, size: int, values
-) -> np.ndarray:
+def _get_interval_id_regular_real_axis(start: RealNumber, step: RealNumber, size: int, values) -> np.ndarray:
     """The interval id is intended as the interval starting at the returned position, containing the point.
     If the point is exactly an edge of the interval, the interval starting at the point should be returned.
 
@@ -353,9 +342,7 @@ def _get_interval_id_regular_real_axis(
     return np.array([to_int_and_clip(val)])
 
 
-def _get_interval_id_not_regular_real_axis(
-    array: np.ndarray, increasing: bool, values: np.ndarray
-) -> np.ndarray:
+def _get_interval_id_not_regular_real_axis(array: np.ndarray, increasing: bool, values: np.ndarray) -> np.ndarray:
     """The interval id is intended as the interval starting at the returned position, containing the point.
     If the point is exactly an edge of the interval, the interval starting at the point should be returned.
 

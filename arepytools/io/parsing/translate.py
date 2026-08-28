@@ -198,13 +198,9 @@ def translate_unit_to_model(unit: str) -> metadata_models.Units:
     return metadata_models.Units(unit)
 
 
-def translate_double_with_unit_to_model(
-    value: float, unit: str
-) -> metadata_models.DoubleWithUnit:
+def translate_double_with_unit_to_model(value: float, unit: str) -> metadata_models.DoubleWithUnit:
     """Create a DoubleWithUnit model"""
-    return metadata_models.DoubleWithUnit(
-        value=value, unit=translate_unit_to_model(unit)
-    )
+    return metadata_models.DoubleWithUnit(value=value, unit=translate_unit_to_model(unit))
 
 
 def translate_str_with_unit_from_model(
@@ -221,13 +217,9 @@ def translate_str_with_unit_from_model(
     return value, translate_unit_from_model(str_with_unit.unit)
 
 
-def translate_str_with_unit_to_model(
-    value: Union[PreciseDateTime, float], unit: str
-) -> metadata_models.StringWithUnit:
+def translate_str_with_unit_to_model(value: Union[PreciseDateTime, float], unit: str) -> metadata_models.StringWithUnit:
     """Translate a StringWithUnit from model"""
-    return metadata_models.StringWithUnit(
-        value=str(value), unit=translate_unit_to_model(unit)
-    )
+    return metadata_models.StringWithUnit(value=str(value), unit=translate_unit_to_model(unit))
 
 
 def translate_dcomplex_to_model(value: complex) -> metadata_models.Dcomplex:
@@ -255,22 +247,12 @@ def translate_raster_info_to_model(
         row_prefix_bytes=raster_info.row_prefix_bytes,
         byte_order=translate_endianity_to_model(raster_info.byte_order),
         cell_type=translate_cell_type_to_model(raster_info.cell_type),
-        lines_step=translate_double_with_unit_to_model(
-            raster_info.lines_step, raster_info.lines_step_unit
-        ),
-        samples_step=translate_double_with_unit_to_model(
-            raster_info.samples_step, raster_info.samples_step_unit
-        ),
-        lines_start=translate_str_with_unit_to_model(
-            raster_info.lines_start, unit=raster_info.lines_start_unit
-        ),
-        samples_start=translate_str_with_unit_to_model(
-            raster_info.samples_start, unit=raster_info.samples_start_unit
-        ),
+        lines_step=translate_double_with_unit_to_model(raster_info.lines_step, raster_info.lines_step_unit),
+        samples_step=translate_double_with_unit_to_model(raster_info.samples_step, raster_info.samples_step_unit),
+        lines_start=translate_str_with_unit_to_model(raster_info.lines_start, unit=raster_info.lines_start_unit),
+        samples_start=translate_str_with_unit_to_model(raster_info.samples_start, unit=raster_info.samples_start_unit),
         invalid_value=(
-            translate_dcomplex_to_model(raster_info.invalid_value)
-            if raster_info.invalid_value is not None
-            else None
+            translate_dcomplex_to_model(raster_info.invalid_value) if raster_info.invalid_value is not None else None
         ),
         raster_format=(
             translate_raster_format_type_to_model(raster_info.format_type)
@@ -291,13 +273,8 @@ def translate_raster_info_from_model(
     assert raster_info.row_prefix_bytes is not None
     assert raster_info.byte_order is not None
     assert raster_info.cell_type is not None
-    assert (
-        raster_info.lines_step is not None and raster_info.lines_step.value is not None
-    )
-    assert (
-        raster_info.samples_step is not None
-        and raster_info.samples_step.value is not None
-    )
+    assert raster_info.lines_step is not None and raster_info.lines_step.value is not None
+    assert raster_info.samples_step is not None and raster_info.samples_step.value is not None
     assert raster_info.lines_start is not None
     assert raster_info.samples_start is not None
 
@@ -310,9 +287,7 @@ def translate_raster_info_from_model(
         byteorder=translate_endianity_from_model(raster_info.byte_order),
         celltype=translate_cell_type_from_model(raster_info.cell_type),
         invalid_value=(
-            translate_dcomplex_from_model(raster_info.invalid_value)
-            if raster_info.invalid_value is not None
-            else None
+            translate_dcomplex_from_model(raster_info.invalid_value) if raster_info.invalid_value is not None else None
         ),
         format_type=(
             translate_raster_format_type_from_model(raster_info.raster_format)
@@ -322,9 +297,7 @@ def translate_raster_info_from_model(
     )
 
     assert raster_info.lines_step.unit is not None
-    lines_start, lines_start_unit = translate_str_with_unit_from_model(
-        raster_info.lines_start
-    )
+    lines_start, lines_start_unit = translate_str_with_unit_from_model(raster_info.lines_start)
     raster_info_out.set_lines_axis(
         lines_start,
         lines_start_unit,
@@ -333,9 +306,7 @@ def translate_raster_info_from_model(
     )
 
     assert raster_info.samples_step.unit is not None
-    samples_start, samples_start_unit = translate_str_with_unit_from_model(
-        raster_info.samples_start
-    )
+    samples_start, samples_start_unit = translate_str_with_unit_from_model(raster_info.samples_start)
     raster_info_out.set_samples_axis(
         samples_start,
         samples_start_unit,
@@ -344,6 +315,16 @@ def translate_raster_info_from_model(
     )
 
     return raster_info_out
+
+
+def translate_image_quantity_to_model(image_quantity: metadata.ImageQuantity) -> metadata_models.ImageQuantityType:
+    """Translate image quantity to model"""
+    return metadata_models.ImageQuantityType(image_quantity.name)
+
+
+def translate_image_quantity_from_model(image_quantity: metadata_models.ImageQuantityType) -> metadata.ImageQuantity:
+    """Translate image quantity from model"""
+    return metadata.ImageQuantity(image_quantity.name)
 
 
 def translate_dataset_info_from_model(
@@ -364,16 +345,12 @@ def translate_dataset_info_from_model(
     assert info.fc_hz.value is not None
     assert info.side_looking is not None
 
-    info_out = metadata.DataSetInfo(
-        acquisition_mode_i=info.acquisition_mode.value, fc_hz_i=info.fc_hz.value
-    )
+    info_out = metadata.DataSetInfo(acquisition_mode_i=info.acquisition_mode.value, fc_hz_i=info.fc_hz.value)
 
     if info.sense_date.value != "NOT_AVAILABLE":
         info_out.sense_date = PreciseDateTime.from_utc_string(info.sense_date.value)
     if info.processing_date.value != "NOT_AVAILABLE":
-        info_out.processing_date = PreciseDateTime.from_utc_string(
-            info.processing_date.value
-        )
+        info_out.processing_date = PreciseDateTime.from_utc_string(info.processing_date.value)
     info_out.side_looking = translate_side_looking_from_model(info.side_looking)
     info_out.sensor_name = info.sensor_name
     info_out.description = info.description.value
@@ -386,6 +363,13 @@ def translate_dataset_info_from_model(
         info_out.external_calibration_factor = info.external_calibration_factor
     if info.data_take_id is not None:
         info_out.data_take_id = info.data_take_id
+    if info.image_quantity is not None:
+        info_out.image_quantity = translate_image_quantity_from_model(info.image_quantity)
+    if info.projection_parameters is not None:
+        assert info.projection_parameters.format is not None
+        info_out.projection_params = info.projection_parameters.value
+        info_out.projection_params_format = info.projection_parameters.format
+    info_out.instrument_conf_id = info.instrument_conf_id
 
     return info_out
 
@@ -395,74 +379,57 @@ def translate_dataset_info_to_model(
 ) -> metadata_models.DataSetInfoType:
     """Translate dataset info to model"""
     if info.description is None:
-        raise RuntimeError(
-            "Description field in DataSetInfo is required: cannot be 'None'"
-        )
+        raise RuntimeError("Description field in DataSetInfo is required: cannot be 'None'")
     if info.acquisition_mode is None:
-        raise RuntimeError(
-            "AcquisitionMode field in DataSetInfo is required: cannot be 'None'"
-        )
+        raise RuntimeError("AcquisitionMode field in DataSetInfo is required: cannot be 'None'")
     if info.image_type is None:
-        raise RuntimeError(
-            "ImageType field in DataSetInfo is required: cannot be 'None'"
-        )
+        raise RuntimeError("ImageType field in DataSetInfo is required: cannot be 'None'")
     if info.projection is None:
-        raise RuntimeError(
-            "Projection field in DataSetInfo is required: cannot be 'None'"
-        )
+        raise RuntimeError("Projection field in DataSetInfo is required: cannot be 'None'")
     if info.acquisition_station is None:
-        raise RuntimeError(
-            "AcquisitionStation field in DataSetInfo is required: cannot be 'None'"
-        )
+        raise RuntimeError("AcquisitionStation field in DataSetInfo is required: cannot be 'None'")
     if info.acquisition_station is None:
-        raise RuntimeError(
-            "AcquisitionStation field in DataSetInfo is required: cannot be 'None'"
-        )
+        raise RuntimeError("AcquisitionStation field in DataSetInfo is required: cannot be 'None'")
     if info.processing_center is None:
-        raise RuntimeError(
-            "ProcessingCenter field in DataSetInfo is required: cannot be 'None'"
-        )
+        raise RuntimeError("ProcessingCenter field in DataSetInfo is required: cannot be 'None'")
     if info.processing_software is None:
-        raise RuntimeError(
-            "ProcessingCenter field in DataSetInfo is required: cannot be 'None'"
-        )
+        raise RuntimeError("ProcessingCenter field in DataSetInfo is required: cannot be 'None'")
     if info.side_looking is None:
-        raise RuntimeError(
-            "SideLooking field in DataSetInfo is required: cannot be 'None'"
-        )
+        raise RuntimeError("SideLooking field in DataSetInfo is required: cannot be 'None'")
+    if info.projection_params is not None and info.projection_params_format is None:
+        raise RuntimeError("Projection parameters format is required when projection parameters is specified")
 
     def _optional_pdt_to_type(date: Optional[PreciseDateTime], output_type):
         if date is None:
             return output_type("NOT_AVAILABLE")
         return output_type(str(date))
 
+    output_proj_params = None
+    if info.projection_params is not None:
+        output_proj_params = metadata_models.DataSetInfoType.ProjectionParameters(
+            value=info.projection_params, format=info.projection_params_format
+        )
+
     return metadata_models.DataSetInfoType(
         sensor_name=info.sensor_name,
         description=metadata_models.DataSetInfoType.Description(info.description),
-        sense_date=_optional_pdt_to_type(
-            info.sense_date, metadata_models.DataSetInfoType.SenseDate
-        ),
-        acquisition_mode=metadata_models.DataSetInfoType.AcquisitionMode(
-            info.acquisition_mode
-        ),
+        sense_date=_optional_pdt_to_type(info.sense_date, metadata_models.DataSetInfoType.SenseDate),
+        acquisition_mode=metadata_models.DataSetInfoType.AcquisitionMode(info.acquisition_mode),
         image_type=metadata_models.DataSetInfoType.ImageType(info.image_type),
         projection=metadata_models.DataSetInfoType.Projection(info.projection),
-        acquisition_station=metadata_models.DataSetInfoType.AcquisitionStation(
-            info.acquisition_station
-        ),
-        processing_center=metadata_models.DataSetInfoType.ProcessingCenter(
-            info.processing_center
-        ),
-        processing_date=_optional_pdt_to_type(
-            info.processing_date, metadata_models.DataSetInfoType.ProcessingDate
-        ),
-        processing_software=metadata_models.DataSetInfoType.ProcessingSoftware(
-            info.processing_software
-        ),
+        acquisition_station=metadata_models.DataSetInfoType.AcquisitionStation(info.acquisition_station),
+        processing_center=metadata_models.DataSetInfoType.ProcessingCenter(info.processing_center),
+        processing_date=_optional_pdt_to_type(info.processing_date, metadata_models.DataSetInfoType.ProcessingDate),
+        processing_software=metadata_models.DataSetInfoType.ProcessingSoftware(info.processing_software),
         fc_hz=metadata_models.DataSetInfoType.FcHz(info.fc_hz),
         side_looking=translate_side_looking_to_model(info.side_looking),
         external_calibration_factor=info.external_calibration_factor,
         data_take_id=info.data_take_id,
+        image_quantity=translate_image_quantity_to_model(info.image_quantity)
+        if info.image_quantity is not None
+        else None,
+        projection_parameters=output_proj_params,
+        instrument_conf_id=info.instrument_conf_id,
     )
 
 
@@ -499,14 +466,8 @@ def translate_ground_corner_points_from_model(
     corners: metadata_models.GroundCornersPointsType,
 ) -> metadata.GroundCornerPoints:
     """Translate ground corner points from model"""
-    assert (
-        corners.easting_grid_size is not None
-        and corners.easting_grid_size.value is not None
-    )
-    assert (
-        corners.northing_grid_size is not None
-        and corners.northing_grid_size.value is not None
-    )
+    assert corners.easting_grid_size is not None and corners.easting_grid_size.value is not None
+    assert corners.northing_grid_size is not None and corners.northing_grid_size.value is not None
     assert corners.north_west is not None and corners.north_west.point is not None
     assert corners.north_east is not None and corners.north_east.point is not None
     assert corners.south_west is not None and corners.south_west.point is not None
@@ -528,27 +489,13 @@ def translate_ground_corner_points_to_model(
 ) -> metadata_models.GroundCornersPointsType:
     """Translate ground corner points"""
     return metadata_models.GroundCornersPointsType(
-        easting_grid_size=metadata_models.GroundCornersPointsType.EastingGridSize(
-            corners.easting_grid_size
-        ),
-        northing_grid_size=metadata_models.GroundCornersPointsType.NorthingGridSize(
-            corners.northing_grid_size
-        ),
-        north_west=metadata_models.GroundCornersPointsType.NorthWest(
-            translate_geo_point_to_model(corners.nw_point)
-        ),
-        north_east=metadata_models.GroundCornersPointsType.NorthEast(
-            translate_geo_point_to_model(corners.ne_point)
-        ),
-        south_west=metadata_models.GroundCornersPointsType.SouthWest(
-            translate_geo_point_to_model(corners.sw_point)
-        ),
-        south_east=metadata_models.GroundCornersPointsType.SouthEast(
-            translate_geo_point_to_model(corners.se_point)
-        ),
-        center=metadata_models.GroundCornersPointsType.Center(
-            translate_geo_point_to_model(corners.center_point)
-        ),
+        easting_grid_size=metadata_models.GroundCornersPointsType.EastingGridSize(corners.easting_grid_size),
+        northing_grid_size=metadata_models.GroundCornersPointsType.NorthingGridSize(corners.northing_grid_size),
+        north_west=metadata_models.GroundCornersPointsType.NorthWest(translate_geo_point_to_model(corners.nw_point)),
+        north_east=metadata_models.GroundCornersPointsType.NorthEast(translate_geo_point_to_model(corners.ne_point)),
+        south_west=metadata_models.GroundCornersPointsType.SouthWest(translate_geo_point_to_model(corners.sw_point)),
+        south_east=metadata_models.GroundCornersPointsType.SouthEast(translate_geo_point_to_model(corners.se_point)),
+        center=metadata_models.GroundCornersPointsType.Center(translate_geo_point_to_model(corners.center_point)),
     )
 
 
@@ -558,10 +505,7 @@ def translate_swath_info_from_model(
     """Translate swath info from model"""
     assert info.swath is not None
     assert info.polarization is not None
-    assert (
-        info.swath_acquisition_order is not None
-        and info.swath_acquisition_order.value is not None
-    )
+    assert info.swath_acquisition_order is not None and info.swath_acquisition_order.value is not None
     assert info.rank is not None and info.rank.value is not None
     assert info.range_delay_bias is not None and info.range_delay_bias.value is not None
     assert info.acquisition_start_time is not None
@@ -590,20 +534,14 @@ def translate_swath_info_from_model(
     swath_info_metadata.swath_acquisition_order = info.swath_acquisition_order.value
     swath_info_metadata.rank = info.rank.value
     swath_info_metadata.range_delay_bias = info.range_delay_bias.value
-    swath_info_metadata.acquisition_start_time = PreciseDateTime.from_utc_string(
-        info.acquisition_start_time.value
-    )
+    swath_info_metadata.acquisition_start_time = PreciseDateTime.from_utc_string(info.acquisition_start_time.value)
     if info.azimuth_steering_rate_reference_time is not None:
-        swath_info_metadata.azimuth_steering_rate_reference_time = (
-            info.azimuth_steering_rate_reference_time.value
-        )
+        swath_info_metadata.azimuth_steering_rate_reference_time = info.azimuth_steering_rate_reference_time.value
         swath_info_metadata.azimuth_steering_rate_pol = tuple(
             coeff.value for coeff in info.azimuth_steering_rate_pol.val
         )
     if info.azimuth_steering_angle_reference_time is not None:
-        swath_info_metadata.azimuth_steering_angle_reference_time = (
-            info.azimuth_steering_angle_reference_time.value
-        )
+        swath_info_metadata.azimuth_steering_angle_reference_time = info.azimuth_steering_angle_reference_time.value
         swath_info_metadata.azimuth_steering_angle_pol = tuple(
             coeff.value for coeff in info.azimuth_steering_angle_pol.val
         )
@@ -624,9 +562,7 @@ def translate_swath_info_to_model(
 
     return metadata_models.SwathInfoType(
         swath=metadata_models.SwathInfoType.Swath(info.swath),
-        swath_acquisition_order=metadata_models.SwathInfoType.SwathAcquisitionOrder(
-            info.swath_acquisition_order
-        ),
+        swath_acquisition_order=metadata_models.SwathInfoType.SwathAcquisitionOrder(info.swath_acquisition_order),
         polarization=translate_polarization_to_model(info.polarization),
         rank=metadata_models.SwathInfoType.Rank(info.rank),
         range_delay_bias=metadata_models.SwathInfoType.RangeDelayBias(
@@ -647,18 +583,10 @@ def translate_swath_info_to_model(
         azimuth_steering_angle_pol=(
             metadata_models.SwathInfoType.AzimuthSteeringAnglePol(
                 [
-                    metadata_models.SwathInfoType.AzimuthSteeringAnglePol.Val(
-                        info.azimuth_steering_angle_pol[0], n=1
-                    ),
-                    metadata_models.SwathInfoType.AzimuthSteeringAnglePol.Val(
-                        info.azimuth_steering_angle_pol[1], n=2
-                    ),
-                    metadata_models.SwathInfoType.AzimuthSteeringAnglePol.Val(
-                        info.azimuth_steering_angle_pol[2], n=3
-                    ),
-                    metadata_models.SwathInfoType.AzimuthSteeringAnglePol.Val(
-                        info.azimuth_steering_angle_pol[3], n=4
-                    ),
+                    metadata_models.SwathInfoType.AzimuthSteeringAnglePol.Val(info.azimuth_steering_angle_pol[0], n=1),
+                    metadata_models.SwathInfoType.AzimuthSteeringAnglePol.Val(info.azimuth_steering_angle_pol[1], n=2),
+                    metadata_models.SwathInfoType.AzimuthSteeringAnglePol.Val(info.azimuth_steering_angle_pol[2], n=3),
+                    metadata_models.SwathInfoType.AzimuthSteeringAnglePol.Val(info.azimuth_steering_angle_pol[3], n=4),
                 ]
             )
             if info.azimuth_steering_angle_pol is not None
@@ -675,15 +603,9 @@ def translate_swath_info_to_model(
         azimuth_steering_rate_pol=(
             metadata_models.SwathInfoType.AzimuthSteeringRatePol(
                 [
-                    metadata_models.SwathInfoType.AzimuthSteeringRatePol.Val(
-                        info.azimuth_steering_rate_pol[0], n=1
-                    ),
-                    metadata_models.SwathInfoType.AzimuthSteeringRatePol.Val(
-                        info.azimuth_steering_rate_pol[1], n=2
-                    ),
-                    metadata_models.SwathInfoType.AzimuthSteeringRatePol.Val(
-                        info.azimuth_steering_rate_pol[2], n=3
-                    ),
+                    metadata_models.SwathInfoType.AzimuthSteeringRatePol.Val(info.azimuth_steering_rate_pol[0], n=1),
+                    metadata_models.SwathInfoType.AzimuthSteeringRatePol.Val(info.azimuth_steering_rate_pol[1], n=2),
+                    metadata_models.SwathInfoType.AzimuthSteeringRatePol.Val(info.azimuth_steering_rate_pol[2], n=3),
                 ]
             )
             if info.azimuth_steering_rate_pol is not None
@@ -782,9 +704,7 @@ def translate_acquisition_time_line_from_model(
         noise_packets_number_i=time_line.noise_packets_number,
         noise_packets_azimuth_times_i=to_list(time_line.noise_packets_azimuthtimes),
         internal_calibration_number_i=time_line.internal_calibration_number,
-        internal_calibration_azimuth_times_i=to_list(
-            time_line.internal_calibration_azimuthtimes
-        ),
+        internal_calibration_azimuth_times_i=to_list(time_line.internal_calibration_azimuthtimes),
         swl_changes_number_i=swl_changes_number,
         swl_changes_azimuth_times_i=swl_changes_azimuth_times,
         swl_changes_values_i=swl_changes_values,
@@ -966,9 +886,7 @@ def translate_attitude_from_model(
         ref_frame=translate_reference_frame_from_model(attitude.reference_frame).value,
         rot_order=translate_rotation_order_from_model(attitude.rotation_order).value,
     )
-    attitude_metadata.attitude_type = translate_attitude_type_from_model(
-        attitude.attitude_type
-    ).value
+    attitude_metadata.attitude_type = translate_attitude_type_from_model(attitude.attitude_type).value
     return attitude_metadata
 
 
@@ -979,24 +897,22 @@ def translate_attitude_to_model(
     return metadata_models.AttitudeInfoType(
         t_ref_utc=str(attitude.reference_time),
         dt_ypr_s=metadata_models.AttitudeInfoType.DtYprS(attitude.time_step),
-        n_ypr_n=metadata_models.AttitudeInfoType.NYprN(
-            attitude.attitude_records_number
-        ),
+        n_ypr_n=metadata_models.AttitudeInfoType.NYprN(attitude.attitude_records_number),
         yaw_deg=metadata_models.AttitudeInfoType.YawDeg(
             [
-                metadata_models.AttitudeInfoType.YawDeg.Val(yaw, n=index + 1)
+                metadata_models.AttitudeInfoType.YawDeg.Val(float(yaw), n=index + 1)
                 for index, yaw in enumerate(attitude.yaw_vector)
             ]
         ),
         pitch_deg=metadata_models.AttitudeInfoType.PitchDeg(
             [
-                metadata_models.AttitudeInfoType.PitchDeg.Val(pitch, n=index + 1)
+                metadata_models.AttitudeInfoType.PitchDeg.Val(float(pitch), n=index + 1)
                 for index, pitch in enumerate(attitude.pitch_vector)
             ]
         ),
         roll_deg=metadata_models.AttitudeInfoType.RollDeg(
             [
-                metadata_models.AttitudeInfoType.RollDeg.Val(roll, n=index + 1)
+                metadata_models.AttitudeInfoType.RollDeg.Val(float(roll), n=index + 1)
                 for index, roll in enumerate(attitude.roll_vector)
             ]
         ),
@@ -1031,21 +947,14 @@ def translate_burst_info_from_model(
 ) -> metadata.BurstInfo:
     """Translate burst info from model"""
     assert info.number_of_bursts is not None
-    assert (
-        info.burst_repetition_frequency is not None
-        and info.burst_repetition_frequency.value is not None
-    )
+    assert info.burst_repetition_frequency is not None and info.burst_repetition_frequency.value is not None
 
-    output_info = metadata.BurstInfo(
-        burst_repetition_frequency=info.burst_repetition_frequency.value
-    )
+    output_info = metadata.BurstInfo(burst_repetition_frequency=info.burst_repetition_frequency.value)
     if info.lines_per_burst is not None:
         lines_per_burst = info.number_of_bursts * [info.lines_per_burst]
     else:
         assert info.lines_per_burst_change_list
-        lines_per_burst = _fill_lines_per_burst_list(
-            info.lines_per_burst_change_list.lines, info.number_of_bursts
-        )
+        lines_per_burst = _fill_lines_per_burst_list(info.lines_per_burst_change_list.lines, info.number_of_bursts)
 
     assert len(info.burst) == info.number_of_bursts
     for index, (burst, lines) in enumerate(zip(info.burst, lines_per_burst)):
@@ -1055,14 +964,10 @@ def translate_burst_info_from_model(
         assert burst.n is not None and burst.n == index + 1
         output_info.add_burst(
             range_start_time_i=burst.range_start_time.value,
-            azimuth_start_time_i=PreciseDateTime.from_utc_string(
-                burst.azimuth_start_time.value
-            ),
+            azimuth_start_time_i=PreciseDateTime.from_utc_string(burst.azimuth_start_time.value),
             lines_i=lines,
             burst_center_azimuth_shift_i=(
-                burst.burst_center_azimuth_shift.value
-                if burst.burst_center_azimuth_shift is not None
-                else None
+                burst.burst_center_azimuth_shift.value if burst.burst_center_azimuth_shift is not None else None
             ),
         )
 
@@ -1082,9 +987,7 @@ def translate_burst_info_to_model(
 
     change_list = metadata_models.BurstInfoType.LinesPerBurstChangeList(
         [
-            metadata_models.BurstInfoType.LinesPerBurstChangeList.Lines(
-                lines, from_burst + 1
-            )
+            metadata_models.BurstInfoType.LinesPerBurstChangeList.Lines(lines, from_burst + 1)
             for from_burst, lines in changes.items()
         ]
     )
@@ -1093,16 +996,12 @@ def translate_burst_info_to_model(
     for index in range(info.get_number_of_bursts()):
         burst = info.get_burst(index)
         burst_model = metadata_models.BurstType(
-            range_start_time=metadata_models.DoubleWithUnit(
-                burst.range_start_time, unit=metadata_models.Units.S
-            ),
+            range_start_time=metadata_models.DoubleWithUnit(burst.range_start_time, unit=metadata_models.Units.S),
             azimuth_start_time=metadata_models.StringWithUnit(
                 value=str(burst.azimuth_start_time), unit=metadata_models.Units.UTC
             ),
             burst_center_azimuth_shift=(
-                metadata_models.DoubleWithUnit(
-                    burst.burst_center_azimuth_shift, unit=metadata_models.Units.S
-                )
+                metadata_models.DoubleWithUnit(burst.burst_center_azimuth_shift, unit=metadata_models.Units.S)
                 if burst.burst_center_azimuth_shift is not None
                 else None
             ),
@@ -1139,9 +1038,7 @@ def translate_state_vectors_from_model(
     positions = np.zeros((number_of_state_vectors, 3))
     velocities = np.zeros((number_of_state_vectors, 3))
 
-    for index, (pos, vel) in enumerate(
-        zip(state_vectors.p_sv_m.val, state_vectors.v_sv_m_os.val)
-    ):
+    for index, (pos, vel) in enumerate(zip(state_vectors.p_sv_m.val, state_vectors.v_sv_m_os.val)):
         assert pos is not None and vel is not None
         assert pos.value is not None and vel.value is not None
         assert pos.n == index + 1 and vel.n == index + 1
@@ -1166,9 +1063,7 @@ def translate_state_vectors_from_model(
 
     anx_position = None
     if state_vectors.ascending_node_coords is not None:
-        anx_position = [
-            element.value for element in state_vectors.ascending_node_coords.val
-        ]
+        anx_position = [element.value for element in state_vectors.ascending_node_coords.val]
 
     anx_time = None
     if state_vectors.ascending_node_time is not None:
@@ -1186,61 +1081,31 @@ def translate_state_vectors_to_model(
 
     position = metadata_models.StateVectorDataType.PSvM([])
     velocity = metadata_models.StateVectorDataType.VSvMOs([])
-    for index, (pos, vel) in enumerate(
-        zip(state_vectors.position_vector, state_vectors.velocity_vector)
-    ):
+    for index, (pos, vel) in enumerate(zip(state_vectors.position_vector, state_vectors.velocity_vector)):
         for component, (pos_comp, vel_comp) in enumerate(zip(pos, vel)):
             index_current = index * 3 + component + 1
 
-            position.val.append(
-                metadata_models.StateVectorDataType.PSvM.Val(pos_comp, n=index_current)
-            )
-            velocity.val.append(
-                metadata_models.StateVectorDataType.VSvMOs.Val(
-                    vel_comp, n=index_current
-                )
-            )
+            position.val.append(metadata_models.StateVectorDataType.PSvM.Val(float(pos_comp), n=index_current))
+            velocity.val.append(metadata_models.StateVectorDataType.VSvMOs.Val(float(vel_comp), n=index_current))
 
     state_vectors_model = metadata_models.StateVectorDataType(
         p_sv_m=position,
         v_sv_m_os=velocity,
-        orbit_number=(
-            "NOT_AVAILABLE"
-            if state_vectors.orbit_number < 0
-            else str(state_vectors.orbit_number)
-        ),
-        track=(
-            "NOT_AVAILABLE"
-            if state_vectors.track_number < 0
-            else str(state_vectors.track_number)
-        ),
-        orbit_direction=translate_orbit_direction_to_model(
-            state_vectors.orbit_direction
-        ),
+        orbit_number=("NOT_AVAILABLE" if state_vectors.orbit_number < 0 else str(state_vectors.orbit_number)),
+        track=("NOT_AVAILABLE" if state_vectors.track_number < 0 else str(state_vectors.track_number)),
+        orbit_direction=translate_orbit_direction_to_model(state_vectors.orbit_direction),
         t_ref_utc=str(state_vectors.reference_time),
-        dt_sv_s=metadata_models.StateVectorDataType.DtSvS(
-            state_vectors.time_step, unit=metadata_models.Units.S
-        ),
-        n_sv_n=metadata_models.StateVectorDataType.NSvN(
-            state_vectors.number_of_state_vectors
-        ),
+        dt_sv_s=metadata_models.StateVectorDataType.DtSvS(state_vectors.time_step, unit=metadata_models.Units.S),
+        n_sv_n=metadata_models.StateVectorDataType.NSvN(state_vectors.number_of_state_vectors),
     )
 
     if state_vectors.anx_position is not None:
-        state_vectors_model.ascending_node_coords = (
-            metadata_models.StateVectorDataType.AscendingNodeCoords(
-                [
-                    metadata_models.StateVectorDataType.AscendingNodeCoords.Val(
-                        state_vectors.anx_position[0]
-                    ),
-                    metadata_models.StateVectorDataType.AscendingNodeCoords.Val(
-                        state_vectors.anx_position[1]
-                    ),
-                    metadata_models.StateVectorDataType.AscendingNodeCoords.Val(
-                        state_vectors.anx_position[2]
-                    ),
-                ]
-            )
+        state_vectors_model.ascending_node_coords = metadata_models.StateVectorDataType.AscendingNodeCoords(
+            [
+                metadata_models.StateVectorDataType.AscendingNodeCoords.Val(state_vectors.anx_position[0]),
+                metadata_models.StateVectorDataType.AscendingNodeCoords.Val(state_vectors.anx_position[1]),
+                metadata_models.StateVectorDataType.AscendingNodeCoords.Val(state_vectors.anx_position[2]),
+            ]
         )
 
     if state_vectors.anx_time is not None:
@@ -1249,9 +1114,7 @@ def translate_state_vectors_to_model(
     return state_vectors_model
 
 
-def translate_polynomial_from_model(
-    poly: metadata_models.PolyType, specific_type=metadata._Poly2D
-) -> metadata._Poly2D:
+def translate_polynomial_from_model(poly: metadata_models.PolyType, specific_type=metadata._Poly2D) -> metadata._Poly2D:
     """Translate polynomial from model"""
     assert poly.pol is not None
     assert poly.trg0_s is not None
@@ -1267,27 +1130,17 @@ def translate_polynomial_from_model(
 def translate_polynomial_to_model(poly: metadata._Poly2D) -> metadata_models.PolyType:
     """Translate polynomial to model"""
     if poly.coefficients is None:
-        raise RuntimeError(
-            "Coefficients are required in 2D polynomial: cannot be 'None'"
-        )
+        raise RuntimeError("Coefficients are required in 2D polynomial: cannot be 'None'")
 
     return metadata_models.PolyType(
         pol=metadata_models.PolyType.Pol(
             [
-                metadata_models.PolyType.Pol.Val(
-                    coeff, unit=translate_unit_to_model(unit), n=index + 1
-                )
-                for index, (coeff, unit) in enumerate(
-                    zip(poly.coefficients, poly.get_units())
-                )
+                metadata_models.PolyType.Pol.Val(coeff, unit=translate_unit_to_model(unit), n=index + 1)
+                for index, (coeff, unit) in enumerate(zip(poly.coefficients, poly.get_units()))
             ]
         ),
-        trg0_s=metadata_models.PolyType.Trg0S(
-            poly.t_ref_rg, unit=metadata_models.Units.S
-        ),
-        taz0_utc=metadata_models.PolyType.Taz0Utc(
-            str(poly.t_ref_az), unit=metadata_models.Units.UTC
-        ),
+        trg0_s=metadata_models.PolyType.Trg0S(poly.t_ref_rg, unit=metadata_models.Units.S),
+        taz0_utc=metadata_models.PolyType.Taz0Utc(str(poly.t_ref_az), unit=metadata_models.Units.UTC),
     )
 
 
@@ -1296,12 +1149,7 @@ def translate_polynomial_list_from_model(
     specific_type=metadata._Poly2DVector,
 ) -> metadata._Poly2DVector:
     """Translate polynomial list from model"""
-    return specific_type(
-        [
-            translate_polynomial_from_model(poly, specific_type._SINGLE_POLY_TYPE)
-            for poly in poly_list
-        ]
-    )
+    return specific_type([translate_polynomial_from_model(poly, specific_type._SINGLE_POLY_TYPE) for poly in poly_list])
 
 
 def translate_polynomial_list_to_model(
@@ -1315,9 +1163,7 @@ def translate_polynomial_list_to_model(
         return poly
 
     return [
-        _add_number_and_total(
-            translate_polynomial_to_model(poly), index + 1, len(poly_list)
-        )
+        _add_number_and_total(translate_polynomial_to_model(poly), index + 1, len(poly_list))
         for index, poly in enumerate(poly_list)
     ]
 
@@ -1344,14 +1190,10 @@ def translate_coreg_polynomial_to_model(
 ) -> metadata_models.PolyCoregType:
     """Translate coregistration polynomial to model"""
     if poly.azimuth_poly.coefficients is None:
-        raise RuntimeError(
-            "Azimuth Coefficients are required in Coreg Polynomial: cannot be 'None'"
-        )
+        raise RuntimeError("Azimuth Coefficients are required in Coreg Polynomial: cannot be 'None'")
 
     if poly.range_poly.coefficients is None:
-        raise RuntimeError(
-            "Range Coefficients are required in Coreg Polynomial: cannot be 'None'"
-        )
+        raise RuntimeError("Range Coefficients are required in Coreg Polynomial: cannot be 'None'")
 
     return metadata_models.PolyCoregType(
         pol_az=metadata_models.PolyCoregType.PolAz(
@@ -1366,12 +1208,8 @@ def translate_coreg_polynomial_to_model(
                 for index, coeff in enumerate(poly.range_poly.coefficients)
             ]
         ),
-        trg0_s=metadata_models.PolyCoregType.Trg0S(
-            poly.ref_range_time, unit=metadata_models.Units.S
-        ),
-        taz0_utc=metadata_models.PolyCoregType.Taz0Utc(
-            str(poly.ref_azimuth_time), unit=metadata_models.Units.UTC
-        ),
+        trg0_s=metadata_models.PolyCoregType.Trg0S(poly.ref_range_time, unit=metadata_models.Units.S),
+        taz0_utc=metadata_models.PolyCoregType.Taz0Utc(str(poly.ref_azimuth_time), unit=metadata_models.Units.UTC),
     )
 
 
@@ -1379,9 +1217,7 @@ def translate_coreg_polynomial_list_from_model(
     poly_list: List[metadata_models.PolyCoregType],
 ) -> metadata.CoregPolyVector:
     """Translate coregistration polynomial list from model"""
-    return metadata.CoregPolyVector(
-        [translate_coreg_polynomial_from_model(poly) for poly in poly_list]
-    )
+    return metadata.CoregPolyVector([translate_coreg_polynomial_from_model(poly) for poly in poly_list])
 
 
 def translate_coreg_polynomial_list_to_model(
@@ -1389,9 +1225,7 @@ def translate_coreg_polynomial_list_to_model(
 ) -> List[metadata_models.PolyCoregType]:
     """Translate coregistration polynomial list to model"""
 
-    def _add_number_and_total(
-        poly: metadata_models.PolyCoregType, number: int, total: int
-    ):
+    def _add_number_and_total(poly: metadata_models.PolyCoregType, number: int, total: int):
         poly.number = number
         poly.total = total
         return poly
@@ -1440,10 +1274,7 @@ def translate_data_statistics_from_model(
         for block_stat in stat.statistics_list.data_block_statistic:
             assert block_stat.line_start is not None
             assert block_stat.line_stop is not None
-            assert (
-                block_stat.num_samples is not None
-                and block_stat.num_samples.value is not None
-            )
+            assert block_stat.num_samples is not None and block_stat.num_samples.value is not None
             assert block_stat.max_i is not None and block_stat.max_i.value is not None
             assert block_stat.max_q is not None and block_stat.max_q.value is not None
             assert block_stat.min_i is not None and block_stat.min_i.value is not None
@@ -1491,16 +1322,12 @@ def translate_data_statistics_to_model(
         std_dev_q=metadata_models.DataStatisticsType.StdDevQ(stat.std_dev_q),
     )
     if stat.get_number_of_data_block_statistic() != 0:
-        stat_model.statistics_list = metadata_models.DataStatisticsType.StatisticsList(
-            []
-        )
+        stat_model.statistics_list = metadata_models.DataStatisticsType.StatisticsList([])
         for index in range(stat.get_number_of_data_block_statistic()):
             block = stat.get_data_block_statistic(index)
             stat_model.statistics_list.data_block_statistic.append(
                 metadata_models.DataBlockStatisticsType(
-                    num_samples=metadata_models.DataBlockStatisticsType.NumSamples(
-                        block.num_samples
-                    ),
+                    num_samples=metadata_models.DataBlockStatisticsType.NumSamples(block.num_samples),
                     max_i=metadata_models.DataBlockStatisticsType.MaxI(block.max_i),
                     min_i=metadata_models.DataBlockStatisticsType.MinI(block.min_i),
                     max_q=metadata_models.DataBlockStatisticsType.MaxQ(block.max_q),
@@ -1554,9 +1381,7 @@ def translate_antenna_info_to_model(
 
     info_model = metadata_models.AntennaInfoType(
         beam_name=info.acquisition_beam,
-        sensor_name=metadata_models.SensorNamesType(
-            info.sensor_name if info.sensor_name is not None else "NOT SET"
-        ),
+        sensor_name=metadata_models.SensorNamesType(info.sensor_name if info.sensor_name is not None else "NOT SET"),
         acquisition_mode=metadata_models.AcquisitionModeType(info.acquisition_mode),
         polarization=translate_polarization_to_model(info.polarization),
     )
@@ -1591,23 +1416,13 @@ def translate_pulse_from_model(pulse: metadata_models.PulseType) -> metadata.Pul
         i_pulse_length=pulse.pulse_length.value,
         i_bandwidth=pulse.bandwidth.value,
         i_pulse_sampling_rate=pulse.pulse_sampling_rate.value,
-        i_pulse_energy=(
-            pulse.pulse_energy.value if pulse.pulse_energy is not None else None
-        ),
+        i_pulse_energy=(pulse.pulse_energy.value if pulse.pulse_energy is not None else None),
         i_pulse_start_frequency=(
-            pulse.pulse_start_frequency.value
-            if pulse.pulse_start_frequency is not None
-            else None
+            pulse.pulse_start_frequency.value if pulse.pulse_start_frequency is not None else None
         ),
-        i_pulse_start_phase=(
-            pulse.pulse_start_phase.value
-            if pulse.pulse_start_phase is not None
-            else None
-        ),
+        i_pulse_start_phase=(pulse.pulse_start_phase.value if pulse.pulse_start_phase is not None else None),
         i_pulse_direction=(
-            translate_pulse_direction_from_model(pulse.direction)
-            if pulse.direction is not None
-            else None
+            translate_pulse_direction_from_model(pulse.direction) if pulse.direction is not None else None
         ),
     )
 
@@ -1628,13 +1443,9 @@ def translate_pulse_to_model(pulse: metadata.Pulse) -> metadata_models.PulseType
         pulse_length=metadata_models.DoubleWithUnit(
             pulse.pulse_length, translate_unit_to_model(pulse.pulse_length_unit)
         ),
-        bandwidth=metadata_models.DoubleWithUnit(
-            pulse.bandwidth, translate_unit_to_model(pulse.bandwidth_unit)
-        ),
+        bandwidth=metadata_models.DoubleWithUnit(pulse.bandwidth, translate_unit_to_model(pulse.bandwidth_unit)),
         pulse_energy=(
-            metadata_models.DoubleWithUnit(
-                pulse.pulse_energy, translate_unit_to_model(pulse.pulse_energy_unit)
-            )
+            metadata_models.DoubleWithUnit(pulse.pulse_energy, translate_unit_to_model(pulse.pulse_energy_unit))
             if pulse.pulse_energy is not None
             else None
         ),
@@ -1659,9 +1470,7 @@ def translate_pulse_to_model(pulse: metadata.Pulse) -> metadata_models.PulseType
             else None
         ),
         direction=(
-            translate_pulse_direction_to_model(pulse.pulse_direction)
-            if pulse.pulse_direction is not None
-            else None
+            translate_pulse_direction_to_model(pulse.pulse_direction) if pulse.pulse_direction is not None else None
         ),
     )
 
@@ -1701,29 +1510,19 @@ def translate_metadata_from_model(
             mdc.insert_element(translate_swath_info_from_model(channel.swath_info))
 
         if channel.sampling_constants is not None:
-            mdc.insert_element(
-                translate_sampling_constants_from_model(channel.sampling_constants)
-            )
+            mdc.insert_element(translate_sampling_constants_from_model(channel.sampling_constants))
 
         if channel.acquisition_time_line is not None:
-            mdc.insert_element(
-                translate_acquisition_time_line_from_model(
-                    channel.acquisition_time_line
-                )
-            )
+            mdc.insert_element(translate_acquisition_time_line_from_model(channel.acquisition_time_line))
 
         if channel.data_statistics is not None:
-            mdc.insert_element(
-                translate_data_statistics_from_model(channel.data_statistics)
-            )
+            mdc.insert_element(translate_data_statistics_from_model(channel.data_statistics))
 
         if channel.burst_info is not None:
             mdc.insert_element(translate_burst_info_from_model(channel.burst_info))
 
         if channel.state_vector_data is not None:
-            mdc.insert_element(
-                translate_state_vectors_from_model(channel.state_vector_data)
-            )
+            mdc.insert_element(translate_state_vectors_from_model(channel.state_vector_data))
 
         if channel.doppler_centroid is not None:
             mdc.insert_element(
@@ -1785,17 +1584,13 @@ def translate_metadata_from_model(
             mdc.insert_element(translate_attitude_from_model(channel.attitude_info))
 
         if channel.ground_corner_points is not None:
-            mdc.insert_element(
-                translate_ground_corner_points_from_model(channel.ground_corner_points)
-            )
+            mdc.insert_element(translate_ground_corner_points_from_model(channel.ground_corner_points))
 
         if channel.pulse is not None:
             mdc.insert_element(translate_pulse_from_model(channel.pulse))
 
         if channel.coreg_poly is not None:
-            mdc.insert_element(
-                translate_coreg_polynomial_list_from_model(channel.coreg_poly)
-            )
+            mdc.insert_element(translate_coreg_polynomial_list_from_model(channel.coreg_poly))
 
         if channel.antenna_info is not None:
             mdc.insert_element(translate_antenna_info_from_model(channel.antenna_info))
@@ -1828,17 +1623,9 @@ def translate_metadata_to_model(
     for channel_index in range(metadata_obj.get_number_of_channels()):
         metadata_channel = metadata_obj.get_metadata_channels(channel_index)
 
-        number = (
-            metadata_channel.number
-            if metadata_channel.number is not None
-            else channel_index + 1
-        )
+        number = metadata_channel.number if metadata_channel.number is not None else channel_index + 1
 
-        total = (
-            metadata_channel.total
-            if metadata_channel.total is not None
-            else metadata_obj.get_number_of_channels()
-        )
+        total = metadata_channel.total if metadata_channel.total is not None else metadata_obj.get_number_of_channels()
 
         channel_model = metadata_models.AresysXmlDoc.Channel(
             number=number,
@@ -1846,95 +1633,45 @@ def translate_metadata_to_model(
             content_id=metadata_channel.contentID,
         )
 
-        raster_info: Optional[metadata.RasterInfo] = metadata_channel.get_element(
-            "RasterInfo"
-        )  # type: ignore
-        sampling_constants: Optional[
-            metadata.SamplingConstants
-        ] = metadata_channel.get_element(
-            "SamplingConstants"
-        )  # type: ignore
+        raster_info: Optional[metadata.RasterInfo] = metadata_channel.get_element("RasterInfo")  # type: ignore
+        sampling_constants: Optional[metadata.SamplingConstants] = metadata_channel.get_element("SamplingConstants")  # type: ignore
         pulse: Optional[metadata.Pulse] = metadata_channel.get_element("Pulse")  # type: ignore
-        swath_info: Optional[metadata.SwathInfo] = metadata_channel.get_element(
-            "SwathInfo"
-        )  # type: ignore
-        data_set_info: Optional[metadata.DataSetInfo] = metadata_channel.get_element(
-            "DataSetInfo"
-        )  # type: ignore
-        state_vectors: Optional[metadata.StateVectors] = metadata_channel.get_element(
-            "StateVectors"
-        )  # type: ignore
-        attitude_info: Optional[metadata.AttitudeInfo] = metadata_channel.get_element(
-            "AttitudeInfo"
-        )  # type: ignore
-        acquisition_time_line: Optional[
-            metadata.AcquisitionTimeLine
-        ] = metadata_channel.get_element(
+        swath_info: Optional[metadata.SwathInfo] = metadata_channel.get_element("SwathInfo")  # type: ignore
+        data_set_info: Optional[metadata.DataSetInfo] = metadata_channel.get_element("DataSetInfo")  # type: ignore
+        state_vectors: Optional[metadata.StateVectors] = metadata_channel.get_element("StateVectors")  # type: ignore
+        attitude_info: Optional[metadata.AttitudeInfo] = metadata_channel.get_element("AttitudeInfo")  # type: ignore
+        acquisition_time_line: Optional[metadata.AcquisitionTimeLine] = metadata_channel.get_element(
             "AcquisitionTimeLine"
         )  # type: ignore
-        ground_corner_points: Optional[
-            metadata.GroundCornerPoints
-        ] = metadata_channel.get_element(
-            "GroundCornerPoints"
-        )  # type: ignore
-        burst_info: Optional[metadata.BurstInfo] = metadata_channel.get_element(
-            "BurstInfo"
-        )  # type: ignore
-        doppler_centroid_vector: Optional[
-            metadata.DopplerCentroidVector
-        ] = metadata_channel.get_element(
+        ground_corner_points: Optional[metadata.GroundCornerPoints] = metadata_channel.get_element("GroundCornerPoints")  # type: ignore
+        burst_info: Optional[metadata.BurstInfo] = metadata_channel.get_element("BurstInfo")  # type: ignore
+        doppler_centroid_vector: Optional[metadata.DopplerCentroidVector] = metadata_channel.get_element(
             "DopplerCentroidVector"
         )  # type: ignore
-        doppler_rate_vector: Optional[
-            metadata.DopplerRateVector
-        ] = metadata_channel.get_element(
-            "DopplerRateVector"
+        doppler_rate_vector: Optional[metadata.DopplerRateVector] = metadata_channel.get_element("DopplerRateVector")  # type: ignore
+        tops_azimuth_modulation_rate_vector: Optional[metadata.TopsAzimuthModulationRateVector] = (
+            metadata_channel.get_element("TopsAzimuthModulationRateVector")
         )  # type: ignore
-        tops_azimuth_modulation_rate_vector: Optional[
-            metadata.TopsAzimuthModulationRateVector
-        ] = metadata_channel.get_element(
-            "TopsAzimuthModulationRateVector"
-        )  # type: ignore
-        slant_to_ground_vector: Optional[
-            metadata.SlantToGroundVector
-        ] = metadata_channel.get_element(
+        slant_to_ground_vector: Optional[metadata.SlantToGroundVector] = metadata_channel.get_element(
             "SlantToGroundVector"
         )  # type: ignore
-        ground_to_slant_vector: Optional[
-            metadata.GroundToSlantVector
-        ] = metadata_channel.get_element(
+        ground_to_slant_vector: Optional[metadata.GroundToSlantVector] = metadata_channel.get_element(
             "GroundToSlantVector"
         )  # type: ignore
-        slant_to_incidence_vector: Optional[
-            metadata.SlantToIncidenceVector
-        ] = metadata_channel.get_element(
+        slant_to_incidence_vector: Optional[metadata.SlantToIncidenceVector] = metadata_channel.get_element(
             "SlantToIncidenceVector"
         )  # type: ignore
-        slant_to_elevation_vector: Optional[
-            metadata.SlantToElevationVector
-        ] = metadata_channel.get_element(
+        slant_to_elevation_vector: Optional[metadata.SlantToElevationVector] = metadata_channel.get_element(
             "SlantToElevationVector"
         )  # type: ignore
-        antenna_info: Optional[metadata.AntennaInfo] = metadata_channel.get_element(
-            "AntennaInfo"
-        )  # type: ignore
-        data_statistics: Optional[
-            metadata.DataStatistics
-        ] = metadata_channel.get_element(
-            "DataStatistics"
-        )  # type: ignore
-        coreg_poly_vector: Optional[
-            metadata.CoregPolyVector
-        ] = metadata_channel.get_element(
-            "CoregPolyVector"
-        )  # type: ignore
+        antenna_info: Optional[metadata.AntennaInfo] = metadata_channel.get_element("AntennaInfo")  # type: ignore
+        data_statistics: Optional[metadata.DataStatistics] = metadata_channel.get_element("DataStatistics")  # type: ignore
+        coreg_poly_vector: Optional[metadata.CoregPolyVector] = metadata_channel.get_element("CoregPolyVector")  # type: ignore
 
         if raster_info:
             channel_model.raster_info = translate_raster_info_to_model(raster_info)
         if sampling_constants:
-            channel_model.sampling_constants = translate_sampling_constants_to_model(
-                sampling_constants
-            )
+            channel_model.sampling_constants = translate_sampling_constants_to_model(sampling_constants)
         if pulse:
             channel_model.pulse = translate_pulse_to_model(pulse)
         if swath_info:
@@ -1942,59 +1679,37 @@ def translate_metadata_to_model(
         if data_set_info:
             channel_model.data_set_info = translate_dataset_info_to_model(data_set_info)
         if state_vectors:
-            channel_model.state_vector_data = translate_state_vectors_to_model(
-                state_vectors
-            )
+            channel_model.state_vector_data = translate_state_vectors_to_model(state_vectors)
         if attitude_info:
             channel_model.attitude_info = translate_attitude_to_model(attitude_info)
         if acquisition_time_line:
-            channel_model.acquisition_time_line = (
-                translate_acquisition_time_line_to_model(acquisition_time_line)
-            )
+            channel_model.acquisition_time_line = translate_acquisition_time_line_to_model(acquisition_time_line)
         if ground_corner_points:
-            channel_model.ground_corner_points = (
-                translate_ground_corner_points_to_model(ground_corner_points)
-            )
+            channel_model.ground_corner_points = translate_ground_corner_points_to_model(ground_corner_points)
         if burst_info:
             channel_model.burst_info = translate_burst_info_to_model(burst_info)
         if doppler_centroid_vector:
-            channel_model.doppler_centroid = translate_polynomial_list_to_model(
-                doppler_centroid_vector
-            )
+            channel_model.doppler_centroid = translate_polynomial_list_to_model(doppler_centroid_vector)
         if doppler_rate_vector:
-            channel_model.doppler_rate = translate_polynomial_list_to_model(
-                doppler_rate_vector
-            )
+            channel_model.doppler_rate = translate_polynomial_list_to_model(doppler_rate_vector)
         if tops_azimuth_modulation_rate_vector:
-            channel_model.tops_azimuth_modulation_rate = (
-                translate_polynomial_list_to_model(tops_azimuth_modulation_rate_vector)
+            channel_model.tops_azimuth_modulation_rate = translate_polynomial_list_to_model(
+                tops_azimuth_modulation_rate_vector
             )
         if slant_to_ground_vector:
-            channel_model.slant_to_ground = translate_polynomial_list_to_model(
-                slant_to_ground_vector
-            )
+            channel_model.slant_to_ground = translate_polynomial_list_to_model(slant_to_ground_vector)
         if ground_to_slant_vector:
-            channel_model.ground_to_slant = translate_polynomial_list_to_model(
-                ground_to_slant_vector
-            )
+            channel_model.ground_to_slant = translate_polynomial_list_to_model(ground_to_slant_vector)
         if slant_to_elevation_vector:
-            channel_model.slant_to_elevation = translate_polynomial_list_to_model(
-                slant_to_elevation_vector
-            )
+            channel_model.slant_to_elevation = translate_polynomial_list_to_model(slant_to_elevation_vector)
         if slant_to_incidence_vector:
-            channel_model.slant_to_incidence = translate_polynomial_list_to_model(
-                slant_to_incidence_vector
-            )
+            channel_model.slant_to_incidence = translate_polynomial_list_to_model(slant_to_incidence_vector)
         if antenna_info:
             channel_model.antenna_info = translate_antenna_info_to_model(antenna_info)
         if data_statistics:
-            channel_model.data_statistics = translate_data_statistics_to_model(
-                data_statistics
-            )
+            channel_model.data_statistics = translate_data_statistics_to_model(data_statistics)
         if coreg_poly_vector:
-            channel_model.coreg_poly = translate_coreg_polynomial_list_to_model(
-                coreg_poly_vector
-            )
+            channel_model.coreg_poly = translate_coreg_polynomial_list_to_model(coreg_poly_vector)
 
         metadata_model.channel.append(channel_model)
 

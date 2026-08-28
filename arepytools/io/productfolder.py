@@ -10,7 +10,6 @@
     Using productfolder module from arepytools.io is deprecated, use productfolder2 instead
 """
 
-
 import copy
 import re
 import warnings
@@ -19,7 +18,6 @@ from typing import List, Optional, Union
 
 from arepytools.io import (
     ProductFolderDeprecationWarning,
-    RemoveProductFolderDeprecationWarning,
     RenameProductFolderDeprecationWarning,
     channel,
     read_metadata,
@@ -32,8 +30,7 @@ _header_extension = ".xml"
 
 
 warnings.warn(
-    "productfolder module is deprecated starting from Arepytools v1.6.0"
-    + " please use productfolder2 instead",
+    "productfolder module is deprecated starting from Arepytools v1.6.0" + " please use productfolder2 instead",
     ProductFolderDeprecationWarning,
     stacklevel=2,
 )
@@ -59,10 +56,7 @@ class ProductFolder:
                 raise IsNotAProductFolder(self.__pf_dir_path)
             self.__pf_read(self.__pf_dir_path, self._open_mode)
 
-        elif (
-            self._open_mode == channel.EOpenMode.create
-            or self._open_mode == channel.EOpenMode.create_or_overwrite
-        ):
+        elif self._open_mode == channel.EOpenMode.create or self._open_mode == channel.EOpenMode.create_or_overwrite:
             if self.__pf_dir_path.exists():
                 raise RuntimeError(
                     "Cannot initialize {} on {}: path already exists".format(
@@ -113,9 +107,7 @@ class ProductFolder:
         return product_dir.joinpath("aresys_product")
 
     @staticmethod
-    def _create_manifest(
-        manifest_file: Path, data_file_extension: Optional[str] = None
-    ):
+    def _create_manifest(manifest_file: Path, data_file_extension: Optional[str] = None):
         manifest = Manifest(datafile_extension=data_file_extension)
         manifest.write(manifest_file)
 
@@ -126,9 +118,7 @@ class ProductFolder:
             metadata = read_metadata(dir_path.joinpath(header))
             raster_filename = header[0 : -len(_header_extension)] + raster_extension
             raster_path = dir_path.joinpath(raster_filename)
-            self.__channels.append(
-                channel.Channel(str(raster_path), metadata, open_mode)
-            )
+            self.__channels.append(channel.Channel(str(raster_path), metadata, open_mode))
 
     def append_channel(
         self,
@@ -159,14 +149,10 @@ class ProductFolder:
 
         # Create the metadata
         file_name = chan_file_path.name
-        current_raster_info = RasterInfo(
-            lines, samples, data_type, file_name, header_offset, row_prefix, byte_order
-        )
+        current_raster_info = RasterInfo(lines, samples, data_type, file_name, header_offset, row_prefix, byte_order)
 
         # Create the new channel
-        current_channel = channel.Channel.from_raster_info(
-            str(chan_file_path), current_raster_info, self._open_mode
-        )
+        current_channel = channel.Channel.from_raster_info(str(chan_file_path), current_raster_info, self._open_mode)
 
         # Add the channel to the product folder
         self.__channels.append(current_channel)
@@ -178,9 +164,7 @@ class ProductFolder:
             f.name
             for f in dir_path.iterdir()
             if re.fullmatch(
-                "{}".format(pf_name)
-                + channel.CHANNEL_ID_RE_PATTERN
-                + _header_extension,
+                "{}".format(pf_name) + channel.CHANNEL_ID_RE_PATTERN + _header_extension,
                 f.name,
             )
             is not None
@@ -194,10 +178,7 @@ class ProductFolder:
         raster_list = [
             f.name
             for f in dir_path.iterdir()
-            if re.fullmatch(
-                "{}".format(pf_name) + channel.CHANNEL_ID_RE_PATTERN, f.name
-            )
-            is not None
+            if re.fullmatch("{}".format(pf_name) + channel.CHANNEL_ID_RE_PATTERN, f.name) is not None
         ]
         raster_list.sort()
         return raster_list
@@ -350,11 +331,11 @@ def get_channel_indexes(
 
     Examples:
         >>> from arepytools.io.metadata import EPolarization
-        >>> get_channel_indexes(pf, swath_name='IW1', polarization=EPolarization.hh)
-        >>> get_channel_indexes(pf, swath_name='IW1', polarization='H/H')
-        >>> get_channel_indexes(pf, swath_name='IW2')
+        >>> get_channel_indexes(pf, swath_name="IW1", polarization=EPolarization.hh)
+        >>> get_channel_indexes(pf, swath_name="IW1", polarization="H/H")
+        >>> get_channel_indexes(pf, swath_name="IW2")
         >>> get_channel_indexes(pf, polarization=EPolarization.hv)
-        >>> get_channel_indexes(pf, polarization='H/V')
+        >>> get_channel_indexes(pf, polarization="H/V")
 
     """
     if polarization is not None:
@@ -405,15 +386,11 @@ def rename_product_folder(input_product, new_name: str) -> str:
     for channel_index in range(input_pf.get_number_channels()):
         input_channel = input_pf.get_channel(channel_index)
 
-        output_raster_file = input_channel.raster_file.replace(
-            input_pf.pf_name, output_pf.pf_name
-        )
+        output_raster_file = input_channel.raster_file.replace(input_pf.pf_name, output_pf.pf_name)
 
         Path(input_channel.raster_file).rename(output_raster_file)
 
-        output_metadata_file = input_channel.metadata_file.replace(
-            input_pf.pf_name, output_pf.pf_name
-        )
+        output_metadata_file = input_channel.metadata_file.replace(input_pf.pf_name, output_pf.pf_name)
 
         # Create a new channel from the original one
         output_channel = copy.copy(input_channel)
@@ -423,13 +400,9 @@ def rename_product_folder(input_product, new_name: str) -> str:
         output_channel._open_mode = output_pf.open_mode
 
         # Replace raster name in raster info
-        for metadata_channel_index in range(
-            output_channel.metadata.get_number_of_channels()
-        ):
+        for metadata_channel_index in range(output_channel.metadata.get_number_of_channels()):
             raster_info = output_channel.get_raster_info(metadata_channel_index)
-            raster_info._file_name = raster_info.file_name.replace(
-                input_pf.pf_name, output_pf.pf_name
-            )
+            raster_info._file_name = raster_info.file_name.replace(input_pf.pf_name, output_pf.pf_name)
 
         output_pf._ProductFolder__channels.append(output_channel)
         output_pf.write_metadata(channel_index)

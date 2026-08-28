@@ -1,12 +1,9 @@
-[build-system]
-requires = ["setuptools>=61.2"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "arepytools"
 description = "ArePyTools is the Aresys Python toolset for SAR data processing."
 authors = [{ name = "Aresys S.R.L.", email = "info@aresys.it" }]
-license = { text = "MIT" }
+license = { file = "LICENSE.txt" }
+readme = "README.md"
 classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
@@ -21,11 +18,12 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 ]
 requires-python = ">= 3.9"
-dependencies = ["xsdata", "lxml", "python-dateutil", "scipy", "numpy<2"]
+dependencies = ["xsdata", "lxml", "python-dateutil", "scipy", "numpy >= 1.20"]
 dynamic = ["version"]
 
 [project.optional-dependencies]
-dev = ['black', 'isort', 'pylint']
+dev = ["nox", "ruff", "pylint"]
+test = ["unittest-xml-reporting", "coverage"]
 doc = [
     "ipython",
     "nbsphinx",
@@ -35,20 +33,55 @@ doc = [
     "pydata-sphinx-theme",
 ]
 
-[project.readme]
-file = "README.md"
-content-type = "text/markdown"
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.setuptools]
-license-files = ["LICENSE.txt"]
-include-package-data = false
+[tool.hatch.version]
+path = "arepytools/__init__.py"
 
-[tool.setuptools.packages.find]
-exclude = ["tests", "tests*"]
-namespaces = false
+[tool.hatch.build.targets.sdist]
+only-include = ["arepytools", "tests", "docs"]
 
-[tool.setuptools.dynamic]
-version = { attr = "arepytools.__version__" }
+[tool.pdm.scripts]
+format_check = "ruff format --check"
+format = "ruff format"
+sort = "ruff check --select I --fix-only"
+lint_check = "ruff check"
+lint_fix = "ruff check --show-fixes --fix-only"
+test = "python -m unittest discover -s ./tests -p test_*.py"
+clean_doc = "python -m sphinx -M clean docs/source {args}"
+build_doc = "python -m sphinx -b html docs/source {args}"
+check_code = { composite = ["format_check", "lint_check"] }
+fix_format = { composite = ["format", "sort", "lint_fix"] }
+
+[tool.pdm.resolution]
+respect-source-order = true
+
+[tool.ruff]
+line-length = 120
+output-format = "grouped"
+extend-exclude = [
+    ".venv",
+    "xsd",
+    "docs",
+    "benchmarks",
+    "arepytools/constants.py",        # deprecated
+    "arepytools/io/channel.py",       # deprecated
+    "arepytools/io/productfolder.py", # deprecated
+    "arepytools/geometry/wgs84.py",   # deprecated
+]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "A", "B", "I"]
+exclude = [
+    "arepytools/io/metadata_models/translate.py", # planned rewriting
+    "arepytools/io/metadata.py",                  # planned rewriting 
+]
+ignore = ["A005"]
 
 [tool.pylint.MASTER]
 extension-pkg-allow-list = "lxml"
@@ -64,10 +97,3 @@ fail-under = 8.0
 
 [tool.pylint.FORMAT]
 max-line-length = 120
-
-[tool.black]
-line-length = 88
-target-version = ["py39", "py310", "py311", "py312"]
-
-[tool.isort]
-profile = "black"
